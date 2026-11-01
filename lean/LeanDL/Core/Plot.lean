@@ -36,7 +36,7 @@ def histSvg (w h : Nat) (lo hi : Float) (bins : Nat) (title : String)
     let mut c := Array.replicate bins 0.0
     for v in vals do
       let i := min (bins - 1) (max 0 (Float.floor ((v - lo) / (hi - lo) * bins.toFloat)).toUInt64.toNat)
-      c := c.set! i (c[i]! + 1.0 / vals.size.toFloat)
+      c := c.set! i (c.getD i 0.0 + 1.0 / vals.size.toFloat)
     top := max top (c.foldl max 0.0)
     counts := counts ++ [(color, c)]
     let _ := name
@@ -45,7 +45,7 @@ def histSvg (w h : Nat) (lo hi : Float) (bins : Nat) (title : String)
   let bw := wf / bins.toFloat
   for (color, c) in counts do
     for i in [0:bins] do
-      let bh := c[i]! / top * (hf - 10.0)
+      let bh := c.getD i 0.0 / top * (hf - 10.0)
       out := out ++ s!"<rect x=\"{i.toFloat * bw + 1.0}\" y=\"{hf - bh}\" width=\"{bw - 2.0}\" height=\"{bh}\" fill=\"{color}\" fill-opacity=\"0.5\"/>\n"
   out := out ++ s!"<line x1=\"0\" y1=\"{hf}\" x2=\"{w}\" y2=\"{hf}\" stroke=\"#555\"/>\n"
   out := out ++ s!"<text x=\"4\" y=\"{h + 20}\">{lo}</text><text x=\"{w - 28}\" y=\"{h + 20}\">{hi}</text>\n"
@@ -63,7 +63,7 @@ def fmt (x : Float) : String :=
   else
     let cs := (toString r).toList.reverse.dropWhile (· == '0')
     let cs := if cs.head? == some '.' then cs.tail else cs
-    String.mk cs.reverse
+    String.ofList cs.reverse
 
 /-- A line chart with axes, grid and legend. Points outside the y-range are clipped. -/
 def lineSvg (w h : Nat) (xlo xhi ylo yhi : Float) (title xlabel ylabel : String)
@@ -100,7 +100,7 @@ def lineSvg (w h : Nat) (xlo xhi ylo yhi : Float) (title xlabel ylabel : String)
 /-- A heat map of a matrix with entries in `[0, 1]`; the numbers are written in the cells. -/
 def heatSvg (cell : Nat) (title rowLabel colLabel : String) (m : Array (Array Float)) : String := Id.run do
   let rows := m.size
-  let cols := (m[0]!).size
+  let cols := (m.getD 0 #[]).size
   let c := cell.toFloat
   let w := cols.toFloat * c + 60.0
   let h := rows.toFloat * c + 70.0
@@ -110,7 +110,7 @@ def heatSvg (cell : Nat) (title rowLabel colLabel : String) (m : Array (Array Fl
   for i in [0:rows] do
     out := out ++ s!"<text x=\"44\" y=\"{30.0 + i.toFloat * c + c / 2.0 + 4.0}\" text-anchor=\"end\">{i}</text>\n"
     for j in [0:cols] do
-      let v := m[i]![j]!
+      let v := (m.getD i #[]).getD j 0.0
       out := out ++ s!"<rect x=\"{50.0 + j.toFloat * c}\" y=\"{30.0 + i.toFloat * c}\" width=\"{c}\" height=\"{c}\" fill=\"#2e5aa8\" fill-opacity=\"{v}\" stroke=\"#ccc\"/>"
       if v > 0.0 then
         out := out ++ s!"<text x=\"{50.0 + j.toFloat * c + c / 2.0}\" y=\"{30.0 + i.toFloat * c + c / 2.0 + 4.0}\" text-anchor=\"middle\" fill=\"{if v > 0.5 then "white" else "#222"}\">{fmt v}</text>"

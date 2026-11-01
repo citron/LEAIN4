@@ -109,3 +109,11 @@ Proved: the coefficient algebra of the forward process and the exactness of the 
 2. Prove that the ε-prediction and $x_0$-prediction targets determine each other: given $x_t=\bar a x_0+\sigma\varepsilon$, express $\varepsilon$ in terms of $x_0$ and $x_t$.
 3. Run `lake exe diffusion` with 20000 steps. Does the TV drop towards the noise floor?
 4. Replace the schedule by a cosine schedule and compare the DDIM results with $T=5$ steps.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch12/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch12/Exercises.lean#ex1
+```
+
+```lean file=Ch12/Exercises.lean#ex2
+```

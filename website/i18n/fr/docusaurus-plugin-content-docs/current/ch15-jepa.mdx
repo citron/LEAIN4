@@ -63,6 +63,9 @@ Les théorèmes le disent précisément. `collapse_zero` : l'effondrement a une 
 
 Si l'encodeur cible n'est pas entraîné par la perte mais est une **moyenne mobile exponentielle** de l'encodeur de contexte, $\bar\theta\leftarrow m\bar\theta+(1-m)\theta$, et qu'aucun gradient n'y entre (« stop-gradient »), les deux encodeurs ne peuvent pas s'entendre pour atteindre la solution triviale. C'est ce que font BYOL, DINO et I-JEPA. La mise à jour est une contraction :
 
+<Figure src="ema_distance.svg" alt="Distance entre paramètres cible et contexte pour trois taux EMA" caption="La cible EMA : la distance aux paramètres du contexte rétrécit comme m puissance k (théorème emaIter_error). Une cible lente (m = 0,999) suit très lentement ; m = 0,9 copie presque l’encodeur de contexte." />
+
+
 ```lean file=Ch15/Jepa.lean#ema
 ```
 
@@ -71,6 +74,9 @@ Si l'encodeur cible n'est pas entraîné par la perte mais est une **moyenne mob
 ## Remède 2 : garder explicitement les plongements dispersés
 
 Les méthodes de type VICReg ajoutent un régularisateur qui pénalise des plongements trop semblables : un terme de **variance** (chaque coordonnée doit garder une variance d'au moins $\gamma$) et un terme de **covariance** (les coordonnées ne doivent pas être redondantes). Nous prouvons la propriété qui fait fonctionner le terme de variance, sous la forme la plus simple (plongements scalaires, une « dispersion » nulle exactement quand tous les plongements coïncident) :
+
+<Figure src="collapse_penalty.svg" alt="Objectif d’un prédicteur parfait pour la représentation effondrée et une représentation informative" caption="L’objectif d’un prédicteur de perte de prédiction nulle (gamma = 1) : la solution effondrée coûte w fois gamma, une solution informative assez dispersée ne coûte rien, donc l’effondrement n’est plus un minimiseur (théorème collapse_not_optimal)." />
+
 
 ```lean file=Ch15/Jepa.lean#variance
 ```
@@ -120,3 +126,11 @@ Prouvé : l'effondrement est un minimiseur global de la perte simple ; la mise �
 2. Dans `collapse_not_optimal`, remplacez l'hypothèse $\gamma\le s$ par $s\ge\gamma/2$. À quoi le score $w\gamma$ de l'effondrement doit-il maintenant être comparé ?
 3. Lancez l'expérience avec une perturbation d'écart-type $0{,}3$ au lieu de $3$. Le poids de variance 5 échoue-t-il encore ?
 4. Ajoutez le prédicteur conditionné par l'action de ce chapitre au contrôleur du chapitre 14 : planifiez en faisant évoluer des actions qui minimisent la distance entre le *plongement prédit* et un plongement-but.
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch15/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+
+```lean file=Ch15/Exercises.lean#ex1
+```
+
+```lean file=Ch15/Exercises.lean#ex2
+```

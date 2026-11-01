@@ -63,6 +63,9 @@ The theorems say it precisely. `collapse_zero`: collapse has loss exactly $0$ on
 
 If the target encoder is not trained by the loss but is an **exponential moving average** of the context encoder, $\bar\theta\leftarrow m\bar\theta+(1-m)\theta$, and no gradient flows into it ("stop-gradient"), the two encoders cannot collude to reach the trivial solution. This is what BYOL, DINO and I-JEPA do. The update is a contraction:
 
+<Figure src="ema_distance.svg" alt="Distance between target and context parameters for three EMA rates" caption="The EMA target: the distance to the context parameters shrinks like m to the power k (theorem emaIter_error). A slow target (m = 0.999) follows very slowly; m = 0.9 almost copies the context encoder." />
+
+
 ```lean file=Ch15/Jepa.lean#ema
 ```
 
@@ -71,6 +74,9 @@ If the target encoder is not trained by the loss but is an **exponential moving 
 ## Remedy 2: explicitly keep the embeddings spread out
 
 VICReg-style methods add a regulariser that penalises embeddings for being too similar: a **variance** term (each coordinate must keep a variance of at least $\gamma$) and a **covariance** term (coordinates must not be redundant). We prove the property that makes the variance term work, in the cleanest form (scalar embeddings, a "spread" that is zero exactly when all embeddings coincide):
+
+<Figure src="collapse_penalty.svg" alt="Objective of a perfect predictor for the collapsed and an informative representation" caption="The objective of a predictor with zero prediction loss (gamma = 1): the collapsed solution costs w times gamma, an informative one with enough spread costs nothing, so collapse is no longer a minimiser (theorem collapse_not_optimal)." />
+
 
 ```lean file=Ch15/Jepa.lean#variance
 ```
@@ -120,3 +126,11 @@ Proved: collapse is a global minimiser of the plain loss; the EMA update is a ge
 2. In `collapse_not_optimal`, replace the hypothesis $\gamma\le s$ by $s\ge\gamma/2$. What does the collapsed score $w\gamma$ need to be compared with now?
 3. Run the experiment with a distractor of standard deviation $0.3$ instead of $3$. Does variance weight 5 still fail?
 4. Add the action-conditioned predictor of this chapter to the controller of Chapter 14: plan by evolving actions that minimise the distance between the *predicted embedding* and a goal embedding.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch15/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch15/Exercises.lean#ex1
+```
+
+```lean file=Ch15/Exercises.lean#ex2
+```

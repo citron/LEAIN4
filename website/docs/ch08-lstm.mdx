@@ -134,3 +134,11 @@ The **gated recurrent unit** (Cho et al., 2014) merges the cell and hidden state
 2. Prove `prodF_ge` and `prodF_le_one` for an arbitrary ordered field instead of `Rat` (hint: the proof only uses a few order lemmas).
 3. Make the LSTM's forget-gate bias initial value a parameter. For $T=60$ with plain training, does $b_f = 2$ or $b_f = 0$ change the outcome?
 4. Combine the cell-path theorem with the gate dependence: write the full $\partial c_T/\partial c_0$ for a 2-step LSTM and identify the extra terms.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch08/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch08/Exercises.lean#ex1
+```
+
+```lean file=Ch08/Exercises.lean#ex2
+```

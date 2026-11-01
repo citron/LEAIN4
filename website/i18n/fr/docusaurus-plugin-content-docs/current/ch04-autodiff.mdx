@@ -142,3 +142,11 @@ Les paramètres initiaux aléatoires proviennent d'un générateur déterministe
 2. `relu` n'a pas de dérivée en 0 ; la table ci-dessus utilise `step` (qui vaut 0 en 0). Qu'est-ce qui changerait si `step 0 = 1` ? Les théorèmes restent-ils valables ?
 3. Énoncez et démontrez la règle delta pour $\partial L / \partial b$.
 4. Pourquoi `back` est-il quadratique en la profondeur de l'expression ? Comment mémoïser `eval` y remédierait-il ?
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch04/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+
+```lean file=Ch04/Exercises.lean#ex1
+```
+
+```lean file=Ch04/Exercises.lean#ex2
+```

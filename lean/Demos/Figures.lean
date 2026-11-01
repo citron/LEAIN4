@@ -1,6 +1,7 @@
 import LeanDL.Core.Plot
 import LeanDL.Core.Rng
 import LeanDL.Ch12.Model
+import LeanDL.Ch14.Model
 
 /-!
 # Figures of the book
@@ -105,4 +106,32 @@ def main : IO Unit := do
     curve kk fun k => if l == 1.0 then k else (Float.exp (k * Float.log l) - 1.0) / (l - 1.0)
   save "compounding" <| lineSvg 480 280 0.0 32.0 0.0 40.0 "Imagined-rollout error bound (one-step error = 1)" "imagined steps k" "bound on the error"
     [("L = 0.8", green, bound 0.8), ("L = 1.0", blue, bound 1.0), ("L = 1.1", orange, bound 1.1)]
+  -- Chapter 14: real rollout against a rollout of a model whose gravity term is 10 % too strong
+  let rollout (gravity : Float) : Array (Float × Float) := Id.run do
+    let mut x := 0.5
+    let mut v := 0.0
+    let mut out := #[(0.0, x)]
+    for k in [1:41] do
+      let u := 0.3 * Float.sin (0.3 * k.toFloat)
+      let u := max (-1.0) (min 1.0 u)
+      let x' := x + 0.1 * v
+      let v' := 0.97 * v + 0.15 * u + gravity * Float.sin x
+      x := x'
+      v := v'
+      out := out.push (k.toFloat, x)
+    return out
+  let real := rollout 0.1
+  let model := rollout 0.11
+  save "rollout_drift" <| lineSvg 480 280 0.0 40.0 0.0 8.0 "Open-loop rollout with the same actions" "step" "position x"
+    [("real world", blue, real), ("imagined (gravity 10 % off)", orange, model),
+     ("difference x 10", grey, (Array.range 41).map fun k => (k.toFloat, 10.0 * Float.abs (real[k]!.2 - model[k]!.2)))]
+  -- Chapter 15: the EMA target closes a fraction (1 - m) of the gap at each step
+  let ks2 := grid 0.0 200.0 200
+  let emaGap (m : Float) : Array (Float × Float) := curve ks2 fun k => Float.exp (k * Float.log m)
+  save "ema_distance" <| lineSvg 480 280 0.0 200.0 0.0 1.2 "Distance between target and context parameters" "update k" "distance / initial distance"
+    [("m = 0.9", orange, emaGap 0.9), ("m = 0.99", blue, emaGap 0.99), ("m = 0.999", green, emaGap 0.999)]
+  -- Chapter 15: with the variance penalty, collapse scores w * gamma, an informative solution scores 0
+  let ws := grid 0.0 2.0 20
+  save "collapse_penalty" <| lineSvg 480 280 0.0 2.0 0.0 2.0 "Objective of a perfect predictor (gamma = 1)" "penalty weight w" "total objective"
+    [("collapsed (spread 0)", orange, curve ws fun w => w), ("informative (spread >= gamma)", green, curve ws fun _ => 0.0)]
   IO.println "figures written to ../website/static/img/"

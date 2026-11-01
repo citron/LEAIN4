@@ -64,6 +64,9 @@ C'est de l'apprentissage supervisé ordinaire : régression du *changement* d'é
 
 Un modèle à un pas est précis, mais l'imagination donne au modèle **ses propres prédictions** en entrée. Une petite erreur au pas 1 devient une partie de l'entrée au pas 2, et ainsi de suite. La vitesse de croissance de l'erreur dépend de combien le modèle amplifie les différences, sa **constante de Lipschitz** $L$ :
 
+<Figure src="rollout_drift.svg" alt="Trajectoire réelle et trajectoire imaginée avec un modèle légèrement faux" caption="Les mêmes actions appliquées dans le monde réel et dans un modèle dont le terme de gravité est 10 % trop fort (tracé par Lean). Une petite erreur à un pas écarte lentement la trajectoire imaginée ; la courbe grise est la différence, multipliée par 10 pour être visible." />
+
+
 <Figure src="compounding.svg" alt="Borne sur l’erreur des trajectoires imaginées pour trois constantes de Lipschitz" caption="La borne de compounding_error pour une erreur d’un pas égale à 1. Avec L inférieur à 1 elle plafonne, avec L = 1 elle croît linéairement, avec L supérieur à 1 elle croît exponentiellement." />
 
 
@@ -117,7 +120,15 @@ Le contrôleur entraîné **uniquement sur des épisodes imaginés** se comporte
 
 ## Exercices
 
-1. Prouvez `geom_one` : pour $L=1$, `geom 1 k` vaut $k$ (comme rationnel).
+1. Prouvez que pour $L=1$, `geom 1 k` vaut $k$ (comme rationnel), par récurrence sur $k$ ; le pas de récurrence est le premier exercice Lean ci-dessous.
 2. Montrez que la borne d'erreur est *atteinte* : trouvez $f$, $\hat f$ avec `absQ (fh - f) = ε` et constante de Lipschitz exactement $L$ pour lesquelles `compounding_error` est une égalité.
 3. Lancez la démo avec seulement 5 pas d'entraînement du modèle et comparez les coûts « rêve » et « réel » du contrôleur.
 4. Remplacez le modèle à un pas par un modèle qui prend **deux** états passés. La dérive en $k=40$ change-t-elle ?
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch14/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+
+```lean file=Ch14/Exercises.lean#ex1
+```
+
+```lean file=Ch14/Exercises.lean#ex2
+```

@@ -109,3 +109,11 @@ Prouvé : la convergence géométrique de la mise à jour de Bellman (un état),
 2. Prouvez que la mise à jour TD ne dépasse jamais la cible : si $0\le\eta\le1$ et $Q\le\text{cible}$, alors $Q\le\mathrm{tdUpdate}\le\text{cible}$ (sur `Rat`).
 3. Étendez `reinforce_bandit` à un bandit à *trois* bras avec probabilités softmax (utilisez `Expr` et `sigmoid` deux fois, ou définissez le softmax avec `exp`).
 4. Changez les récompenses pour que chaque pas coûte $-0{,}05$. À quoi ressemble la meilleure politique, et comment $Q(1,\text{droite})$ change-t-il ?
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch13/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+
+```lean file=Ch13/Exercises.lean#ex1
+```
+
+```lean file=Ch13/Exercises.lean#ex2
+```

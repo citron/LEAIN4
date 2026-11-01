@@ -110,3 +110,11 @@ The gradient check agrees to better than $10^{-6}$ (the printed value rounds to 
 2. State the adjoint identity with respect to the *input* (the "transposed convolution" that carries the gradient to the previous layer) and prove it.
 3. Add a second convolutional layer to `Cnn.lean`. How many channels can you afford for the same running time?
 4. Max-pooling is not differentiable at ties. What does the code do at a tie, and does it matter?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch06/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch06/Exercises.lean#ex1
+```
+
+```lean file=Ch06/Exercises.lean#ex2
+```

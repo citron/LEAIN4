@@ -61,7 +61,7 @@ theorem kl_grad (half : α) (x : Vec α 2) :
 
 /-- **The prior is the unique stationary point.** At `μ = 0`, `ℓ = 0` (the standard normal) the
 penalty vanishes and so does its gradient: the KL term pulls every posterior towards `N(0, 1)`. -/
-theorem kl_at_prior [LawfulExp α] (half : α) (h2 : half * 2 = 1) (x : Vec α 2)
+theorem kl_at_prior [LawfulExp α] (half : α) (_h2 : half * 2 = 1) (x : Vec α 2)
     (hμ : x 0 = 0) (hℓ : x 1 = 0) :
     (klE half).eval x = 0 ∧ ((klE half).backprop x).getD 0 0 = 0 ∧
       ((klE half).backprop x).getD 1 0 = 0 := by

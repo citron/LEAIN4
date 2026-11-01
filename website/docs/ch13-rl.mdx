@@ -109,3 +109,11 @@ Proved: geometric convergence of the Bellman update (one state), the TD error fa
 2. Prove that the TD update never overshoots: if $0\le\eta\le1$ and $Q\le\text{target}$ then $Q\le\mathrm{tdUpdate}\le\text{target}$ (over `Rat`).
 3. Extend `reinforce_bandit` to a *three*-armed bandit with softmax probabilities (use `Expr` and `sigmoid` twice, or define softmax with `exp`).
 4. Change the rewards so that each step costs $-0.05$. What does the best policy look like, and how does $Q(1,\text{right})$ change?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch13/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch13/Exercises.lean#ex1
+```
+
+```lean file=Ch13/Exercises.lean#ex2
+```

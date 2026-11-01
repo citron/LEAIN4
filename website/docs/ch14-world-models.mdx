@@ -64,6 +64,9 @@ This is plain supervised learning: regression of the *change* of the state from 
 
 A one-step model is accurate, but imagination feeds the model its **own predictions**. A small error at step 1 becomes part of the input at step 2, and so on. How fast the error grows depends on how much the model amplifies differences, its **Lipschitz constant** $L$:
 
+<Figure src="rollout_drift.svg" alt="Real rollout and imagined rollout with a slightly wrong model" caption="The same actions applied in the real world and in a model whose gravity term is 10 % too strong (drawn by Lean). A small one-step error slowly pulls the imagined trajectory away; the grey curve is the difference, multiplied by 10 to be visible." />
+
+
 <Figure src="compounding.svg" alt="Bound on the imagined-rollout error for three Lipschitz constants" caption="The bound of compounding_error for a one-step error of 1. With L below 1 it levels off, with L = 1 it grows linearly, with L above 1 it grows exponentially." />
 
 
@@ -117,7 +120,15 @@ The controller trained **only on imagined episodes** performs as well in the rea
 
 ## Exercises
 
-1. Prove `geom_one`: for $L=1$, `geom 1 k` equals $k$ (as a rational).
+1. Prove that for $L=1$, `geom 1 k` equals $k$ (as a rational), by induction on $k$; the induction step is the first Lean exercise below.
 2. Show that the error bound is *tight*: find $f$, $\hat f$ with `absQ (fh - f) = ε` and Lipschitz constant exactly $L$ for which `compounding_error` is an equality.
 3. Run the demo with only 5 training steps for the model and compare the "dream" and "real" costs of the controller.
 4. Replace the one-step model by a model that takes **two** past states. Does the drift at $k=40$ change?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch14/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch14/Exercises.lean#ex1
+```
+
+```lean file=Ch14/Exercises.lean#ex2
+```

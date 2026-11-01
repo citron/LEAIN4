@@ -129,3 +129,11 @@ For $T\le 20$ the network learns the rule. For $T\ge 60$ it fits the 32 training
 2. Prove `deriv_hE` for $h_{t+1} = \tanh(w\,h_t + c_t)$ when $w$ is itself a variable. What is $\partial h_T/\partial w$?
 3. Add gradient clipping (rescale the gradient if its norm exceeds a threshold) to the training loop. Does it help on the memory task at $T = 60$?
 4. Replace the 32 training sequences by a fresh batch at every step. Does the network still memorise at $T = 60$?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch07/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch07/Exercises.lean#ex1
+```
+
+```lean file=Ch07/Exercises.lean#ex2
+```

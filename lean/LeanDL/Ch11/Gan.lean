@@ -51,7 +51,7 @@ end Field
 open LeanDL.Ch02 in
 /-- **The optimal discriminator.** For non-negative densities `a`, `b` with `a + b > 0`, no
 value `d` does better than `a / (a + b)`. -/
-theorem lsLoss_min (a b d : Rat) (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : 0 < a + b) :
+theorem lsLoss_min (a b d : Rat) (_ha : 0 ≤ a) (_hb : 0 ≤ b) (hab : 0 < a + b) :
     lsLoss a b (dStar a b) ≤ lsLoss a b d := by
   have h := lsLoss_sq a b d (by grind)
   have hsq := sq_nonneg (d - dStar a b)

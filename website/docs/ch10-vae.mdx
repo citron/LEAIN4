@@ -112,3 +112,11 @@ We first tried a **full circle**. It does not work with a one-dimensional latent
 2. Make the KL weight $\beta$ a hyper-parameter sweep ($0$, $0.1$, $1$, $10$). How do the three numbers of the table move?
 3. Use a two-dimensional latent space on the **full circle** and check that the seam disappears.
 4. Prove that the reparameterised sample has mean $\mu$ when $\mathbb E[\varepsilon]=0$ (state it for a finite list of equally weighted noise values).
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch10/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch10/Exercises.lean#ex1
+```
+
+```lean file=Ch10/Exercises.lean#ex2
+```

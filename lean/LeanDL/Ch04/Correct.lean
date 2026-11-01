@@ -10,6 +10,7 @@ open Lean.Grind
 
 variable {α : Type} {n : Nat} [CommRing α] [HasAct α]
 
+omit [HasAct α] in
 theorem dot_basis : ∀ {n : Nat} (dx : Vec α n) (i : Fin n),
     Vec.dot dx (fun j => if i = j then (1 : α) else 0) = dx i
   | 0, _, i => i.elim0
@@ -118,7 +119,7 @@ theorem back_spec (x : Vec α n) (e : Expr α n) :
     simp only [Expr.back, Expr.deriv, Expr.eval]
     by_cases hij : i = j
     · subst hij
-      simp [Array.getD_eq_getD_getElem?, Array.getElem?_modify, h]
+      simp [Array.getD_eq_getD_getElem?, h]
       grind
     · have : i.val ≠ j.val := fun h' => hij (Fin.ext h')
       simp [Array.getD_eq_getD_getElem?, Array.getElem?_modify, hij, this]

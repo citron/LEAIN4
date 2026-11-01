@@ -142,3 +142,11 @@ The random initial parameters come from a deterministic generator written in Lea
 2. `relu` has no derivative at 0; the table above uses `step` (which is 0 at 0). What would change if `step 0 = 1`? Do the theorems still hold?
 3. State and prove the delta rule for $\partial L / \partial b$.
 4. Why is `back` quadratic in the depth of the expression? How would memoising `eval` fix it?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch04/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch04/Exercises.lean#ex1
+```
+
+```lean file=Ch04/Exercises.lean#ex2
+```

@@ -163,3 +163,11 @@ Le code MNIST n'est pas démontré correct : seule la formule du gradient de sa 
 2. Montrez que la translation $z \mapsto z - c$ ne change pas `softmax` dans un corps.
 3. Implémentez le *dropout* avec `Rng` : mettre à zéro chaque unité cachée avec probabilité $q$ pendant l'entraînement et rééchelonner par $1/(1-q)$. Mesurez l'effet sur la précision en test.
 4. Ajoutez une pénalité L2 à `Net.sgdStep`. Pour quelles valeurs la précision en test s'améliore-t-elle ?
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch05/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+
+```lean file=Ch05/Exercises.lean#ex1
+```
+
+```lean file=Ch05/Exercises.lean#ex2
+```

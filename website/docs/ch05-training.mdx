@@ -163,3 +163,11 @@ The MNIST code is not proved correct: only the formula for its output-layer grad
 2. Show that the shift $z \mapsto z - c$ does not change `softmax` in a field.
 3. Implement *dropout* with `Rng`: zero each hidden unit with probability $q$ during training and rescale by $1/(1-q)$. Measure the effect on test accuracy.
 4. Add an L2 penalty to `Net.sgdStep`. For which values does test accuracy improve?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch05/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch05/Exercises.lean#ex1
+```
+
+```lean file=Ch05/Exercises.lean#ex2
+```

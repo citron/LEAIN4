@@ -21,4 +21,13 @@ theorem delta_rule_bias (x0 x1 y : α) (w : Vec α 3) :
   simp [neuronLoss, sqErr, Expr.deriv, Expr.eval, u]
   grind
 
+/-- Exercise 2: backpropagation through a product gives the other factor. -/
+theorem product_grad (x : Vec α 2) :
+    ((Expr.mul (.var 0) (.var 1) : Expr α 2).backprop x).getD 0 0 = x 1 := by
+  have := backprop_correct x (Expr.mul (.var 0) (.var 1) : Expr α 2) 0
+  simp only [Fin.val_zero] at this
+  rw [this]
+  simp [Expr.deriv, Expr.eval]
+  grind
+
 end LeanDL.Ch04

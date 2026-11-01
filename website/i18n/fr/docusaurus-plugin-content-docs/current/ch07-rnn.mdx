@@ -129,3 +129,11 @@ Pour $T\le 20$, le réseau apprend la règle. Pour $T\ge 60$ il s'ajuste aux 32 
 2. Démontrez `deriv_hE` pour $h_{t+1} = \tanh(w\,h_t + c_t)$ lorsque $w$ est lui-même une variable. Que vaut $\partial h_T/\partial w$ ?
 3. Ajoutez l'écrêtage de gradient (remettre le gradient à l'échelle si sa norme dépasse un seuil) à la boucle d'entraînement. Cela aide-t-il sur la tâche de mémoire à $T = 60$ ?
 4. Remplacez les 32 séquences d'entraînement par un nouveau lot à chaque pas. Le réseau mémorise-t-il encore à $T = 60$ ?
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch07/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+
+```lean file=Ch07/Exercises.lean#ex1
+```
+
+```lean file=Ch07/Exercises.lean#ex2
+```
