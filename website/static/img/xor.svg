@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 260" font-family="sans-serif" font-size="13">
+  <rect width="360" height="260" fill="white"/>
+  <g stroke="#555" stroke-width="1.5">
+    <line x1="50" y1="220" x2="320" y2="220"/>
+    <line x1="50" y1="220" x2="50" y2="20"/>
+  </g>
+  <text x="318" y="238">x₁</text>
+  <text x="30" y="26">x₂</text>
+  <!-- XOR = 1 : (0,1) and (1,0) ; XOR = 0 : (0,0) and (1,1) -->
+  <circle cx="90" cy="180" r="12" fill="#d9534f"/>
+  <circle cx="270" cy="60" r="12" fill="#d9534f"/>
+  <circle cx="90" cy="60" r="12" fill="#2e5aa8"/>
+  <circle cx="270" cy="180" r="12" fill="#2e5aa8"/>
+  <text x="76" y="205">(0,0)</text>
+  <text x="250" y="85">(1,1)</text>
+  <text x="76" y="40">(0,1)</text>
+  <text x="250" y="205">(1,0)</text>
+  <!-- two attempted lines -->
+  <line x1="60" y1="130" x2="300" y2="110" stroke="#999" stroke-dasharray="5,4"/>
+  <line x1="130" y1="210" x2="230" y2="30" stroke="#999" stroke-dasharray="5,4"/>
+  <text x="100" y="250" fill="#d9534f">XOR = 0</text>
+  <text x="190" y="250" fill="#2e5aa8">XOR = 1</text>
+</svg>

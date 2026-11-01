@@ -1,0 +1,108 @@
+import LeanDL.Core.Plot
+import LeanDL.Core.Rng
+import LeanDL.Ch12.Model
+
+/-!
+# Figures of the book
+
+`lake exe figures` writes the concept figures (curves computed by Lean itself) to
+`../website/static/img/`. The training demos write their own figures.
+-/
+
+open LeanDL LeanDL.Plot
+
+def blue := "#2e5aa8"
+def orange := "#c4561a"
+def green := "#2a9d5c"
+def purple := "#8a4fb3"
+def grey := "#888888"
+
+def grid (lo hi : Float) (n : Nat) : Array Float :=
+  (Array.range (n + 1)).map fun i => lo + (hi - lo) * i.toFloat / n.toFloat
+
+def curve (xs : Array Float) (f : Float → Float) : Array (Float × Float) := xs.map fun x => (x, f x)
+
+def sigmoid (x : Float) : Float := 1.0 / (1.0 + Float.exp (-x))
+
+def save (name : String) (svg : String) : IO Unit :=
+  IO.FS.writeFile s!"../website/static/img/{name}.svg" svg
+
+def normalPdf (m s x : Float) : Float :=
+  Float.exp (-(x - m) * (x - m) / (2.0 * s * s)) / (s * Float.sqrt (2.0 * 3.141592653589793))
+
+def main : IO Unit := do
+  -- Chapter 1: the four activation functions
+  let xs := grid (-4.0) 4.0 160
+  save "activations" <| lineSvg 480 280 (-4.0) 4.0 (-2.0) 2.0 "Activation functions" "input u" "output"
+    [("step", grey, curve xs fun x => if x > 0.0 then 1.0 else 0.0),
+     ("sigmoid", blue, curve xs sigmoid),
+     ("tanh", orange, curve xs Float.tanh),
+     ("ReLU", green, curve xs fun x => if x > 0.0 then x else 0.0)]
+  -- Chapter 2: mistakes per epoch (the numbers printed by `lake exe ch02`)
+  let pts (l : List Nat) : Array (Float × Float) :=
+    (l.toArray.mapIdx fun i m => (i.toFloat, m.toFloat))
+  save "perceptron_mistakes" <| lineSvg 480 260 0.0 8.0 0.0 8.0 "Perceptron mistakes per epoch" "epoch" "mistakes"
+    [("AND", blue, pts [2, 3, 3, 2, 2, 3, 2, 1, 0]),
+     ("OR", green, pts [3, 1, 2, 2, 1, 0]),
+     ("XOR", orange, pts [4, 4, 4, 4, 4, 4, 4, 4, 4])]
+  -- Chapter 3: gradient descent on L(w) = w^2 for four learning rates
+  let gd (eta : Float) : Array (Float × Float) := Id.run do
+    let mut w := 1.0
+    let mut out := #[(0.0, w)]
+    for k in [1:21] do
+      w := w - eta * 2.0 * w
+      out := out.push (k.toFloat, w)
+    return out
+  save "gradient_descent" <| lineSvg 480 280 0.0 20.0 (-1.5) 1.5 "Gradient descent on L(w) = w^2, start w = 1" "step" "w"
+    [("rate 0.05", blue, gd 0.05), ("rate 0.4", green, gd 0.4), ("rate 0.9", purple, gd 0.9), ("rate 1.05", orange, gd 1.05)]
+  -- Chapter 7: gradient of a one-unit RNN with |tanh'| <= 1 and recurrent weight w: size at most |w|^T
+  let steps := grid 0.0 30.0 30
+  let logPow (w : Float) : Array (Float × Float) := curve steps fun t => t * Float.log10 w
+  save "vanishing" <| lineSvg 480 280 0.0 32.0 (-12.0) 4.0 "Size of the RNN gradient after T steps" "T (steps back in time)" "log10 of |w|^T"
+    [("w = 0.5", blue, logPow 0.5), ("w = 0.9", green, logPow 0.9), ("w = 1.0", grey, logPow 1.0), ("w = 1.1", orange, logPow 1.1)]
+  -- Chapter 8: the LSTM highway multiplies forget gates instead
+  let steps100 := grid 0.0 100.0 100
+  let logPow100 (w : Float) : Array (Float × Float) := curve steps100 fun t => t * Float.log10 w
+  save "highway" <| lineSvg 480 280 0.0 100.0 (-30.0) 10.0 "Gradient along the memory path" "T (steps back in time)" "log10 of the product"
+    [("RNN factor 0.5", orange, logPow100 0.5), ("forget gate 0.9", purple, logPow100 0.9),
+     ("forget gate 0.99", blue, logPow100 0.99), ("forget gate 1.0", green, logPow100 1.0)]
+  -- Chapter 9: a causal mask with uniform scores: position t averages positions 0..t
+  save "causal_mask" <| heatSvg 44 "Causal attention (equal scores)" "query position t" "key position j"
+    ((Array.range 6).map fun t => (Array.range 6).map fun j => if j ≤ t then 1.0 / (t + 1).toFloat else 0.0)
+  -- Chapter 11: the optimal discriminator between a real and a generated density
+  let gx := grid (-4.0) 6.0 200
+  save "optimal_discriminator" <| lineSvg 480 280 (-4.0) 6.0 0.0 1.2 "Optimal discriminator D*(x) = a / (a + b)" "x" "density / probability"
+    [("real data a(x)", blue, curve gx (normalPdf 2.0 1.0)),
+     ("generated b(x)", orange, curve gx (normalPdf 0.0 1.2)),
+     ("D*(x)", green, curve gx fun x => normalPdf 2.0 1.0 x / (normalPdf 2.0 1.0 x + normalPdf 0.0 1.2 x))]
+  -- Chapter 12: signal and noise levels along the schedule, and the data being destroyed
+  let tt := (Array.range (LeanDL.Ch12.T + 1))
+  save "noise_schedule" <| lineSvg 480 280 0.0 20.0 0.0 1.2 "The forward process" "noising step t" "level"
+    [("signal factor", blue, tt.map fun t => (t.toFloat, Float.sqrt LeanDL.Ch12.abars[t]!)),
+     ("noise level", orange, tt.map fun t => (t.toFloat, Float.sqrt (1.0 - LeanDL.Ch12.abars[t]!)))]
+  let sample (t : Nat) : Array Float := Id.run do
+    let mut r := Rng.seed (100 + t.toUInt64)
+    let mut out := #[]
+    let ab := LeanDL.Ch12.abars[t]!
+    for _ in [0:4000] do
+      let (g, r1) := r.normal
+      let (u, r2) := r1.uniform
+      let (e, r3) := r2.normal
+      r := r3
+      let x0 := (if u < 0.5 then -2.0 else 2.0) + 0.4 * g
+      out := out.push (Float.sqrt ab * x0 + Float.sqrt (1.0 - ab) * e)
+    return out
+  save "forward_diffusion" <| histSvg 480 200 (-5.0) 5.0 40 "Data at noising steps 0, 4, 10 and 20"
+    [("t = 0", blue, sample 0), ("t = 4", green, sample 4), ("t = 10", purple, sample 10), ("t = 20", orange, sample 20)]
+  -- Chapter 13: value iteration error shrinks like gamma^k
+  let ks := grid 0.0 100.0 100
+  let geo (g : Float) : Array (Float × Float) := curve ks fun k => Float.exp (k * Float.log g)
+  save "value_iteration" <| lineSvg 480 280 0.0 100.0 0.0 1.2 "Value iteration: remaining error" "sweep k" "error / initial error"
+    [("gamma 0.9", blue, geo 0.9), ("gamma 0.95", green, geo 0.95), ("gamma 0.99", orange, geo 0.99)]
+  -- Chapter 14: the bound of `compounding_error` for a one-step error of 1
+  let kk := grid 0.0 30.0 30
+  let bound (l : Float) : Array (Float × Float) :=
+    curve kk fun k => if l == 1.0 then k else (Float.exp (k * Float.log l) - 1.0) / (l - 1.0)
+  save "compounding" <| lineSvg 480 280 0.0 32.0 0.0 40.0 "Imagined-rollout error bound (one-step error = 1)" "imagined steps k" "bound on the error"
+    [("L = 0.8", green, bound 0.8), ("L = 1.0", blue, bound 1.0), ("L = 1.1", orange, bound 1.1)]
+  IO.println "figures written to ../website/static/img/"

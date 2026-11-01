@@ -1,0 +1,64 @@
+---
+slug: /
+sidebar_position: 0
+title: Le Deep Learning en Lean 4
+---
+
+# Le Deep Learning en Lean 4
+
+Ce cours enseigne **Lean 4** et **le deep learning** en même temps. Chaque modèle est implémenté uniquement en Lean 4, sans Python ni bibliothèque externe. Chaque fois qu'une propriété du modèle peut être énoncée précisément, elle est **démontrée** en Lean.
+
+## Fonctionnement du cours
+
+- Chaque chapitre correspond à un fichier Lean du dossier `lean/`. Le code affiché sur ces pages est extrait de ces fichiers : il est donc compilé et vérifié.
+- Chaque chapitre contient un **Coin Lean** : la fonctionnalité de Lean nécessaire pour ce chapitre, présentée au moment utile.
+- Chaque chapitre se termine par des exercices (fichiers Lean contenant des `sorry` à remplacer).
+- Chaque chapitre commence par un encadré **En bref (TL;DR)** : un court résumé et les mots nouveaux en termes simples. Si vous êtes perdu, consultez l’[Index des concepts essentiels](concepts-index) (quels concepts sont indispensables, et où) et le [Glossaire](glossary).
+
+## Deux manières d'utiliser les nombres
+
+Lean ne peut pas raisonner sur les nombres flottants ; le code est donc écrit une seule fois, **de façon générique sur un type de scalaires** `α` :
+
+- Pour **exécuter** un modèle, on prend `α := Float`.
+- Pour **démontrer** des théorèmes, on prend des nombres exacts (`Int`, `Rat`) ou des structures algébriques abstraites, grâce aux classes d'algèbre fournies avec la tactique `grind` de Lean.
+
+:::info Ce que signifie « démonstration » ici
+Les preuves portent sur le modèle mathématique exact (par exemple un réseau sur les rationnels). Elles ne certifient pas les arrondis de `Float`. Cela est précisé chaque fois que c'est important.
+:::
+
+
+```mermaid
+flowchart LR
+  c0["0 Lean"] --> c1["1 Neurone"] --> c2["2 Perceptron, XOR"] --> c3["3 MLP"] --> c4["4 Autodiff"] --> c5["5 Entraînement, MNIST"]
+  c5 --> c6["6 CNN"]
+  c5 --> c7["7 RNN"] --> c8["8 LSTM"] --> c9["9 Transformer"]
+  c5 --> c10["10 VAE"] --> c11["11 GAN"] --> c12["12 Diffusion"]
+  c5 --> c13["13 Apprentissage par renforcement"] --> c14["14 Modèles du monde"]
+  c10 --> c15["15 JEPA"]
+  c14 --> c15
+```
+
+*Le cours en un coup d’œil : un tronc commun (chapitres 0 à 5), puis trois branches (images et séquences, modèles génératifs, prise de décision) qui se rejoignent dans les derniers chapitres.*
+
+## Programme
+
+| # | Chapitre | Vous apprenez (Lean) | Vous apprenez (deep learning) |
+|---|----------|----------------------|-------------------------------|
+| 0 | Installation et tour de Lean | `def`, `#eval`, `theorem` | — |
+| 1 | Le neurone seul | structures, classes de types, code générique | somme pondérée, biais, activations |
+| 2 | Le perceptron et le XOR | `grind`, preuves sur les anneaux ordonnés | règle d'apprentissage, XOR, premier hiver de l'IA |
+| 3 | Le perceptron multicouche | types inductifs indexés, récurrence | couches, XOR résolu, universalité booléenne, gradient à la main |
+| 4 | Réseaux profonds et autodiff | types inductifs, récursion structurelle, preuves par induction | rétropropagation, mode direct/inverse, correction démontrée |
+| 5 | Pertes, optimiseurs, régularisation, MNIST | listes, Fin, preuves sur les corps | entropie croisée, SGD/momentum/Adam, décroissance des poids, MNIST à 96 % |
+| 6 | Réseaux convolutifs | types dépendants dans les indices, sommes doubles | convolution, partage des poids, équivariance, CNN à 97 % sur MNIST |
+| 7 | Réseaux récurrents | récurrence sur Nat, hypothèses de théorème | BPTT, gradients qui s'évanouissent et explosent, tâche de mémoire |
+| 8 | LSTM et mémoire à portes | bornes sur les produits, Rat | porte d'oubli, chemin additif, expériences honnêtes sur la mémoire |
+| 9 | L'attention et le Transformer | corps abstraits, listes et permutations | softmax, ensemble vs séquence, masque causal, normalisation de couche, mini-Transformer |
+| 10 | Autoencodeurs et VAE | l'astuce de reparamétrisation comme théorème | variables latentes, pénalité KL, échantillonnage |
+| 11 | GAN | optimalité par complétion du carré | jeu minimax, discriminateur optimal, instabilité |
+| 12 | Modèles de diffusion | récurrence sur les calendriers, identités de corps | processus direct en forme fermée, pas de débruitage exact |
+| 13 | Apprentissage par renforcement | récursion, identités d'anneau | mises à jour de Bellman, Q-learning, REINFORCE avec ligne de base |
+| 14 | Modèles du monde | récurrence avec hypothèses sur des fonctions, inégalité triangulaire | apprendre la dynamique, trajectoires imaginées, accumulation d'erreur, entraîner un contrôleur dans un rêve |
+| 15 | JEPA | raisonnement sur les minimiseurs, suites géométriques | prédire dans l'espace des représentations, effondrement, cibles EMA, régularisation de variance |
+
+Commencez par le [chapitre 0](ch00-setup).

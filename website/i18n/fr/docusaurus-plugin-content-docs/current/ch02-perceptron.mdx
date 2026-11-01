@@ -1,0 +1,110 @@
+---
+sidebar_position: 3
+title: "Chapitre 2 — Le perceptron, le XOR et le premier hiver de l'IA"
+---
+
+# Chapitre 2 — Le perceptron, le XOR et le premier hiver de l'IA
+
+:::tip[En bref (TL;DR)]
+**En bref.** Un neurone trace une seule droite, donc il ne peut pas calculer le XOR. Nous le prouvons, nous prouvons aussi que la règle d’apprentissage du perceptron finit toujours par s’arrêter sur des données séparables, et nous voyons pourquoi cela a mené au premier hiver de l’IA.
+
+**Mots nouveaux, en termes simples:**
+
+- **Perceptron**: Un neurone à sortie tout-ou-rien, avec une règle pour apprendre de ses erreurs.
+- **Linéairement séparable**: Des données qu’une seule droite (ou un seul plan) peut séparer en deux groupes.
+- **XOR**: Vrai quand exactement une des deux entrées est active. Aucune droite ne sépare ses deux réponses.
+- **Règle d’apprentissage du perceptron**: Quand la réponse est fausse, pousser les poids vers la bonne : ajouter l’exemple s’il fallait dire oui, le retrancher s’il fallait dire non.
+- **Marge**: L’écart de sécurité entre les deux groupes de données. Plus il est grand, moins il y a d’erreurs.
+- **Théorème de convergence (Novikoff)**: Une preuve que sur des données séparables le perceptron fait un nombre limité d’erreurs puis s’arrête pour toujours.
+- **Inégalité de Cauchy–Schwarz**: Le produit scalaire de deux vecteurs n’est jamais plus grand que le produit de leurs longueurs.
+- **Hiver de l’IA**: Une période où l’argent et l’intérêt pour l’IA se sont effondrés faute de promesses tenues. Le premier a commencé dans les années 1970.
+:::
+
+
+## L'histoire en un paragraphe
+
+En 1958, Frank Rosenblatt introduit le **perceptron** : un neurone à seuil accompagné d'une règle d'apprentissage. En 1969, Marvin Minsky et Seymour Papert publient *Perceptrons*, qui analyse exactement ce que les perceptrons à une couche peuvent et ne peuvent pas calculer. L'exemple le plus simple de ce qu'ils ne peuvent pas calculer est le **XOR** (ou exclusif). Ajouté aux résultats décevants d'autres programmes d'IA (par exemple le rapport Lighthill de 1973 au Royaume-Uni), cela a contribué à l'effondrement des financements du milieu des années 1970, appelé **premier hiver de l'IA**. Les historiens s'accordent sur le fait que les causes furent multiples ; le fait mathématique ci-dessous est le cœur technique de la partie « réseaux de neurones » de cette histoire.
+
+<Figure src="xor.svg" alt="Les quatre points du XOR dans le plan" caption="Aucune droite ne sépare les deux points bleus des deux points rouges." />
+
+## Théorème 1 — aucun neurone ne calcule le XOR
+
+Précisons d'abord ce que signifie « un neurone calcule le XOR », pour tout type de scalaires muni de `0`, `1`, `+`, `*` et d'un `≤` décidable :
+
+```lean file=Ch02/Xor.lean#xor_def
+```
+
+L'énoncé est ensuite démontré pour **tout anneau commutatif totalement ordonné** `α`, donc pour `Int`, `Rat` et les nombres réels. Avec des poids $(w_1,w_2)$ et un biais $b$, les quatre contraintes donnent :
+
+$$ b < 0,\quad w_1 + b \ge 0,\quad w_2 + b \ge 0,\quad w_1 + w_2 + b < 0. $$
+
+En additionnant les deux inégalités du milieu, on obtient $w_1 + w_2 + 2b \ge 0$, donc $w_1+w_2+b \ge -b > 0$, ce qui contredit la dernière. La preuve en Lean est le même argument, confié à `grind` :
+
+```lean file=Ch02/Xor.lean#xor_impossible
+```
+
+:::tip[Coin Lean : algèbre abstraite avec `grind`]
+Les hypothèses `[CommRing α] [LE α] [LT α] [Std.IsLinearOrder α] …` signifient « α se comporte comme les entiers ou les réels ». `grind` sait combiner ces hypothèses (identités d'anneau, inégalités linéaires). Le même énoncé est donc valable pour tous ces types à la fois.
+:::
+
+## La règle d'apprentissage
+
+Un perceptron prédit le signe de $w\cdot x$ (le biais est intégré à $w$ en ajoutant une coordonnée constante `1` à chaque entrée). Sur un exemple $(x,y)$ d'étiquette $y=\pm 1$ qu'il classe mal, c'est-à-dire $y\,(w\cdot x)\le 0$, il met à jour $w \leftarrow w + y\,x$.
+
+```mermaid
+flowchart TD
+  A["Prendre un exemple x d’étiquette y, +1 ou -1"] --> B["Prédire le signe de w . x"]
+  B --> C{"Juste ?"}
+  C -->|"oui"| A
+  C -->|"non"| D["Mise à jour : w = w + y x"]
+  D --> A
+```
+
+*La boucle d’apprentissage du perceptron : les poids ne changent que lorsque la prédiction est fausse.*
+
+
+```lean file=Ch02/Perceptron.lean#update
+```
+
+```lean file=Ch02/Train.lean#train
+```
+
+Exécutez-le avec `lake exe ch02`. ET et OU convergent ; le XOR fait 4 erreurs à chaque époque, indéfiniment :
+
+```text
+AND: mistakes per epoch = [2, 3, 3, 2, 2, 3, 2, 1, 0]
+OR: mistakes per epoch = [3, 1, 2, 2, 1, 0]
+XOR: mistakes per epoch = [4, 4, 4, 4, 4, ...]
+```
+
+## Théorème 2 — le théorème de convergence de Novikoff
+
+Si les données *sont* linéairement séparables avec une marge, le perceptron s'arrête. Précisément : supposons un vecteur $w^*$ tel que $y_t\,(w^*\cdot x_t) \ge \gamma > 0$ pour tous les exemples et $\|x_t\|^2 \le R^2$. Alors toute suite de $k$ mises à jour déclenchées par des erreurs, à partir de $w=0$, vérifie
+
+$$ k\,\gamma^2 \;\le\; \|w^*\|^2 R^2 . $$
+
+La preuve classique a trois ingrédients, chacun étant un lemme Lean :
+
+1. `alignment_grows` : après $k$ mises à jour, $w^*\cdot w_k \ge k\gamma$.
+2. `norm_grows` : après $k$ mises à jour, $\|w_k\|^2 \le k R^2$, car chaque mise à jour correspond à une erreur.
+3. `cauchy_schwarz` : $(a\cdot b)^2 \le (a\cdot a)(b\cdot b)$. Nous la démontrons de zéro, sans racine carrée, en étudiant le trinôme $\|s a + t b\|^2 \ge 0$.
+
+```lean file=Ch02/Perceptron.lean#cauchy_schwarz
+```
+
+```lean file=Ch02/Perceptron.lean#novikoff
+```
+
+Le théorème porte sur *toute* suite de mises à jour déclenchées par des erreurs ; il s'applique donc à la boucle d'entraînement ci-dessus. Il est démontré sur `Rat` (arithmétique exacte).
+
+## Ce que cela dit du XOR
+
+En mettant les deux théorèmes côte à côte : sur des données séparables, le perceptron fait un nombre borné d'erreurs ; sur le XOR, aucun vecteur de poids ne fait zéro erreur, donc le nombre d'erreurs ne peut jamais être borné. Le remède, au chapitre suivant, est d'empiler des neurones.
+
+<Figure src="perceptron_mistakes.svg" alt="Erreurs par époque pour ET, OU et XOR" caption="Erreurs par époque (les nombres affichés par lake exe ch02). ET et OU atteignent zéro erreur et s’arrêtent pour toujours ; XOR fait 4 erreurs à chaque époque." />
+
+
+## Exercices
+
+1. Montrez qu'aucun neurone ne calcule non plus le XNOR (`exercise_xnor` dans `LeanDL/Ch02/Exercises.lean`).
+2. Énoncez le théorème de Novikoff pour les entrées augmentées `Vec.cons1 x` et expliquez le rôle du biais.

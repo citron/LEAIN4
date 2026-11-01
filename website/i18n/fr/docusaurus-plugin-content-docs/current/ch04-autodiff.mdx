@@ -1,0 +1,144 @@
+---
+sidebar_position: 5
+title: "Chapitre 4 — Réseaux profonds et différentiation automatique"
+---
+
+# Chapitre 4 — Réseaux profonds et différentiation automatique
+
+:::tip[En bref (TL;DR)]
+**En bref.** Au lieu de dériver les gradients à la main, un programme les calcule. Nous construisons en Lean la différentiation automatique en mode direct et en mode inverse (rétropropagation) et prouvons les deux correctes.
+
+**Mots nouveaux, en termes simples:**
+
+- **Dérivée**: La vitesse à laquelle une sortie change quand on pousse un peu une entrée.
+- **Gradient**: La liste de toutes les dérivées par rapport à tous les poids. Il pointe vers le haut, donc on avance dans le sens opposé.
+- **Différentiation automatique (autodiff)**: Un programme qui calcule les dérivées exactes de n’importe quel calcul en appliquant mécaniquement la règle en chaîne.
+- **Arbre d’expression**: Un calcul écrit comme un arbre de petites opérations (addition, produit, sigmoïde…). L’autodiff parcourt cet arbre.
+- **Mode direct**: Transporter une dérivée pendant qu’on calcule la valeur. Une passe donne l’effet d’une direction choisie.
+- **Rétropropagation (mode inverse)**: Calculer vers l’avant, puis balayer une seule fois vers l’arrière pour obtenir la dérivée de tous les poids à la fois.
+- **Adjoint**: Le message qui circule pendant le balayage arrière : de combien le résultat final change par unité de changement de ce nœud.
+- **Vérification du gradient**: Vérifier un gradient en poussant un poids très légèrement et en regardant comment la perte bouge vraiment (différences finies).
+- **Preuve par récurrence**: Prouver un énoncé pour le plus petit cas, puis montrer que s’il est vrai pour les petits morceaux il l’est pour le grand.
+:::
+
+
+Au chapitre 3, nous avons calculé à la main le gradient d'un réseau à 2 couches. Pour dix couches, ou un Transformer, personne ne le fait : l'ordinateur applique mécaniquement la règle de dérivation en chaîne. C'est la **différentiation automatique** (autodiff), le moteur de tous les frameworks de deep learning. Dans ce chapitre nous en construisons un en Lean, **et nous démontrons qu'il est correct**.
+
+## Expressions
+
+Nous décrivons un calcul comme un arbre d'expression sur $n$ variables d'entrée (les paramètres).
+
+```mermaid
+flowchart LR
+  w["w"] --> m["produit"]
+  x["x"] --> m
+  m --> a["somme"]
+  b["b"] --> a
+  a --> s["sigmoïde"]
+  s --> L["perte"]
+```
+
+*Un calcul sous forme d’arbre d’expression (ici la perte d’un neurone sigmoïde). L’autodiff parcourt cet arbre.*
+
+
+```lean file=Ch04/Autodiff.lean#expr
+```
+
+:::tip[Coin Lean : types inductifs et récursion structurelle]
+`Expr` est un type `inductive` : une valeur est construite par l'un des constructeurs. Une fonction définie par filtrage sur chaque constructeur, qui ne s'appelle que sur des sous-expressions (comme `eval`), est *structurellement récursive* : Lean vérifie qu'elle termine, et les preuves à son sujet se font par `induction`.
+:::
+
+## Qu'est-ce que « la dérivée » ?
+
+Nous définissons la **dérivée partielle formelle** $\partial_j e$ d'une expression par rapport à la variable $j$, comme une autre expression : règle de la somme, règle du produit, et règle de dérivation en chaîne pour chaque non-linéarité ($\exp' = \exp$, $\sigma' = \sigma(1-\sigma)$, $\tanh' = 1-\tanh^2$, $\log' = 1/x$, $(1/x)' = -1/x^2$, $\sqrt{x}' = 1/(2\sqrt{x})$, et $\mathrm{relu}' = \mathrm{step}$). Ces primitives suffisent pour la suite du cours : softmax, normalisation, attention.
+
+```lean file=Ch04/Autodiff.lean#deriv
+```
+
+C'est la spécification. Elle est lente (l'expression dérivée peut être bien plus grosse que l'originale), mais manifestement juste. Les deux algorithmes ci-dessous doivent s'y conformer.
+
+## Mode direct (forward)
+
+On transporte une *tangente* à côté de chaque valeur : la dérivée dans une direction `dx` choisie.
+
+```lean file=Ch04/Autodiff.lean#fwd
+```
+
+Une passe directe donne une dérivée directionnelle. Pour le gradient complet d'une fonction de $n$ paramètres, il faut $n$ passes.
+
+## Mode inverse (rétropropagation)
+
+On exécute le calcul vers l'avant, puis on remonte depuis la sortie en transportant l'**adjoint** $s$ = la dérivée de la sortie finale par rapport à la valeur du nœud courant. Chaque nœud multiplie $s$ par sa dérivée locale et la transmet à ses enfants. Sur une variable, l'adjoint est ajouté à l'entrée correspondante du gradient.
+
+```mermaid
+flowchart TD
+  A["x, w, b"] -->|"avant : calculer"| B["u = w x + b"]
+  B -->|"avant"| C["y = sigmoïde de u"]
+  C -->|"avant"| D["perte"]
+  D -.->|"arrière : d perte / d y"| C
+  C -.->|"arrière : d perte / d u"| B
+  B -.->|"arrière : d perte / d w et d perte / d b"| A
+```
+
+*Mode inverse : une passe avant calcule les valeurs (flèches pleines), un balayage arrière renvoie la dérivée à chaque poids (flèches pointillées).*
+
+
+```lean file=Ch04/Autodiff.lean#back
+```
+
+Un seul balayage arrière donne **toutes** les $n$ dérivées partielles, pour un coût comparable à une passe avant. C'est pourquoi l'entraînement de réseaux à des millions de paramètres est possible.
+
+## Les deux modes sont corrects
+
+D'abord, le mode direct calcule la valeur et la dérivée directionnelle $\sum_i dx_i\,\partial_i e$ :
+
+```lean file=Ch04/Correct.lean#fwd_correct
+```
+
+Puis le théorème clé : le balayage arrière ajoute exactement $s \cdot \partial_j e$ à la coordonnée $j$. La preuve est une récurrence sur l'expression, et chaque cas est une identité d'anneau réglée par `grind`.
+
+```lean file=Ch04/Correct.lean#back_correct
+```
+
+Le dernier théorème est le sens précis dans lequel **le mode inverse est la transposée du mode direct** : la dérivée directionnelle vaut $dx \cdot \nabla e$.
+
+:::info Ce qui est démontré, et ce qui ne l'est pas
+Les théorèmes valent dans tout anneau commutatif muni d'un `exp`, d'un `sigmoid` et d'un `tanh` ; la table des dérivées est la *définition* de `deriv`. Que cette table soit la vraie dérivée des fonctions réelles est le théorème classique d'analyse, que nous ne redémontrons pas (il faudrait de l'analyse réelle). Les arrondis flottants ne sont pas modélisés non plus. Comme filet de sécurité, la démo effectue une **vérification de gradient** par différences finies.
+:::
+
+## Retour au neurone
+
+Avec cette machinerie, la règle delta du chapitre 3 devient un corollaire : la rétropropagation à travers un neurone sigmoïde avec erreur quadratique renvoie $\partial L/\partial w_0 = 2(\sigma(u)-y)\,\sigma(u)(1-\sigma(u))\,x_0$.
+
+```lean file=Ch04/Network.lean#delta_rule
+```
+
+## Des réseaux de profondeur quelconque
+
+Une couche dense et un perceptron multicouche entier ne sont que des fonctions qui construisent des expressions. Rien dans le code d'autodiff ne connaît les couches.
+
+```lean file=Ch04/Network.lean#builders
+```
+
+## Exécution
+
+`lake exe ch04` entraîne un réseau **2-3-3-1** (25 paramètres, deux couches cachées) sur le XOR. Le gradient n'est jamais écrit à la main.
+
+```text
+parameters: 25
+max |backprop - finite difference| over 25 parameters = 0.000000
+after 0 steps: loss = 1.014810
+after 1000 steps: loss = 0.000666
+...
+(0.000000, 1.000000) -> 0.995773   target 1.000000
+(1.000000, 1.000000) -> 0.005598   target 0.000000
+```
+
+Les paramètres initiaux aléatoires proviennent d'un générateur déterministe écrit en Lean (`Core/Rng.lean`) : chaque exécution est donc reproductible.
+
+## Exercices
+
+1. Ajoutez un constructeur `softplus` ($\log(1+e^x)$, dérivée $\sigma$) et étendez les preuves.
+2. `relu` n'a pas de dérivée en 0 ; la table ci-dessus utilise `step` (qui vaut 0 en 0). Qu'est-ce qui changerait si `step 0 = 1` ? Les théorèmes restent-ils valables ?
+3. Énoncez et démontrez la règle delta pour $\partial L / \partial b$.
+4. Pourquoi `back` est-il quadratique en la profondeur de l'expression ? Comment mémoïser `eval` y remédierait-il ?

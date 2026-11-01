@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" font-family="sans-serif" font-size="12">
+<rect width="400" height="200" fill="white"/>
+<rect x="1.000000" y="160.000000" width="23.000000" height="0.000000" fill="#999" fill-opacity="0.5"/>
+<rect x="26.000000" y="158.605578" width="23.000000" height="1.394422" fill="#999" fill-opacity="0.5"/>
+<rect x="51.000000" y="140.478088" width="23.000000" height="19.521912" fill="#999" fill-opacity="0.5"/>
+<rect x="76.000000" y="85.298805" width="23.000000" height="74.701195" fill="#999" fill-opacity="0.5"/>
+<rect x="101.000000" y="76.334661" width="23.000000" height="83.665339" fill="#999" fill-opacity="0.5"/>
+<rect x="126.000000" y="136.693227" width="23.000000" height="23.306773" fill="#999" fill-opacity="0.5"/>
+<rect x="151.000000" y="158.804781" width="23.000000" height="1.195219" fill="#999" fill-opacity="0.5"/>
+<rect x="176.000000" y="160.000000" width="23.000000" height="0.000000" fill="#999" fill-opacity="0.5"/>
+<rect x="201.000000" y="160.000000" width="23.000000" height="0.000000" fill="#999" fill-opacity="0.5"/>
+<rect x="226.000000" y="158.406375" width="23.000000" height="1.593625" fill="#999" fill-opacity="0.5"/>
+<rect x="251.000000" y="141.673307" width="23.000000" height="18.326693" fill="#999" fill-opacity="0.5"/>
+<rect x="276.000000" y="85.896414" width="23.000000" height="74.103586" fill="#999" fill-opacity="0.5"/>
+<rect x="301.000000" y="80.717131" width="23.000000" height="79.282869" fill="#999" fill-opacity="0.5"/>
+<rect x="326.000000" y="139.482072" width="23.000000" height="20.517928" fill="#999" fill-opacity="0.5"/>
+<rect x="351.000000" y="159.203187" width="23.000000" height="0.796813" fill="#999" fill-opacity="0.5"/>
+<rect x="376.000000" y="160.000000" width="23.000000" height="0.000000" fill="#999" fill-opacity="0.5"/>
+<rect x="1.000000" y="160.000000" width="23.000000" height="0.000000" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="26.000000" y="160.000000" width="23.000000" height="0.000000" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="51.000000" y="146.852590" width="23.000000" height="13.147410" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="76.000000" y="139.083665" width="23.000000" height="20.916335" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="101.000000" y="10.000000" width="23.000000" height="150.000000" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="126.000000" y="158.007968" width="23.000000" height="1.992032" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="151.000000" y="158.007968" width="23.000000" height="1.992032" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="176.000000" y="157.410359" width="23.000000" height="2.589641" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="201.000000" y="158.804781" width="23.000000" height="1.195219" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="226.000000" y="159.203187" width="23.000000" height="0.796813" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="251.000000" y="158.007968" width="23.000000" height="1.992032" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="276.000000" y="14.980080" width="23.000000" height="145.019920" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="301.000000" y="141.474104" width="23.000000" height="18.525896" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="326.000000" y="146.653386" width="23.000000" height="13.346614" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="351.000000" y="148.844622" width="23.000000" height="11.155378" fill="#2e5aa8" fill-opacity="0.5"/>
+<rect x="376.000000" y="144.262948" width="23.000000" height="15.737052" fill="#2e5aa8" fill-opacity="0.5"/>
+<line x1="0" y1="160.000000" x2="400" y2="160.000000" stroke="#555"/>
+<text x="4" y="180">-4.000000</text><text x="372" y="180">4.000000</text>
+<text x="120" y="180">Two-Gaussian data against the GAN's samples</text>
+<rect x="250.000000" y="6" width="10" height="10" fill="#999"/><text x="264.000000" y="16">data</text>
+<rect x="320.000000" y="6" width="10" height="10" fill="#2e5aa8"/><text x="334.000000" y="16">GAN</text>
+</svg>

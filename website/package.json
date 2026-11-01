@@ -1,0 +1,41 @@
+{
+  "name": "leandl-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "docusaurus start",
+    "start:fr": "docusaurus start --locale fr",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
+    "@docusaurus/theme-mermaid": "^3.10.2",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "^2.1.1",
+    "hast-util-from-html-isomorphic": "^2.0.0",
+    "prism-react-renderer": "^2.4.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}

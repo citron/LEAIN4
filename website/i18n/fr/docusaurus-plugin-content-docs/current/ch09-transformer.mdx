@@ -1,0 +1,151 @@
+---
+sidebar_position: 10
+title: "Chapitre 9 — L'attention et le Transformer"
+---
+
+# Chapitre 9 — L'attention et le Transformer
+
+:::tip[En bref (TL;DR)]
+**En bref.** L’attention permet à chaque position de regarder directement toutes les autres. Nous prouvons quatre propriétés (poids softmax, insénsibilité à l’ordre, masque causal, invariance de la normalisation de couche par décalage) et entraînons un petit Transformer.
+
+**Mots nouveaux, en termes simples:**
+
+- **Jeton et plongement**: Un jeton est un morceau de texte (ici un caractère). Un plongement est la liste de nombres qui le représente.
+- **Attention**: Chaque position regarde toutes les autres, évalue leur pertinence et prend une moyenne pondérée de ce qu’elles portent.
+- **Requête, clé, valeur**: La requête est ce que je cherche, la clé est ce que chaque élément propose, la valeur est ce qu’il donne s’il est choisi.
+- **Transformer**: Un réseau construit avec de l’attention et de petits blocs MLP, sans récurrence.
+- **Connexion résiduelle**: Ajouter l’entrée d’un bloc à sa sortie, pour que l’information et les gradients aient un raccourci.
+- **Encodage positionnel**: Des nombres supplémentaires qui disent au modèle où se trouve chaque jeton, car l’attention seule ignore l’ordre.
+- **Masque causal**: Interdire de regarder les positions futures, pour qu’un modèle de langage ne puisse pas tricher.
+- **Normalisation de couche**: Recentrer et remettre à l’échelle les nombres d’une position. Ajouter la même constante à tous ne change rien.
+- **Modèle de langage**: Un modèle qui prédit le jeton suivant.
+:::
+
+
+Les réseaux récurrents lisent une séquence un pas à la fois : l'information lointaine doit donc survivre à de nombreux pas. Le **Transformer** (Vaswani et al., 2017) abandonne la récurrence : chaque position peut regarder directement toutes les autres, grâce à l'**attention**.
+
+## L'attention par produit scalaire normalisé
+
+Chaque position $t$ a une *requête* $q_t$, une *clé* $k_t$ et une *valeur* $v_t$ (trois applications linéaires de sa représentation $x_t$). La position $t$ compare sa requête à toutes les clés, transforme les scores en poids par un softmax, et prend la moyenne pondérée des valeurs :
+
+```mermaid
+flowchart LR
+  X["vecteurs de jetons"] --> Q["requêtes Q"]
+  X --> K["clés K"]
+  X --> V["valeurs V"]
+  Q --> S["scores : Q . K / racine de d"]
+  K --> S
+  S --> M["masque causal"]
+  M --> W["softmax : poids"]
+  W --> O["moyenne pondérée de V"]
+  V --> O
+```
+
+*L’attention : chaque jeton compare sa requête à toutes les clés, transforme les scores en poids, et moyenne les valeurs.*
+
+
+$$
+a_{t,j} = \frac{\exp(q_t\cdot k_j/\sqrt d)}{\sum_{j'}\exp(q_t\cdot k_{j'}/\sqrt d)},\qquad o_t = \sum_j a_{t,j}\,v_j .
+$$
+
+Un bloc Transformer ajoute ceci à son entrée (une **connexion résiduelle**) puis applique un petit MLP, de nouveau avec une connexion résiduelle. Les vrais modèles empilent de nombreux blocs, utilisent plusieurs « têtes » d'attention en parallèle et normalisent les activations par normalisation de couche.
+
+## Quatre faits, démontrés
+
+### 1. Les poids forment une distribution, et le softmax est invariant par translation
+
+```lean file=Ch09/Attention.lean#weights
+```
+
+Le second théorème justifie l'*astuce de stabilité* utilisée au chapitre 5 : soustraire le score maximal avant d'exponentier ne change pas le résultat. (C'était un exercice là-bas ; c'est démontré ici.) Les deux théorèmes valent dans tout corps muni d'un `exp` vérifiant $e^{x+y}=e^xe^y$ et $e^0=1$. L'hypothèse « le normalisateur est non nul » est automatique pour l'exponentielle réelle, qui est positive.
+
+### 2. L'attention ne voit pas l'ordre
+
+L'attention traite ses entrées comme un *ensemble* : réordonner les éléments ne change pas la sortie.
+
+```lean file=Ch09/Attention.lean#perm
+```
+
+C'est pourquoi les Transformers ont besoin d'**encodages de position** : sans eux, « le chien mord l'homme » et « l'homme mord le chien » sont indiscernables. Nous ajoutons un vecteur de position à chaque plongement de jeton (appris dans notre code ; l'article d'origine utilise des sinus et des cosinus).
+
+### 3. Un masque causal empêche vraiment toute fuite
+
+Un modèle de langage qui prédit le jeton suivant ne doit pas le regarder. Le *masque causal* donne un poids $0$ aux positions $j>t$. Nous démontrons que la sortie à la position $t$ ne peut dépendre de rien après $t$ :
+
+<Figure src="causal_mask.svg" alt="Carte de chaleur des poids d’attention causale avec des scores égaux" caption="Le masque causal : la position t ne peut regarder que les positions 0 à t. Avec des scores égaux, chaque ligne est une simple moyenne des valeurs visibles." />
+
+
+```lean file=Ch09/Attention.lean#mask
+```
+
+### 4. La normalisation de couche ignore un décalage constant
+
+La normalisation de couche centre son entrée, divise par l'écart-type, puis applique une échelle et un décalage appris. Le théorème dit qu'ajouter la même constante à chaque entrée ne change rien :
+
+```lean file=Ch09/Attention.lean#layernorm
+```
+
+(L'identité de centrage $\sum_i (x_i - \bar x) = 0$ est le théorème `centered_sum_zero` du chapitre 5.)
+
+## Un petit Transformer causal en Lean
+
+Notre réseau est un bloc : plongements de jetons et de positions, auto-attention causale à une tête avec connexion résiduelle, un MLP ReLU avec connexion résiduelle, une lecture linéaire et un softmax. La normalisation de couche est démontrée ci-dessus mais laissée de côté dans le code exécuté, car à cette taille le modèle s'entraîne sans elle.
+
+```mermaid
+flowchart TD
+  T["plongement du jeton + plongement de position"] --> A["auto-attention causale"]
+  T --> P1(("+"))
+  A --> P1
+  P1 --> M["MLP avec ReLU"]
+  P1 --> P2(("+"))
+  M --> P2
+  P2 --> R["lecture linéaire"] --> S["softmax : jeton suivant"]
+```
+
+*Le bloc Transformer de ce chapitre. Les deux plus encerclés sont les connexions résiduelles.*
+
+
+```lean file=Ch09/Gpt.lean#forward
+```
+
+La passe arrière est écrite à la main. Ses étapes reflètent la passe avant à l'envers : la lecture donne `probs - onehot` (chapitre 5), le MLP est une couche dense (chapitre 3), la jacobienne du softmax transforme $dA$ en $dS$, et le gradient s'écoule vers les trois projections et les plongements.
+
+```lean file=Ch09/Gpt.lean#backward
+```
+
+## Expériences
+
+`lake exe gpt` commence par comparer le gradient des 171 paramètres d'un minuscule modèle à des différences finies centrées (erreur maximale inférieure à $10^{-6}$, affichée 0.000000).
+
+### L'attention peut-elle trouver un jeton à une distance donnée ?
+
+La *tâche de délai* : des jetons aléatoires d'un alphabet de 8, et la cible à la position $t$ est le jeton **deux positions plus tôt**. Pour la résoudre, l'attention du modèle à la position $t$ doit pointer vers la position $t-2$. Adam, un nouveau lot de 16 séquences à chaque pas, 1500 pas, 200 séquences de test :
+
+| modèle | précision en test |
+|--------|-------------------|
+| avec plongements de position | **100 %** |
+| sans plongements de position | 36,2 % |
+
+Le hasard donne $12{,}5\%$. Avec les positions, l'attention apprend à regarder exactement deux pas en arrière. Sans elles, le modèle n'y arrive pas de façon fiable, ce qui est cohérent avec le théorème 2. Mais il fait *mieux que le hasard*, et la raison est instructive : le théorème 2 porte sur l'attention sur un ensemble, alors qu'un modèle **causal** voit des préfixes différents à des positions différentes ; le *nombre* de jetons visibles laisse donc fuir un peu d'information sur la position (par exemple, les toutes premières positions se distinguent). Les modèles causaux peuvent en partie retrouver la position sans qu'on la leur donne ; la tâche de délai montre que cela ne suffit pas. Une graine, une configuration.
+
+### Un minuscule modèle de langage
+
+`lake exe gpt lm` entraîne un modèle au niveau des caractères, de 5415 paramètres, sur un corpus de 360 caractères (quatre copies de quatre courtes phrases sur un chat et un chien). La perte passe de $2{,}70$ à environ $0{,}17$ en 1500 pas, et un échantillon du modèle donne :
+
+```text
+the mat. the dog sat on the log the cat saw the dog. the dog saw the dog the dog. sa
+```
+
+Le texte a les bons mots, espaces et ponctuation, et des formes de phrases du corpus, mais il n'est **pas** propre : il répète et mélange les phrases. Avec 360 caractères, le modèle mémorise surtout ; c'est une démonstration que la machinerie fonctionne, pas un modèle de langage au sens sérieux.
+
+## Ce qui est couvert et ce qui ne l'est pas
+
+- Les quatre théorèmes portent sur les *abstractions* (un softmax sur des scores, l'attention sur un ensemble, un masque, la normalisation de couche) ; le code tableau du modèle est vérifié par différences finies, pas démontré.
+- L'attention multi-têtes (plusieurs cartes d'attention parallèles dont les sorties sont concaténées), les encodages de position sinusoïdaux et l'empilement de blocs sont décrits mais pas implémentés.
+
+## Exercices
+
+1. Démontrez que les poids de `weights_sum` sont positifs lorsque `exp` est positif (ajoutez une hypothèse `0 < exp x`).
+2. Montrez que `attendM (causal t)` avec tous les scores égaux est la *moyenne* des valeurs visibles.
+3. Ajoutez la normalisation de couche au code (passes avant et arrière) et comparez la vitesse d'apprentissage sur la tâche de délai.
+4. Implémentez une seconde tête d'attention et concaténez les deux sorties. Cela aide-t-il sur une tâche qui exige deux retards différents ?

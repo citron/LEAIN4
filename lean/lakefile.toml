@@ -1,0 +1,91 @@
+name = "LeanDL"
+version = "0.1.0"
+defaultTargets = ["LeanDL"]
+
+[[lean_lib]]
+name = "LeanDL"
+globs = ["LeanDL", "LeanDL.+"]
+weakLeanArgs = ["-Dweak.linter.unusedSectionVars=false", "-Dweak.linter.unusedSimpArgs=false"]
+
+[[lean_exe]]
+name = "ch01"
+root = "Demos.Ch01"
+
+[[lean_exe]]
+name = "ch02"
+root = "Demos.Ch02"
+
+[[lean_exe]]
+name = "ch03"
+root = "Demos.Ch03"
+
+
+[[lean_exe]]
+name = "ch04"
+root = "Demos.Ch04"
+
+
+[[lean_exe]]
+name = "ch05"
+root = "Demos.Ch05"
+
+
+[[lean_exe]]
+name = "mnist"
+root = "Demos.Mnist"
+
+
+[[lean_exe]]
+name = "cnn"
+root = "Demos.Cnn"
+
+
+[[lean_exe]]
+name = "rnn"
+root = "Demos.Rnn"
+
+
+[[lean_exe]]
+name = "lstm"
+root = "Demos.Lstm"
+
+
+[[lean_exe]]
+name = "gpt"
+root = "Demos.Gpt"
+
+
+[[lean_exe]]
+name = "vae"
+root = "Demos.Vae"
+
+
+[[lean_exe]]
+name = "gan"
+root = "Demos.Gan"
+
+
+[[lean_exe]]
+name = "diffusion"
+root = "Demos.Diffusion"
+
+
+[[lean_exe]]
+name = "rl"
+root = "Demos.Rl"
+
+
+[[lean_exe]]
+name = "worldmodel"
+root = "Demos.WorldModel"
+
+
+[[lean_exe]]
+name = "jepa"
+root = "Demos.Jepa"
+
+
+[[lean_exe]]
+name = "figures"
+root = "Demos.Figures"
+

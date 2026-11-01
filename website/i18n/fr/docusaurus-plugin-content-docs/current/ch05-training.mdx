@@ -1,0 +1,165 @@
+---
+sidebar_position: 6
+title: "Chapitre 5 — Pertes, optimiseurs, régularisation et MNIST"
+---
+
+# Chapitre 5 — Pertes, optimiseurs, régularisation et MNIST
+
+:::tip[En bref (TL;DR)]
+**En bref.** Tout ce qu’il faut pour vraiment entraîner un réseau : une perte pour la classification (softmax et entropie croisée), des outils contre le surapprentissage, des optimiseurs (SGD, momentum, Adam) et un premier vrai jeu de données, les chiffres manuscrits MNIST.
+
+**Mots nouveaux, en termes simples:**
+
+- **Softmax**: Transforme une liste de scores en probabilités : toutes positives, de somme 1.
+- **Logits**: Les scores bruts qu’un réseau produit, avant le softmax.
+- **Entropie croisée**: La perte pour la classification : grande quand le réseau donne une faible probabilité à la vraie classe.
+- **Surapprentissage**: Apprendre les exemples d’entraînement par cœur plutôt que la règle générale, de sorte que les nouvelles données échouent.
+- **Régularisation (décroissance des poids)**: Une douce attraction qui garde les poids petits pour décourager le surapprentissage.
+- **Normalisation**: Recentrer et remettre à l’échelle les nombres à l’intérieur du réseau pour qu’ils restent dans une plage confortable.
+- **Optimiseur**: La règle qui transforme un gradient en mise à jour des poids.
+- **SGD**: Descente de gradient stochastique : descente de gradient où chaque pas n’utilise qu’un petit lot aléatoire d’exemples.
+- **Momentum**: Garder un peu de la direction du pas précédent, comme une bille qui roule.
+- **Adam**: Un optimiseur qui adapte la taille du pas de chaque poids grâce à des moyennes mobiles des gradients passés.
+- **Mini-lot et époque**: Un mini-lot est un petit groupe d’exemples utilisé pour un pas. Une époque est un passage sur toutes les données d’entraînement.
+- **Jeu de test**: Des exemples jamais utilisés pour l’entraînement, gardés pour mesurer la vraie performance.
+- **MNIST**: Un jeu de données célèbre de 70 000 chiffres manuscrits.
+:::
+
+
+Le chapitre 4 nous a donné les gradients. Ce chapitre les transforme en *apprentissage* : quelle fonction minimiser (la **perte**), comment suivre le gradient (l'**optimiseur**), comment éviter le surapprentissage (la **régularisation**), et un premier vrai jeu de données, **MNIST**, des chiffres manuscrits.
+
+## Entropie croisée et softmax
+
+Pour la classification, le réseau produit $m$ nombres $z$ (les *logits*). Le softmax les transforme en probabilités $p_k = e^{z_k} / \sum_i e^{z_i}$, et la perte pour la vraie classe $y$ vaut $-\log p_y = \log\sum_i e^{z_i} - z_y$. Sous forme d'expression :
+
+```mermaid
+flowchart LR
+  A["sortie du réseau : logits z"] -->|"softmax"| B["probabilités p, de somme 1"]
+  B --> C["entropie croisée : moins log de p de la vraie classe"]
+  D["vraie étiquette"] --> C
+  C --> E["perte"]
+```
+
+*Des scores bruts à une perte : le softmax fabrique des probabilités, l’entropie croisée punit une faible probabilité sur la vraie classe.*
+
+
+```lean file=Ch05/Loss.lean#softmax_loss
+```
+
+Le théorème est le fait classique (et un peu magique) : **le gradient de l'entropie croisée par rapport aux logits vaut $p - \text{onehot}(y)$**. Remarquez ce qu'il ne contient *pas* : ni dérivée d'un logarithme, ni division par une probabilité.
+
+:::tip[Coin Lean : listes et `Fin`]
+La somme sur les classes est une somme sur `List.finRange m`. La preuve demande un petit lemme sur les listes : sommer $f(i)\cdot[i=k]$ sur une liste sans doublons contenant $k$ donne $f(k)$ (`sumL_indicator`). Les hypothèses `Nodup` et `k ∈ l` sont exactement celles qu'il faut ; Lean ne permet pas de les oublier.
+:::
+
+:::info Stabilité numérique
+Calculer $e^{z}$ déborde pour $z$ grand. Les implémentations soustraient d'abord $\max_i z_i$ (le code MNIST ci-dessous le fait). Cela ne change pas le softmax, ce qui l'autorise. Nous ne démontrons pas formellement cette identité ici, car elle demande une loi reliant `exp`, `inv` et les produits ; c'est un bon exercice dans un corps.
+:::
+
+## Régularisation L2 (décroissance des poids)
+
+Ajouter $c\sum_i w_i^2$ à la perte pénalise les grands poids. Son gradient vaut $2c\,w_k$ : chaque pas de gradient fait donc aussi rétrécir les poids, d'où le nom de *décroissance des poids*.
+
+```lean file=Ch05/Loss.lean#l2
+```
+
+## Normalisation
+
+La normalisation de couche commence par *centrer* les activations. Voici la partie qui se démontre sans racine carrée : les entrées centrées ont une somme nulle.
+
+```lean file=Ch05/Norm.lean#centering
+```
+
+La normalisation de couche complète (division par l'écart-type, avec échelle et décalage appris) viendra avec le Transformer au chapitre 9.
+
+## Optimiseurs
+
+La descente de gradient simple met à jour $w \leftarrow w - \eta\,\nabla L(w)$. Deux raffinements dominent la pratique : le **momentum** (moyenner les gradients dans le temps) et **Adam** (qui remet aussi à l'échelle chaque coordonnée selon la taille de ses gradients récents). Les trois sont de petites fonctions pures sur des tableaux :
+
+```mermaid
+flowchart LR
+  D["mini-lot d’exemples"] --> M["modèle : passe avant"]
+  M --> L["perte"]
+  L -->|"rétropropagation"| G["gradient"]
+  G --> O["optimiseur : SGD, momentum, Adam"]
+  O -->|"mise à jour des poids"| M
+```
+
+*La boucle d’entraînement que tous les chapitres suivants réutilisent.*
+
+
+```lean file=Ch05/Optim.lean#exec
+```
+
+Que peut-on *démontrer* à leur sujet ? D'abord, la **descente de gradient sur une quadratique** $f(w) = \tfrac a2 w^2$ : l'itération est $w \leftarrow (1-\eta a)\,w$, donc $w_t = (1-\eta a)^t w_0$. Elle converge ssi $|1-\eta a|<1$ et diverge si le pas $\eta$ est trop grand.
+
+```lean file=Ch05/Optim.lean#sgd_quadratic
+```
+
+Ensuite, la **correction de biais d'Adam**. Adam conserve des moyennes mobiles exponentielles, initialisées à $0$. Avec un gradient constant $g$, la moyenne après $t$ pas vaut $(1-\beta^t)\,g$ : biaisée vers $0$ au début.
+
+```lean file=Ch05/Optim.lean#ema
+```
+
+```lean file=Ch05/Optim.lean#ema_laws
+```
+
+Diviser par $1-\beta^t$, ce que fait exactement Adam, supprime le biais :
+
+```lean file=Ch05/Optim.lean#bias_correction
+```
+
+### Comparaison
+
+`lake exe ch05` entraîne le réseau 2-3-3-1 du chapitre 4 à partir des mêmes paramètres initiaux avec les trois optimiseurs. Perte d'entraînement après $t$ pas :
+
+| pas | 50 | 100 | 200 | 400 | 800 | 1600 |
+|-----|----|-----|-----|-----|-----|------|
+| SGD (η = 0,3) | 0,992 | 0,821 | 0,674 | 0,0124 | 0,00198 | 0,00070 |
+| Momentum (η = 0,05, μ = 0,9) | 0,989 | 0,739 | 0,641 | 0,0057 | 0,00119 | 0,00043 |
+| Adam (η = 0,05) | 0,659 | 0,0107 | 0,0029 | 0,0010 | 0,00034 | 0,00011 |
+
+Adam passe sous 0,011 après 100 pas ; le SGD simple en demande environ 400. C'est une petite expérience unique, pas un benchmark : les taux d'apprentissage n'ont pas été réglés.
+
+## MNIST
+
+MNIST contient 60 000 images d'entraînement et 10 000 images de test de chiffres manuscrits de $28\times 28$ pixels. Nous lisons les fichiers IDX standard avec un analyseur écrit en Lean :
+
+```lean file=Ch05/Mnist.lean#idx
+```
+
+Le réseau a une couche cachée de 64 unités ReLU. Pour la vitesse, il travaille sur des `FloatArray` non encapsulés, avec une rétropropagation codée à la main (l'`Expr` générique du chapitre 4 construirait un graphe de millions de nœuds par image).
+
+```lean file=Ch05/Mnist.lean#net
+```
+
+```lean file=Ch05/Mnist.lean#sgd
+```
+
+L'erreur de la couche de sortie `p - onehot y` est exactement le théorème `ceLoss_grad`. La couche cachée est rétropropagée à travers $W_2$ et la dérivée de ReLU, comme au chapitre 3.
+
+Téléchargez les données une fois, puis entraînez :
+
+```bash
+pwsh scripts/get-mnist.ps1     # ou : sh scripts/get-mnist.sh
+cd lean && lake exe mnist 60000 10000 3
+```
+
+```text
+epoch 1: test accuracy = 0.957100
+epoch 2: test accuracy = 0.965700
+epoch 3: test accuracy = 0.963500
+```
+
+Environ une minute sur le processeur d'un portable, avec tout le jeu d'entraînement, trois passes, un SGD simple de taux 0,01 et aucun réglage : **96,4 % de précision en test**.
+
+:::warning Ce que l'entraînement codé à la main n'est pas
+Le code MNIST n'est pas démontré correct : seule la formule du gradient de sa couche de sortie l'est. Pour gagner en confiance, la recette du chapitre 4 s'applique : comparer avec des différences finies sur une toute petite instance.
+:::
+
+## Exercices
+
+1. Démontrez que les entrées de `softmax` sont positives et de somme 1 sur `Rat`, avec les lois usuelles de `exp`.
+2. Montrez que la translation $z \mapsto z - c$ ne change pas `softmax` dans un corps.
+3. Implémentez le *dropout* avec `Rng` : mettre à zéro chaque unité cachée avec probabilité $q$ pendant l'entraînement et rééchelonner par $1/(1-q)$. Mesurez l'effet sur la précision en test.
+4. Ajoutez une pénalité L2 à `Net.sgdStep`. Pour quelles valeurs la précision en test s'améliore-t-elle ?

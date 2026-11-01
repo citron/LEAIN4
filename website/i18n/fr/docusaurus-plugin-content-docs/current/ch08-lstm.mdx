@@ -1,0 +1,136 @@
+---
+sidebar_position: 9
+title: "Chapitre 8 — LSTM et mémoire à portes"
+---
+
+# Chapitre 8 — LSTM et mémoire à portes
+
+:::tip[En bref (TL;DR)]
+**En bref.** Le LSTM ajoute des portes et une cellule mémoire pour que le gradient puisse remonter loin. Nous prouvons cette autoroute du gradient, et nous constatons honnêtement que sur notre petite tâche il ne bat pas le RNN simple.
+
+**Mots nouveaux, en termes simples:**
+
+- **LSTM**: Un RNN avec des portes et une cellule mémoire séparée, conçu pour que le signal d’apprentissage puisse remonter loin.
+- **Porte**: Un nombre entre 0 et 1 qui décide quelle part de quelque chose passe : 0 ferme, 1 ouvre.
+- **État de cellule**: La ligne de mémoire à long terme du LSTM, mise à jour par mise à l’échelle et addition.
+- **Porte d’oubli**: Décide quelle part de l’ancienne mémoire garder.
+- **Carrousel d’erreur constante**: Le chemin où la mémoire est conservée avec un facteur 1, de sorte que le gradient ne rétrécit ni ne grandit.
+- **GRU**: Une unité à portes plus légère, avec une porte qui mélange l’ancien état et le nouveau candidat.
+- **Apprentissage par curriculum**: S’entraîner d’abord sur des versions faciles de la tâche (séquences courtes), puis la durcir.
+:::
+
+
+Le chapitre 7 s'est terminé sur un diagnostic : dans un RNN simple, le gradient est un produit de $T$ facteurs $(1-h_s^2)\,w$, chacun typiquement inférieur à 1. Le réseau **Long Short-Term Memory** (Hochreiter et Schmidhuber, 1997) change l'architecture pour que le gradient dispose d'un chemin dont les facteurs peuvent être fixés par le réseau lui-même proches de $1$.
+
+## Le LSTM
+
+En plus de l'état caché $h_t$, le LSTM porte un **état de cellule** $c_t$. Quatre petites couches (les *portes*) lisent $h_{t-1}$ et $x_t$ :
+
+```mermaid
+flowchart LR
+  hprev["h, précédent"] --> f["porte d’oubli f"] & i["porte d’entrée i"] & g["candidat g"] & o["porte de sortie o"]
+  x["entrée x"] --> f & i & g & o
+  cold["ancienne mémoire c"] --> c["nouvelle mémoire c = f * c_ancien + i * g"]
+  f --> c
+  i --> c
+  g --> c
+  c --> hnew["nouveau h = o * tanh de c"]
+  o --> hnew
+```
+
+*Un pas de LSTM. La nouvelle mémoire est l’ancienne multipliée par la porte d’oubli, plus ce que la porte d’entrée laisse passer.*
+
+
+$$
+\begin{aligned}
+f_t &= \sigma(W_f[h_{t-1},x_t]+b_f) & &\text{porte d'oubli}\\
+i_t &= \sigma(W_i[h_{t-1},x_t]+b_i) & &\text{porte d'entrée}\\
+g_t &= \tanh(W_g[h_{t-1},x_t]+b_g) & &\text{candidat}\\
+o_t &= \sigma(W_o[h_{t-1},x_t]+b_o) & &\text{porte de sortie}
+\end{aligned}
+\qquad
+\begin{aligned}
+c_t &= f_t\odot c_{t-1} + i_t\odot g_t\\
+h_t &= o_t\odot \tanh(c_t)
+\end{aligned}
+$$
+
+La ligne qui compte est $c_t = f_t\odot c_{t-1} + i_t\odot g_t$ : la mémoire est mise à jour en *multipliant et additionnant*, et non en écrasant le tout par une matrice de poids et un $\tanh$.
+
+```lean file=Ch08/Lstm.lean#forward
+```
+
+## Le gradient dispose d'une autoroute
+
+Isolons le chemin de la cellule : $c_{t+1} = f_t\,c_t + u_t$, où la porte d'oubli $f_t$ et la mise à jour $u_t = i_t g_t$ sont considérées comme données. Déroulé comme une `Expr` en $c_0$ :
+
+<Figure src="highway.svg" alt="Gradient le long du chemin de mémoire pour des portes d’oubli et pour un RNN simple" caption="Le gradient le long du chemin de mémoire est un produit de portes d’oubli. Avec des portes proches de 1 il survit à 100 pas ; avec un facteur de RNN simple de 0,5 il tombe à 10^-30." />
+
+
+```lean file=Ch08/CellPath.lean#cell
+```
+
+```lean file=Ch08/CellPath.lean#path
+```
+
+Le gradient le long du chemin de la cellule vaut $\prod_s f_s$ : **seulement des portes d'oubli**. Pas de matrice de poids, pas de facteur $1-\tanh^2$. Si le réseau apprend $f\approx 1$, le gradient survit ; avec $f\equiv 1$ il vaut exactement $1$ quelle que soit la longueur de la séquence (le *carrousel d'erreur constante*).
+
+Des portes dans $[0,1]$ gardent aussi ce produit *borné* : il ne s'évanouit pas à vitesse exponentielle (si $f\ge a$) et n'explose pas :
+
+```lean file=Ch08/CellPath.lean#bounds
+```
+
+Par exemple avec $f\ge 0{,}99$, le gradient vaut encore au moins $0{,}99^{100}\approx 0{,}37$ après 100 pas. Au chapitre 7, un facteur $|w|\le 1/2$ donnait $(1/2)^{100}\approx 10^{-30}$.
+
+:::warning Portée des théorèmes
+Les théorèmes décrivent le chemin *direct* de la cellule. Le gradient complet d'un LSTM est la somme de ce chemin et des chemins passant par les portes (qui dépendent de $h_{t-1}$) ; ceux-ci peuvent encore diminuer. L'idée est que le réseau dispose d'un chemin qu'il peut garder ouvert, pas que tout gradient soit préservé.
+:::
+
+## Rétropropagation à travers le temps
+
+La passe arrière écrite à la main suit les équations pas à pas. La ligne `dcPrev := dcj * f` est le chemin de la cellule du théorème.
+
+```lean file=Ch08/Lstm.lean#bptt
+```
+
+Les paramètres sont initialisés avec tous les biais des portes d'oubli égaux à $1$, de sorte que les portes démarrent ouvertes (une astuce classique).
+
+## Ce que nous avons mesuré
+
+`lake exe lstm` commence par comparer le gradient des 329 paramètres à des différences finies centrées (erreur maximale inférieure à $10^{-6}$, affichée 0.000000). Puis il affiche la taille du gradient atteignant les pas antérieurs d'une séquence de 30 pas, avec des poids aléatoires :
+
+```text
+t = 30, 25, 20, 15, 10, 5, 1
+  ‖∂L/∂h_t‖: 0.369405, 0.009537, 0.001595, 0.000542, 0.000253, 0.000144, 0.000111
+  ‖∂L/∂c_t‖: 0.143721, 0.022238, 0.004261, 0.001125, 0.000462, 0.000261, 0.000211
+```
+
+À comparer au RNN du chapitre 7, qui passait de $0{,}35$ à $10^{-6}$. Ici le gradient au premier pas est environ 100 fois plus grand. (Poids aléatoires différents et une seule séquence : indicatif, pas une comparaison statistique.)
+
+### Apprend-il mieux la tâche de mémoire ?
+
+La même tâche qu'au chapitre 7 : l'étiquette est le premier bit d'une suite aléatoire de bits de longueur $T$. Huit unités, Adam, un **nouveau** lot de 32 séquences à chaque pas pour que rien ne puisse être mémorisé, taux d'apprentissage $0{,}005$, 2500 pas, 300 séquences de test (le hasard donne 50 %, avec environ $\pm 3\%$ de bruit) :
+
+| $T$ | RNN | LSTM |
+|-----|-----|------|
+| 20 | 100 % | 100 % |
+| 60 | 46,3 % | 44,7 % |
+| 120 | 48,3 % | 46,7 % |
+
+**Les deux modèles apprennent $T=20$ et aucun n'apprend $T\ge 60$.** Le LSTM n'a ici aucun avantage, malgré le meilleur flux de gradient. Deux observations de plus :
+
+- **Les hyperparamètres comptent.** Avec le taux d'apprentissage $0{,}02$ du chapitre 7, le LSTM n'a *pas* appris $T=20$ (45,7 % après 800 pas, 54,3 % après 4000) alors que le RNN l'a appris. Un taux plus faible a corrigé cela.
+- **Un curriculum aide les deux autant.** Commencer avec $T=10$ et augmenter la longueur de 10 tous les 1500 pas en conservant les paramètres : *les deux* réseaux atteignent 100 % de précision en test à chaque étape jusqu'à $T=60$ (`lake exe lstm curr rnn`, `lake exe lstm curr lstm`).
+
+Que conclure ? Que le meilleur flux de gradient **n'est pas le seul obstacle** dans cette tâche : trouver la règle de zéro dans une longue séquence bruitée est un problème d'optimisation difficile même quand le gradient atteint le premier pas, et un petit curriculum le résout pour les deux architectures. Tout ceci est un jouet : 8 unités, une graine, de petits budgets. L'avantage du LSTM sur de vraies tâches (langage, parole, dépendances longues structurées) est bien documenté dans la littérature, mais l'expérience de ce tutoriel ne le démontre pas, et nous préférons le dire.
+
+## Le GRU, en bref
+
+L'**unité récurrente à portes** (Cho et al., 2014) fusionne cellule et état caché et utilise une seule porte $z_t$ : $h_t = (1-z_t)\odot h_{t-1} + z_t\odot\tilde h_t$. Le chemin direct de $h_{t-1}$ à $h_t$ a pour facteur $1-z_t$ ; le théorème ci-dessus s'applique donc avec $f_t = 1-z_t$.
+
+## Exercices
+
+1. Implémentez le GRU sur des tableaux et vérifiez son gradient par différences finies.
+2. Démontrez `prodF_ge` et `prodF_le_one` pour un corps ordonné quelconque au lieu de `Rat` (indication : la preuve n'utilise que quelques lemmes d'ordre).
+3. Faites de la valeur initiale du biais de la porte d'oubli un paramètre. Pour $T=60$ avec entraînement simple, $b_f = 2$ ou $b_f = 0$ changent-ils le résultat ?
+4. Combinez le théorème du chemin de la cellule avec la dépendance des portes : écrivez le $\partial c_T/\partial c_0$ complet pour un LSTM à 2 pas et identifiez les termes supplémentaires.

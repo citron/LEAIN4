@@ -1,0 +1,114 @@
+---
+sidebar_position: 11
+title: "Chapitre 10 — Autoencodeurs et VAE"
+---
+
+# Chapitre 10 — Autoencodeurs et VAE
+
+:::tip[En bref (TL;DR)]
+**En bref.** Un VAE génère des données en les encodant dans un court code aléatoire qui suit une loi connue. Nous prouvons l’astuce de reparamétrisation et les propriétés de la pénalité KL.
+
+**Mots nouveaux, en termes simples:**
+
+- **Modèle génératif**: Un modèle capable de produire de nouvelles données qui ressemblent à ses données d’entraînement.
+- **Variable latente**: Un court code caché qui résume une donnée.
+- **Espace latent**: L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
+- **Autoencodeur**: Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
+- **VAE**: Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
+- **A priori**: La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
+- **Divergence KL**: Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
+- **Astuce de reparamétrisation**: Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
+:::
+
+
+Jusqu'ici, nos réseaux *reconnaissaient* des choses. Un **modèle génératif** apprend à *produire* de nouvelles données ressemblant aux données d'entraînement. Ce chapitre commence par l'idée la plus simple, l'autoencodeur, puis corrige sa principale faiblesse avec l'autoencodeur variationnel (VAE).
+
+## L'autoencodeur
+
+Un **autoencodeur** est formé de deux réseaux. L'**encodeur** comprime une donnée $x$ en un court code $z$ (la variable *latente*) ; le **décodeur** reconstruit $x$ à partir de $z$. On l'entraîne à minimiser l'erreur de reconstruction $\|x - \mathrm{dec}(\mathrm{enc}(x))\|^2$. L'espace dans lequel vivent les codes s'appelle l'**espace latent** (*latent* signifie caché : on ne l'observe jamais, c'est le réseau qui l'invente). Avec un code de deux nombres, c'est un plan, et chaque point de ce plan se décode en une donnée possible.
+
+```mermaid
+flowchart LR
+  x["donnée x"] --> E["encodeur"] --> z["code z dans l’espace latent"] --> D["décodeur"] --> xh["reconstruction"]
+  xh -.->|"comparer à x"| x
+```
+
+*Un autoencodeur : comprimer les données en un code, puis les reconstruire. Le signal d’entraînement est l’erreur de reconstruction.*
+
+
+Pour *générer*, on tirerait un code $z$ au hasard et on lancerait le décodeur. Le problème : rien n'oblige les codes des données d'entraînement à occuper une région dans laquelle nous savons tirer. Des codes aléatoires peuvent tomber là où le décodeur n'a jamais été entraîné.
+
+## L'autoencodeur variationnel
+
+Le VAE (Kingma et Welling, 2013) rend les codes échantillonnables par construction :
+
+1. L'encodeur ne produit pas un code mais une **distribution** : une moyenne $\mu$ et un log-variance $\ell=\log\sigma^2$.
+2. Un code est **tiré** : $z = \mu + \sigma\,\varepsilon$ avec $\varepsilon\sim\mathcal N(0,1)$.
+3. La perte ajoute une pénalité qui tire chaque postérieure $\mathcal N(\mu,\sigma^2)$ vers l'**a priori** $\mathcal N(0,1)$ :
+
+$$ \mathcal L \;=\; \underbrace{\mathbb E\,\|x-\hat x\|^2}_{\text{reconstruction}} \;+\; \beta\;\underbrace{\tfrac12\bigl(\mu^2+e^{\ell}-1-\ell\bigr)}_{\mathrm{KL}\bigl(\mathcal N(\mu,e^\ell)\,\|\,\mathcal N(0,1)\bigr)} . $$
+
+Après l'entraînement, générer est simple : tirer $z\sim\mathcal N(0,1)$ et décoder.
+
+(La forme close du terme KL est une intégrale gaussienne classique ; nous la prenons comme définition et démontrons ses propriétés. Montrer que la perte minore la log-vraisemblance des données demande des intégrales et n'est pas formalisé ici.)
+
+## L'astuce de reparamétrisation
+
+Le tirage semble poser problème à la rétropropagation : comment dériver à travers un tirage aléatoire ? L'astuce consiste à **sortir l'aléa**. On écrit $z=\mu+\sigma\varepsilon$ où $\varepsilon$ est tiré d'abord, indépendamment des paramètres. Alors $z$ est une fonction ordinaire, dérivable, de $(\mu,\sigma)$ :
+
+```lean file=Ch10/Vae.lean#reparam
+```
+
+Le théorème dit que $\partial z/\partial\mu = 1$ et $\partial z/\partial\sigma = \varepsilon$, calculés par *la rétropropagation vérifiée du chapitre 4*. C'est toute l'astuce, et la raison pour laquelle un VAE peut être entraîné par descente de gradient.
+
+## La pénalité KL, démontrée
+
+```lean file=Ch10/Vae.lean#kl
+```
+
+- `kl_grad` : $\partial/\partial\mu = \tfrac12(\mu+\mu)$, c'est-à-dire $\mu$, et $\partial/\partial\ell = \tfrac12(e^\ell-1)$.
+- `kl_at_prior` : en $\mu=0$, $\ell=0$ (l'a priori lui-même) la pénalité vaut $0$ et son gradient aussi. C'est exactement l'attraction vers l'a priori.
+
+La pénalité n'est jamais négative. La preuve demande un fait sur l'exponentielle, la borne de la tangente $1+\ell\le e^\ell$, que nous supposons en hypothèse car notre `exp` est abstrait (elle vaut pour l'exponentielle réelle) :
+
+```lean file=Ch10/Vae.lean#kl_nonneg
+```
+
+## Un VAE en Lean
+
+Nos données sont un **demi-cercle** bruité dans le plan. L'espace latent a une seule dimension. L'encodeur est un réseau 2-8-2, le décodeur un réseau 1-8-2, soit 76 paramètres au total. La perte *entière* est une `Expr` : son gradient vient donc de la `backprop` vérifiée.
+
+```lean file=Ch10/Model.lean#model
+```
+
+:::tip[Coin Lean : une preuve, plusieurs modèles]
+Nous n'avons jamais écrit de gradient pour ce modèle. `backprop_correct` (chapitre 4) est un théorème sur *toute* expression : le gradient de cette perte particulière, y compris l'étape de tirage et le terme KL, est donc correct par ce seul théorème. Les seules parties non démontrées sont les arrondis Float et le générateur de nombres aléatoires.
+:::
+
+## Autoencodeur contre VAE
+
+`lake exe vae` entraîne les deux modèles (l'autoencodeur est le même code avec $\beta=0$) pendant 3000 pas d'Adam sur de nouveaux lots de 16 points, puis évalue sur 200 points de test et sur 400 décodages d'échantillons de l'a priori $z\sim\mathcal N(0,1)$.
+
+| | autoencodeur ($\beta=0$) | VAE ($\beta=1$) |
+|---|---|---|
+| erreur de reconstruction (test) | **0,0032** | 0,0223 |
+| KL moyenne vers l'a priori | 5,72 | **1,25** |
+| distribution des angles des échantillons de l'a priori : distance à l'uniforme | 0,213 | **0,102** |
+
+La dernière ligne mesure l'uniformité avec laquelle les échantillons décodés de l'a priori couvrent le demi-cercle (les données le couvrent uniformément ; le bruit d'échantillonnage des données donne 0,052). Les chiffres racontent toute l'histoire :
+
+- L'**autoencodeur reconstruit mieux**, mais ses codes sont loin de l'a priori (grande KL) : décoder des échantillons de l'a priori couvre l'arc de façon inégale.
+- Le **VAE** paie en qualité de reconstruction et obtient des codes qui suivent $\mathcal N(0,1)$ : ses échantillons de l'a priori couvrent l'arc environ deux fois plus uniformément.
+
+<Figure src="vae.svg" alt="Données sur un demi-cercle et échantillons générés par le VAE" caption="Gris : données de test. Bleu : le décodeur appliqué à des échantillons z ~ N(0,1), générés par le VAE." />
+
+:::info Un détour topologique
+Nous avons d'abord essayé un **cercle complet**. Cela ne marche pas avec un espace latent de dimension un : un cercle ne peut pas être envoyé continûment et bijectivement sur une droite, il y a donc toujours une couture. Les deux modèles ont échoué (erreur de reconstruction 0,16 pour l'autoencodeur, 0,25 pour le VAE, et seulement 69 % des échantillons du VAE près du cercle). Choisir une dimension latente adaptée à la *forme* des données est important. Une exécution, une graine.
+:::
+
+## Exercices
+
+1. Montrez que `klE` est strictement convexe en $\mu$, et trouvez son minimum en $\ell$ à $\mu$ fixé.
+2. Faites varier le poids $\beta$ de la KL ($0$, $0{,}1$, $1$, $10$). Comment les trois nombres du tableau évoluent-ils ?
+3. Utilisez un espace latent de dimension deux sur le **cercle complet** et vérifiez que la couture disparaît.
+4. Démontrez que l'échantillon reparamétré a pour moyenne $\mu$ lorsque $\mathbb E[\varepsilon]=0$ (énoncez-le pour une liste finie de valeurs de bruit équipondérées).

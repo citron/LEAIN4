@@ -1,0 +1,190 @@
+---
+sidebar_position: 18
+title: "Glossary"
+---
+
+# Glossary
+
+Every new word of the course, in the simplest terms we could find, listed in the order in which you meet them. Each entry says in which chapter it is introduced. To look a word up alphabetically, use the [Index of essential concepts](concepts-index).
+
+## Chapter 0 — Setup and a tour of Lean
+
+- **Lean**: A programming language that can also check mathematical proofs. If your proof compiles, it is correct.
+- **Type**: The kind of thing a value is (a number, a list, a vector of length 3). Lean refuses to mix incompatible types.
+- **Structure**: A labelled box of values, like a form with named fields.
+- **Theorem**: A statement together with its proof. In Lean the proof is a program whose type is the statement.
+- **Proof versus test**: A proof is certain for every possible input; a test only tells you about the cases you tried. This course does both and says which is which.
+- **Tactic**: A command that builds a proof step by step. `grind` and `omega` are tactics that do a lot of routine reasoning for you.
+- **Generic code (type class)**: Code written once for any kind of number. Brackets like `[Add α]` tell Lean which operations are needed, and it finds them for you.
+- **Float**: The computer’s decimal numbers. They round off, so we run models on Floats but state proofs about exact numbers.
+
+## Chapter 1 — The single neuron
+
+- **Neuron**: A tiny calculator: multiply each input by a weight, add everything up, add a bias, then squash the result with an activation function.
+- **Weight**: A number saying how much one input matters. Learning means adjusting weights.
+- **Bias**: A number added at the end. It shifts the point at which the neuron switches on.
+- **Activation function**: The squashing step after the sum (step, sigmoid, tanh, ReLU). Without it, stacking neurons would add nothing.
+- **Sigmoid**: A smooth S-shaped curve that turns any number into a value between 0 and 1.
+- **ReLU**: Keeps positive numbers as they are and turns negative numbers into 0.
+- **tanh**: Like the sigmoid, but its output is between -1 and 1.
+- **Vector**: An ordered list of numbers. In Lean its length is part of its type.
+- **Dot product**: Multiply two lists position by position and add up the results. It is the weighted sum of a neuron.
+- **Logic gate**: A tiny rule on true/false values (AND, OR, NAND). One neuron can do AND and OR.
+- **Linear**: Behaving like only scaling and adding: double the input and the output doubles; add two inputs and the outputs add.
+
+## Chapter 2 — The perceptron, XOR and the first AI winter
+
+- **Perceptron**: A neuron with a hard on/off output, plus a rule for learning from its mistakes.
+- **Linearly separable**: Data that one straight line (or flat plane) can split into two groups.
+- **XOR**: True when exactly one of two inputs is on. No single straight line separates its two answers.
+- **Perceptron learning rule**: When the answer is wrong, nudge the weights toward the right answer: add the example if it should have said yes, subtract it if no.
+- **Margin**: The safety gap between the two groups of data. A bigger gap means fewer mistakes.
+- **Convergence theorem (Novikoff)**: A proof that on separable data the perceptron makes a limited number of mistakes and then stops forever.
+- **Cauchy–Schwarz inequality**: The dot product of two vectors is never bigger than the product of their lengths.
+- **AI winter**: A period when money and interest in AI collapsed because promises were not kept. The first one began in the 1970s.
+
+## Chapter 3 — The multi-layer perceptron
+
+- **Layer**: A row of neurons that all read the same inputs.
+- **Hidden layer**: A layer between the input and the output. The network invents its own useful intermediate features there.
+- **MLP (multi-layer perceptron)**: Several layers stacked: the outputs of each layer are the inputs of the next.
+- **Shape-checked network**: A network whose layer sizes appear in its type, so a network with mismatched layers does not compile.
+- **Universality**: With enough neurons, one hidden layer can compute any true/false function.
+- **Loss**: One number saying how wrong the network is. Learning means making it smaller.
+- **Gradient descent**: Learning by small steps: measure how the loss changes with each weight, then move every weight a little downhill.
+- **Learning rate**: The size of each gradient-descent step. Too big and you overshoot; too small and you crawl.
+- **Chain rule**: To get the effect of a first change on a last result, multiply the effects of every step in between.
+- **Error signal (delta)**: How much a neuron is responsible for the final error. It is passed backwards from layer to layer.
+
+## Chapter 4 — Deep networks and automatic differentiation
+
+- **Derivative**: How fast an output changes when you nudge one input.
+- **Gradient**: The list of all derivatives with respect to all weights. It points uphill, so we step the opposite way.
+- **Automatic differentiation (autodiff)**: A program that computes exact derivatives of any computation by applying the chain rule mechanically.
+- **Expression tree**: A computation written as a tree of small operations (add, multiply, sigmoid…). Autodiff walks over this tree.
+- **Forward mode**: Carry a derivative along while computing the value. One pass gives the effect of one chosen direction.
+- **Backpropagation (reverse mode)**: Compute forward, then sweep backwards once to get the derivative for all weights at the same time.
+- **Adjoint**: The running message in the backward sweep: how much the final result changes per unit change of this node.
+- **Gradient check**: Verify a gradient by nudging a weight a tiny bit and seeing how the loss really moves (finite differences).
+- **Proof by induction**: Prove a statement for the smallest case, then show that if it holds for the smaller pieces it holds for the bigger one.
+
+## Chapter 5 — Losses, optimizers, regularisation and MNIST
+
+- **Softmax**: Turns a list of scores into probabilities: all positive, adding up to 1.
+- **Logits**: The raw scores a network outputs, before the softmax.
+- **Cross-entropy**: The loss for classification: large when the network gives a low probability to the true class.
+- **Overfitting**: Learning the training examples by heart instead of the general rule, so that new data fails.
+- **Regularisation (weight decay)**: A gentle pull that keeps weights small to discourage over-fitting.
+- **Normalisation**: Re-centre and rescale numbers inside the network so they stay in a comfortable range.
+- **Optimizer**: The rule that turns a gradient into a weight update.
+- **SGD**: Stochastic gradient descent: gradient descent where every step uses only a small random batch of examples.
+- **Momentum**: Keep a bit of the previous step’s direction, like a rolling ball.
+- **Adam**: An optimizer that adapts the step size of every weight using running averages of past gradients.
+- **Mini-batch and epoch**: A mini-batch is a small group of examples used for one step. An epoch is one pass over all the training data.
+- **Test set**: Examples never used for training, kept to measure real performance.
+- **MNIST**: A famous dataset of 70 000 handwritten digits.
+
+## Chapter 6 — Convolutional networks
+
+- **Convolution**: Slide a small pattern detector over the input and record how well it matches at each position.
+- **Kernel (filter)**: The small grid of weights used by a convolution.
+- **Weight sharing**: Using the same weights at every position, so the network needs far fewer parameters.
+- **Translation equivariance**: Shift the input and the output shifts the same way: a pattern is found wherever it is.
+- **Channel (feature map)**: One output image produced by one kernel.
+- **Max-pooling**: Shrink an image by keeping only the biggest number of every small block.
+- **CNN**: Convolutional neural network: convolutions, non-linearities and pooling, followed by a classifier.
+
+## Chapter 7 — Recurrent networks
+
+- **Recurrent neural network (RNN)**: A network that reads a sequence one element at a time and carries a memory forward.
+- **Hidden state**: The network’s memory: a vector updated at every step.
+- **Unrolling**: Writing the loop out as many copies of the same network, one per time step.
+- **Backpropagation through time (BPTT)**: Backpropagation on the unrolled network.
+- **Vanishing gradient**: The learning signal shrinks at every step backwards until nothing is left, so distant causes are not learned.
+- **Exploding gradient**: The opposite: the signal grows at every step until it is huge and unstable.
+- **Gradient clipping**: Cap the size of the gradient to tame explosions.
+
+## Chapter 8 — LSTM and gated memory
+
+- **LSTM**: An RNN with gates and a separate memory cell, designed so that the learning signal can travel far back.
+- **Gate**: A number between 0 and 1 that decides how much of something passes: 0 closes, 1 opens.
+- **Cell state**: The LSTM’s long-term memory line, updated by scaling and adding.
+- **Forget gate**: Decides how much of the old memory to keep.
+- **Constant error carousel**: The path where the memory is kept with factor 1, so the gradient neither shrinks nor grows.
+- **GRU**: A lighter gated unit with one gate that mixes the old state and the new candidate.
+- **Curriculum learning**: Train on easy versions of the task first (short sequences), then make it harder.
+
+## Chapter 9 — Attention and the Transformer
+
+- **Token and embedding**: A token is a piece of text (here, a character). An embedding is the list of numbers that represents it.
+- **Attention**: Each position looks at all the others, scores how relevant each one is, and takes a weighted average of what they carry.
+- **Query, key, value**: The query is what I look for, the key is what each item offers, the value is what it hands over if chosen.
+- **Transformer**: A network built from attention and small MLP blocks, with no recurrence.
+- **Residual connection**: Add a block’s input to its output, so that information and gradients have a shortcut.
+- **Positional encoding**: Extra numbers that tell the model where each token sits, because attention alone ignores order.
+- **Causal mask**: Forbid looking at future positions, so a language model cannot cheat.
+- **Layer normalisation**: Re-centre and rescale the numbers of one position. Adding the same constant to all of them changes nothing.
+- **Language model**: A model that predicts the next token.
+
+## Chapter 10 — Autoencoders and the VAE
+
+- **Generative model**: A model that can produce new data that looks like its training data.
+- **Latent variable**: A short hidden code that summarises a data point.
+- **Latent space**: The space of all possible codes. If a code has 2 numbers, the latent space is a plane, and every point of it decodes into a possible data point. Points that are close should decode into similar data. (Chapter 15 calls the same idea a representation or embedding space.)
+- **Autoencoder**: An encoder squeezes the data into a code, and a decoder rebuilds the data from the code.
+- **VAE**: An autoencoder whose codes are pushed to follow a known distribution, so we can sample new codes and decode them.
+- **Prior**: The distribution we want the codes to follow, here a standard bell curve.
+- **KL divergence**: A number measuring how different one distribution is from another. It is zero when they are the same.
+- **Reparameterisation trick**: Draw the random noise first, then compute the sample from it with ordinary maths, so that gradients can flow.
+
+## Chapter 11 — GANs
+
+- **GAN**: Two networks play a game: a forger makes fakes, a detective tells fake from real, and both improve.
+- **Generator and discriminator**: The generator is the forger (noise in, fake data out). The discriminator is the detective (data in, probability of real out).
+- **Minimax game**: One player tries to minimise what the other tries to maximise.
+- **Optimal discriminator**: The best possible detective answer at a point: the share of real data among all data there.
+- **Mode collapse**: The generator covers only a few of the kinds of data that exist.
+- **Total variation (TV) distance**: A number from 0 to 1 saying how different two histograms are.
+
+## Chapter 12 — Diffusion models
+
+- **Diffusion model**: Learn to remove noise step by step; generate by starting from pure noise and cleaning it up.
+- **Forward process**: Gradually adding noise to data until nothing is left but noise.
+- **Noise schedule**: How much noise is added at each step.
+- **Variance preserving**: The noising steps are scaled so that the overall spread of the data stays the same.
+- **Denoising network**: A network that looks at a noisy input and predicts the noise that was added.
+- **DDPM and DDIM**: Two ways to run the cleaning-up steps: with fresh random noise at every step (DDPM) or fully deterministic (DDIM).
+
+## Chapter 13 — Reinforcement learning
+
+- **Reinforcement learning**: Learning by trial and error from rewards.
+- **Agent, environment, reward**: The agent acts, the environment reacts, and the reward is the score it gets back.
+- **Policy**: The agent’s rule for choosing an action in each situation.
+- **Return and discount**: The return is the sum of future rewards; the discount makes later rewards count less.
+- **Q-value**: How good it is to take an action in a state, counting all the rewards that follow.
+- **Bellman equation**: The value of an action equals the immediate reward plus the discounted value of the best next step.
+- **TD update**: Temporal-difference update: move the current estimate a fraction of the way toward a better target.
+- **Q-learning**: Learn Q-values with TD updates, acting a little at random to explore.
+- **Policy gradient (REINFORCE)**: Increase the probability of actions in proportion to the reward that followed them.
+- **Baseline**: A number subtracted from the rewards to reduce noise without changing the average direction of learning.
+
+## Chapter 14 — World models
+
+- **World model**: A learned simulator: it predicts what happens next from the current situation and an action.
+- **Imagination (dream)**: Practising inside the world model instead of in the real world.
+- **Rollout**: A simulated sequence of steps.
+- **Compounding error**: Small prediction mistakes feed into the next prediction and add up.
+- **Lipschitz constant**: A limit on how much a function can amplify differences between its inputs.
+- **Controller**: The small policy that chooses the actions.
+- **Evolution strategy**: Optimise by trying random variations and moving toward the better ones. No gradients needed.
+
+## Chapter 15 — JEPA
+
+- **Representation (embedding space)**: A list of numbers that captures what matters about an input.
+- **JEPA**: Joint-Embedding Predictive Architecture: predict the embedding of the target from the embedding of the context, not the raw pixels.
+- **Predictor**: The network that maps the context’s embedding (and an action) to the predicted target embedding.
+- **Collapse**: The shortcut where every input gets the same embedding: the loss is zero but nothing is learned.
+- **EMA (exponential moving average)**: A slow-moving copy: at every step it moves a small fraction toward the current weights.
+- **Stop-gradient**: Treat a value as a constant during backpropagation, so no learning flows into it.
+- **Variance regulariser**: A penalty that punishes embeddings for being too similar to each other.
+- **Linear probe**: A simple linear model trained to read a quantity out of an embedding, used to test what the embedding contains.

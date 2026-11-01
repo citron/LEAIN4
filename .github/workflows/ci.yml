@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gpt vae gan diffusion rl worldmodel jepa figures
+      - name: Audit axioms (expects "using sorry: #[]")
+        run: lake env lean ../scripts/audit_axioms.lean
+        working-directory: lean
+
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check.mjs
+      - run: npm ci
+        working-directory: website
+      - run: npm run build
+        working-directory: website
