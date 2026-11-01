@@ -137,3 +137,33 @@ For $T\le 20$ the network learns the rule. For $T\ge 60$ it fits the 32 training
 
 ```lean file=Ch07/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `jacRec` once: the new factor contains `w * jacRec w g t` with `w = 0`. `grind` finishes.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch07/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Induction on `t`. In the step, `simp only [jacRec, ih]` leaves `1 * (1 * 1) = 1`, which `grind` closes.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch07/Solutions.lean#sol2
+```
+
+</details>

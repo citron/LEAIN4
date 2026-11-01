@@ -125,3 +125,48 @@ We never use real analysis. We only assume that `exp` satisfies $e^{x+y}=e^x e^y
 
 ```lean file=Ch01/Exercises.lean#ex3
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Use the weights (-1, -1) and the bias 0: the pre-activation is 0 only when both inputs are 0, and negative otherwise. Then `cases a <;> cases b <;> decide`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch01/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `relu`, split on `0 ≤ x` with `by_cases`, and let `simp` finish each case.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch01/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Unfold `tanh`, rewrite `- -x = x`, and give `grind` the fact that the denominator is non-zero in both orders.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch01/Solutions.lean#sol3
+```
+
+</details>

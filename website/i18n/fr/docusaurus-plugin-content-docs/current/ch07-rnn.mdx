@@ -137,3 +137,33 @@ Pour $T\le 20$, le réseau apprend la règle. Pour $T\ge 60$ il s'ajuste aux 32 
 
 ```lean file=Ch07/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Dépliez `jacRec` une fois : le nouveau facteur contient `w * jacRec w g t` avec `w = 0`. `grind` termine.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch07/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Récurrence sur `t`. Au pas, `simp only [jacRec, ih]` laisse `1 * (1 * 1) = 1`, que `grind` ferme.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch07/Solutions.lean#sol2
+```
+
+</details>

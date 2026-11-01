@@ -117,3 +117,33 @@ Proved: geometric convergence of the Bellman update (one state), the TD error fa
 
 ```lean file=Ch13/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `tdUpdate`: the correction term is `eta * (q - q) = 0`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch13/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Induction on `k`. The step reduces to `r + g * vs = vs`, which is the Bellman hypothesis read backwards.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch13/Solutions.lean#sol2
+```
+
+</details>

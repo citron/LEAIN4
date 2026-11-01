@@ -118,3 +118,33 @@ La vérification du gradient concorde à mieux que $10^{-6}$ (la valeur affiché
 
 ```lean file=Ch06/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Dépliez `conv1d` : chaque terme de la somme est `ker j * 0`. Montrez que la fonction sommande vaut `fun _ => 0` et utilisez `vsum_zero`.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch06/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+C’est exactement `conv1d_add` appliqué à `x` et `x`.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch06/Solutions.lean#sol2
+```
+
+</details>

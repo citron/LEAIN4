@@ -157,3 +157,33 @@ The text has the right words, spaces and punctuation, and sentence shapes from t
 
 ```lean file=Ch09/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `weights` and `vsum`. Over `Fin 1` the denominator is `exp z0`, so the quotient is `exp z0 / exp z0`; use the non-zero hypothesis with `grind`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch09/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `causal`. The condition `j.val ≤ t` contradicts `t < j.val`; `omega` proves it.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch09/Solutions.lean#sol2
+```
+
+</details>

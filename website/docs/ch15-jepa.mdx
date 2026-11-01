@@ -134,3 +134,33 @@ Proved: collapse is a global minimiser of the plain loss; the EMA update is a ge
 
 ```lean file=Ch15/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `spread` and `sumL`: the only term is `(a - a) * (a - a)`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch15/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `vreg`: the condition `s < γ` is false, so the `if` takes its `else` branch.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch15/Solutions.lean#sol2
+```
+
+</details>

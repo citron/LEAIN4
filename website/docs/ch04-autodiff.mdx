@@ -150,3 +150,33 @@ The random initial parameters come from a deterministic generator written in Lea
 
 ```lean file=Ch04/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Use `backprop_correct` for coordinate 2 to replace `backprop` by the formal derivative, unfold `neuronLoss`, `sqErr`, `Expr.deriv` and `Expr.eval`, then close the ring identity with `grind`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch04/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Same method with coordinate 0: the derivative of `x₀ * x₁` with respect to `x₀` is `1 * x₁ + x₀ * 0`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch04/Solutions.lean#sol2
+```
+
+</details>

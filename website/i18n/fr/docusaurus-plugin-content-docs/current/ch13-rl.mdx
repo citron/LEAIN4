@@ -117,3 +117,33 @@ Prouvé : la convergence géométrique de la mise à jour de Bellman (un état),
 
 ```lean file=Ch13/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Dépliez `tdUpdate` : le terme de correction est `eta * (q - q) = 0`.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch13/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Récurrence sur `k`. Le pas se ramène à `r + g * vs = vs`, l’hypothèse de Bellman lue à l’envers.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch13/Solutions.lean#sol2
+```
+
+</details>

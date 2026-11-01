@@ -157,3 +157,33 @@ Le texte a les bons mots, espaces et ponctuation, et des formes de phrases du co
 
 ```lean file=Ch09/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Dépliez `weights` et `vsum`. Sur `Fin 1` le dénominateur est `exp z0`, donc le quotient est `exp z0 / exp z0` ; utilisez l’hypothèse de non-nullité avec `grind`.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch09/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Dépliez `causal`. La condition `j.val ≤ t` contredit `t < j.val` ; `omega` le prouve.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch09/Solutions.lean#sol2
+```
+
+</details>

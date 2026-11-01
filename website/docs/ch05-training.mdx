@@ -171,3 +171,33 @@ The MNIST code is not proved correct: only the formula for its output-layer grad
 
 ```lean file=Ch05/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Rewrite with `sgdQuad_closed` for `t = 2`, unfold `powN`, and close the ring identity with `grind`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch05/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `ema`: `ema β g 0 = 0`, so the value after one step is `β * 0 + (1 - β) * g`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch05/Solutions.lean#sol2
+```
+
+</details>

@@ -142,3 +142,33 @@ L'**unité récurrente à portes** (Cho et al., 2014) fusionne cellule et état 
 
 ```lean file=Ch08/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Dépliez `prodF` trois fois ; l’anneau est commutatif, donc `grind` ferme le but.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch08/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Récursion sur `t` : le cas de base est `0 ≤ 1` ; le pas est `Rat.mul_nonneg` appliqué à l’hypothèse et à l’hypothèse de récurrence.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch08/Solutions.lean#sol2
+```
+
+</details>

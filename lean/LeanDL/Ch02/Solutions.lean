@@ -6,6 +6,7 @@ namespace LeanDL.Ch02
 
 open Lean.Grind LeanDL.Ch01
 
+-- ANCHOR: sol1
 /-- No threshold neuron computes XNOR either: the four constraints are
 `b ≥ 0`, `w₁ + b < 0`, `w₂ + b < 0`, `w₁ + w₂ + b ≥ 0`, which are jointly unsatisfiable. -/
 theorem exercise_xnor_solution {α : Type} [CommRing α] [LE α] [LT α] [Std.IsLinearOrder α]
@@ -19,5 +20,6 @@ theorem exercise_xnor_solution {α : Type} [CommRing α] [LE α] [LT α] [Std.Is
   simp only [Neuron.fire, Neuron.preact, Vec.dot, v2, bit, step] at h00 h01 h10 h11
   simp at h00 h01 h10 h11
   grind
+-- ANCHOR_END: sol1
 
 end LeanDL.Ch02

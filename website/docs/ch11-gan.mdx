@@ -113,3 +113,33 @@ Proved: the optimal-discriminator formulas above, and (from Chapter 4) the gradi
 
 ```lean file=Ch11/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+`a + 0 = a`, so `dStar a 0 = a / a`, which is `1` because `a ≠ 0`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch11/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `lsLoss`: `a * ((1 - 1) * (1 - 1)) + b * (1 * 1)`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch11/Solutions.lean#sol2
+```
+
+</details>

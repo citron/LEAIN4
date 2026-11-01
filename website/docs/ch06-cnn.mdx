@@ -118,3 +118,33 @@ The gradient check agrees to better than $10^{-6}$ (the printed value rounds to 
 
 ```lean file=Ch06/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `conv1d`: every term of the sum is `ker j * 0`. Show the summand function equals `fun _ => 0` and use `vsum_zero`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch06/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+It is exactly `conv1d_add` applied to `x` and `x`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch06/Solutions.lean#sol2
+```
+
+</details>

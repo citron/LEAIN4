@@ -113,3 +113,18 @@ Putting the two theorems side by side: on separable data the perceptron makes a 
 
 ```lean file=Ch02/Exercises.lean#ex1
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Write the four constraints (`b ≥ 0`, `w₁ + b < 0`, `w₂ + b < 0`, `w₁ + w₂ + b ≥ 0`) by specialising the hypothesis to the four inputs, simplify with `simp`, and finish with `grind` (linear arithmetic).
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch02/Solutions.lean#sol1
+```
+
+</details>

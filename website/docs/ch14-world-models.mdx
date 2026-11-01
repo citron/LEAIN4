@@ -132,3 +132,33 @@ The controller trained **only on imagined episodes** performs as well in the rea
 
 ```lean file=Ch14/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `geom`: the new term is `1 + 1 * geom 1 k`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch14/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Apply `compounding_error` with `ε = 0`: the bound is `0 * geom L k`, which is `0`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch14/Solutions.lean#sol2
+```
+
+</details>

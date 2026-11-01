@@ -68,7 +68,7 @@ for (const text of leanText.values()) {
   for (const m of text.matchAll(/^\s*\|\s*([a-z]\w*)/gm)) declared.add(m[1]);
   for (const m of text.matchAll(/^\s+([a-z]\w*)\s*:\s/gm)) declared.add(m[1]);
 }
-const allow = new Set(['grind', 'omega', 'decide', 'simp', 'rfl', 'induction', 'cases', 'lake', 'elan', 'sorry', 'backprop_correct_ring']);
+const allow = new Set(['grind', 'omega', 'decide', 'simp', 'rfl', 'induction', 'cases', 'lake', 'elan', 'sorry', 'by_cases']);
 const nameLike = /^[a-z][A-Za-z0-9]*(_[A-Za-z0-9]+)+$|^[a-z]+[A-Z][A-Za-z0-9]*$/;
 for (const [dir, label] of [[enDir, 'en'], [frDir, 'fr']]) {
   for (const f of list(dir, '.mdx')) {

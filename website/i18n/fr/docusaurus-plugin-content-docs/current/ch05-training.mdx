@@ -171,3 +171,33 @@ Le code MNIST n'est pas démontré correct : seule la formule du gradient de sa 
 
 ```lean file=Ch05/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Réécrivez avec `sgdQuad_closed` pour `t = 2`, dépliez `powN`, et fermez l’identité d’anneau avec `grind`.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch05/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Dépliez `ema` : `ema β g 0 = 0`, donc la valeur après un pas est `β * 0 + (1 - β) * g`.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch05/Solutions.lean#sol2
+```
+
+</details>

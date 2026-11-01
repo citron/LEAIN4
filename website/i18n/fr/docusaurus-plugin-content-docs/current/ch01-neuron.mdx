@@ -125,3 +125,48 @@ Nous n'utilisons jamais l'analyse réelle. Nous supposons seulement que `exp` v�
 
 ```lean file=Ch01/Exercises.lean#ex3
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Prenez les poids (-1, -1) et le biais 0 : la pré-activation vaut 0 seulement si les deux entrées sont 0, et est négative sinon. Puis `cases a <;> cases b <;> decide`.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch01/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Dépliez `relu`, distinguez `0 ≤ x` avec `by_cases`, et laissez `simp` finir chaque cas.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch01/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Indice 3</summary>
+
+Dépliez `tanh`, réécrivez `- -x = x`, et donnez à `grind` le fait que le dénominateur est non nul dans les deux ordres.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch01/Solutions.lean#sol3
+```
+
+</details>

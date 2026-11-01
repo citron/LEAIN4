@@ -150,3 +150,33 @@ Les paramètres initiaux aléatoires proviennent d'un générateur déterministe
 
 ```lean file=Ch04/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Indice 1</summary>
+
+Utilisez `backprop_correct` pour la coordonnée 2 afin de remplacer `backprop` par la dérivée formelle, dépliez `neuronLoss`, `sqErr`, `Expr.deriv` et `Expr.eval`, puis fermez l’identité d’anneau avec `grind`.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch04/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Même méthode avec la coordonnée 0 : la dérivée de `x₀ * x₁` par rapport à `x₀` vaut `1 * x₁ + x₀ * 0`.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch04/Solutions.lean#sol2
+```
+
+</details>

@@ -117,3 +117,33 @@ Proved: the coefficient algebra of the forward process and the exactness of the 
 
 ```lean file=Ch12/Exercises.lean#ex2
 ```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `noiseVar` once: the result is `a * a * 0 + s * s`.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch12/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `cumA` twice: `a1 * (a2 * 1)`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch12/Solutions.lean#sol2
+```
+
+</details>
