@@ -26,31 +26,31 @@ Le chapitre est aussi un tournant méthodologique. Dès ici, tout scalaire d'un 
 
 ## Les distributions, exactement
 
-```lean file=Ch16/Tools.lean#dist
+```lean file=Core/Prob.lean#dist
 ```
 
 Une `Dist n` est un vecteur de poids `w : Vec Rat n` avec deux champs : chaque poids est positif (`pos`), et les poids somment à 1 (`sum1`, écrit comme produit scalaire avec le vecteur de tous les 1). Le champ `n` est un nombre au niveau des *types* : une distribution sur 4 issues est un type différent d'une distribution sur 5 — une incompatibilité de taille est une erreur de type, pas un plantage à l'exécution.
 
 Le logarithme est la seule pièce d'analyse du chapitre, et nous ne faisons pas semblant de le construire : `LawfulLog` est une **opération abstraite à lois nommées** (le même style que `LawfulExp` dans le noyau d'algèbre) :
 
-```lean file=Ch16/Tools.lean#haslog
+```lean file=Core/Prob.lean#haslog
 ```
 
 Quatre lois : la multiplication devient addition, les inverses deviennent négation, et l'inégalité tangente $\log x \le x - 1$, égalité seulement en $1$. Tout théorème du chapitre vaut pour *toute* structure obéissant à ces lois. Le logarithme réel les obéit — c'est un théorème d'analyse, hors de ce cours — et `Float` ne les obéit qu'à l'arrondi près, ce qui est exactement pourquoi les énoncés portent sur `Rat`.
 
 ## Espérance et variance
 
-```lean file=Ch16/Tools.lean#expect
+```lean file=Core/Prob.lean#expect
 ```
 
 L'espérance est un produit scalaire avec les poids ; la variance est $E[f^2] - (Ef)^2$. Quatre lois viennent gratuitement du produit scalaire — constante, additive, monotone, et $E[1] = 1$ (la probabilité totale se conserve) :
 
-```lean file=Ch16/Tools.lean#expect_laws
+```lean file=Core/Prob.lean#expect_laws
 ```
 
 et le nom « variance » est justifié par la forme centrée :
 
-```lean file=Ch16/Tools.lean#variance
+```lean file=Core/Prob.lean#variance
 ```
 
 `variance_eq_centered` prouve que la définition de calcul égale le sens : l'écart quadratique moyen à la moyenne. Une constante a une variance $0$ (exercice 3) : une quantité non aléatoire ne s'étale pas.
@@ -65,7 +65,7 @@ Trois quantités d'un seul motif (somme pondérée de logarithmes) :
 
 La première identité les relie :
 
-```lean file=Ch16/Tools.lean#ce_decomp
+```lean file=Core/Prob.lean#ce_decomp
 ```
 
 **Entropie croisée = entropie + KL.** L'entropie des données ne dépend pas du modèle, donc minimiser l'entropie croisée revient *exactement* à minimiser la KL : ajuster le modèle, pas les données. Voilà pourquoi l'entropie croisée est la perte de classification, et non un choix décoratif.
@@ -74,7 +74,7 @@ La première identité les relie :
 
 Le théorème qui donne un sens à l'entraînement :
 
-```lean file=Ch16/Tools.lean#gibbs
+```lean file=Core/Prob.lean#gibbs
 ```
 
 La preuve est celle du manuel, entièrement vérifiée. La borne ponctuelle $\log q - \log p \le (q-p)/p$ est l'inégalité tangente $\log x \le x-1$ appliquée à $x = q/p$ et réécrite avec `log_div` ; sommer contre des poids $p_i \ge 0$ préserve l'inégalité (`dot_mono`) ; le côté droit **télescope** — $\sum_i p_i (q_i - p_i)/p_i = \sum_i q_i - \sum_i p_i = 1 - 1 = 0$ — via l'annulation exacte $p \cdot p^{-1} = 1$ qui vaut sur `Rat` et *échoue* sur `Float` ; nier retourne le signe. Quatre étapes, chacune une ligne de Lean.
@@ -89,7 +89,7 @@ $$\mathbb{E}_{k}\[(f_{k}(x)-t(x))^{2}\] = (\bar f(x)-t(x))^{2} + \mathbb{E}_{k}\
 
 **risque = biais au carré de la moyenne + variance de la famille.** Aucune théorie des probabilités au-delà de deux sommes pondérées, pas de limites, pas d'asymptotique — c'est l'algèbre des moyennes, valable entrée par entrée :
 
-```lean file=Ch16/Tools.lean#generalization
+```lean file=Core/Prob.lean#generalization
 ```
 
 Le moteur tient en un raisonnement : développe $(f_k - t)^2 = (f_k - \bar f + \bar f - t)^2$, et le terme croisé $2(\bar f - t)\,\mathbb{E}[f_k - \bar f]$ meurt car **l'écart moyen à la moyenne est nul** (`wavg_dev_zero`). Sommer l'identité ponctuelle contre la distribution des entrées donne `ensemble_risk_decomp`.

@@ -26,31 +26,31 @@ The chapter is also a methodological turning point. From here, every scalar in a
 
 ## Distributions, exactly
 
-```lean file=Ch16/Tools.lean#dist
+```lean file=Core/Prob.lean#dist
 ```
 
 A `Dist n` is a weight vector `w : Vec Rat n` with two fields: every weight is positive (`pos`), and the weights sum to 1 (`sum1`, written as a dot product with the all-ones vector). The field `n` is a *type-level* number: a distribution on 4 outcomes is a different type from one on 5 — a size mismatch is a type error, not a runtime crash.
 
 The logarithm is the chapter's one piece of analysis, and we do not pretend to construct it: `LawfulLog` is an **abstract operation with named laws** (the same style as `LawfulExp` in the algebra core):
 
-```lean file=Ch16/Tools.lean#haslog
+```lean file=Core/Prob.lean#haslog
 ```
 
 Four laws: multiplication becomes addition, inverses become negation, and the tangent inequality $\log x \le x - 1$, equality only at $1$. Every theorem in the chapter holds for *any* structure obeying these laws. The real logarithm obeys them — that is a theorem of analysis, outside this course — and `Float` obeys them only up to rounding, which is exactly why the statements are over `Rat`.
 
 ## Expectation and variance
 
-```lean file=Ch16/Tools.lean#expect
+```lean file=Core/Prob.lean#expect
 ```
 
 Expectation is a dot product with the weights; variance is $E[f^2] - (Ef)^2$. Four laws come for free from the dot product — constant, additive, monotone, and $E[1] = 1$ (total probability is conserved):
 
-```lean file=Ch16/Tools.lean#expect_laws
+```lean file=Core/Prob.lean#expect_laws
 ```
 
 and the name "variance" is justified by the centered form:
 
-```lean file=Ch16/Tools.lean#variance
+```lean file=Core/Prob.lean#variance
 ```
 
 `variance_eq_centered` proves the computational definition equals the meaning: the average squared deviation from the mean. A constant has variance $0$ (exercise 3): a non-random quantity has no spread.
@@ -65,7 +65,7 @@ Three quantities from one pattern (weighted sum of logs):
 
 The first identity ties them:
 
-```lean file=Ch16/Tools.lean#ce_decomp
+```lean file=Core/Prob.lean#ce_decomp
 ```
 
 **Cross-entropy = entropy + KL.** The entropy of the data does not depend on the model, so minimising cross-entropy is *exactly* minimising KL: fitting the model, not the data. This is why cross-entropy is the classification loss, not a decorative choice.
@@ -74,7 +74,7 @@ The first identity ties them:
 
 The theorem that makes training mean something:
 
-```lean file=Ch16/Tools.lean#gibbs
+```lean file=Core/Prob.lean#gibbs
 ```
 
 The proof is the textbook one, fully checked. The pointwise bound $\log q - \log p \le (q-p)/p$ is the tangent inequality $\log x \le x-1$ applied to $x = q/p$ and rewritten with `log_div`; summing against weights $p_i \ge 0$ preserves the inequality (`dot_mono`); the right side **telescopes** — $\sum_i p_i (q_i - p_i)/p_i = \sum_i q_i - \sum_i p_i = 1 - 1 = 0$ — using the exact cancellation $p \cdot p^{-1} = 1$ that holds over `Rat` and *fails* over `Float`; negating flips the sign. Four steps, each one line of Lean.
@@ -89,7 +89,7 @@ $$\mathbb{E}_{k}\[(f_{k}(x)-t(x))^{2}\] = (\bar f(x)-t(x))^{2} + \mathbb{E}_{k}\
 
 **risk = squared bias of the average + variance of the family.** No probability theory beyond two weighted sums, no limits, no asymptotics — it is the algebra of averages, valid point by point:
 
-```lean file=Ch16/Tools.lean#generalization
+```lean file=Core/Prob.lean#generalization
 ```
 
 The engine is one line of reasoning: expand $(f_k - t)^2 = (f_k - \bar f + \bar f - t)^2$, and the cross term $2(\bar f - t)\,\mathbb{E}[f_k - \bar f]$ dies because **the average deviation from the average is zero** (`wavg_dev_zero`). Summing the pointwise identity over the input distribution gives `ensemble_risk_decomp`.

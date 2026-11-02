@@ -169,6 +169,8 @@ CI existante (`.github/workflows/ci.yml`) : build Lake + `lake env lean scripts/
 
 Contraintes d'exécution validées par l'audit : Lean 4.35.0, zéro Mathlib, `grind`/`omega`/`norm_cast`/`decide` (pas de `ring`/`linarith`/`norm_num`/`field_simp`), `native_decide` interdit, ancres `ANCHOR/ANCHOR_END` obligatoires, parité FR/EN à chaque ajout.
 
+- **M4 — RÉSOLU.** La théorie des probabilités finies de Ch16 (`LawfulLog`, `Dist`, lois de `dot`, `expect`/`variance`/`entropy`/`kl`/`crossEntropy`, Gibbs, décomposition CE, décomposition biais-variance d'ensemble) est promue en **`Core/Prob.lean`** (couche 1) ; `Ch16/Tools.lean` devient la page pédagogique qui ré-exporte cette couche, sans aucune modification des preuves. Les ancres du site FR/EN ont suivi (`Core/Prob.lean#…`) ; `check.mjs` est vert.
+
 ### Avancement (même jour, après audit)
 
 - **B1 — RÉSOLU.** `ci.yml` : `build-args` contient les 21 cibles ; smoke `lake exe ch05 && ch16 && ch17` ajouté (validé localement `SMOKE_EXIT=0`).
