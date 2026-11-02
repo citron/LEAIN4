@@ -185,3 +185,20 @@ Contraintes d'exécution validées par l'audit : Lean 4.35.0, zéro Mathlib, `gr
 ---
 
 **Verdict de la Phase 1** : le projet est structurellement sain — dépendances unidirectionnelles, zéro `sorry`, zéro axiome non standard sur 1720 déclarations (audit exécuté), documentation à parité mécaniquement vérifiée. Les écarts avec le contrat sont concentrés : un (B1) trivial, deux structurels (M1 pont Rat↔Float, M3 sémantique des couches flottantes) qui définissent le vrai chantier de formalisation, et un ensemble de rangements (Mn*) sans risque. Le MLP est déjà, à un chevron près (M2), le meilleur candidat pour le premier exemple F1→F5 complet demandé par la Phase 3.
+
+---
+
+## Phase 4 — Ch18 « Efficacité » (RÉSOLU)
+
+Le contrat Phase 4 (MoE, quantification, distillation, scaling laws) est bouclé dans un nouveau chapitre **`Ch18/Efficiency.lean`**, prouvé sur `Rat` exact, sans Mathlib, sans `sorry` (audit : **1889 déclarations, `using sorry: []; non-standard axiomes: []`** après intégration) :
+
+- **Quantification** : `quant` (plancher) avec `quant_le`/`quant_lt`/`quant_err_lt` (erreur < un pas de grille), `roundq` (au plus proche) avec `roundq_err_le` (≤ s/2, borne atteinte), `quant_quant` (idempotence — un modèle quantifié se re-sauve sans perte). Preuves via `Rat.floor_le`, `Rat.lt_floor_add_one`, `Rat.mul_le_mul_of_nonneg_right`, `Rat.inv_mul_cancel`, `push_cast; grind`.
+- **MoE** : `balance_ge` — pour tout routeur (`p ≥ 0`, `Σp = 1`), `Σ pᵢ² ≥ 1/E`, preuve par somme de carrés `Σ (pᵢ − 1/E)² ≥ 0` développée avec `vsum_add`/`vsum_smul`/`vsum_const`/`vsum_nonneg` (nouveau bloc `RatLaws` dans `Core/Sum.lean`). `balance_collapse` — le routeur effondré `oneAt0` est une distribution (`vsum_oneAt0`, induction sur `Fin (E+1)`) et paie exactement `1 = E·(1/E)`.
+- **Distillation** : héritée de `Core/Prob` — `distill_ge_entropy` (`CE(T,S) = H(T) + KL ≥ H(T)`, via `Dist.crossEntropy_eq_entropy_add_kl` + `Dist.kl_nonneg`) et `distill_teacher` (`CE(T,T) = H(T)`, plancher atteint via `Dist.kl_self`).
+- **Scaling** : `inv_antitone` (via `Rat.inv_mul_cancel` + `Rat.lt_of_mul_lt_mul_right`), `data_scale` (`N < N' ⇒ C/N' < C/N`), `data_scale_double` (`C/2N = ½·C/N`, via `Rat.mul_inv`), `train_decay` (décroissance exponentielle `cᵗ·(L₀−L∞)` via les projections de `Ch05.powN_le_one`).
+- **Exercices/corrigés** : 3 énoncés (`exercise_quant_mono`, `exercise_quant_translate`, `exercise_uniform_attains`) avec corrigés prouvés dans `Solutions.lean` (ancres `ex1..ex3`, `sol1..sol3`).
+- **Démo exécutable** `lake exe ch18` (`Demos/Ch18.lean`, cible Lake ajoutée) : les quatre expériences `Float` reproduisent les quatre théorèmes (erreurs mesurées sous les bornes prouvées, uniforme = 1/E = 0.125, effondrement = 1.0, CE = H + KL au chiffre imprimé, distillation SGD 200 pas → KL = 0 ≥ H(T) vrai à chaque pas, chaque doublement de N divise l'excès par deux). Validée localement par `lake env lean --run Demos/Ch18.lean` (le `.exe` fraichement compilé est bloqué par le contrôle d'application Windows, comme `ch16` ; CI Linux exécute `lake exe ch18`).
+- **Docs FR/EN paritaires** : `ch18-efficiency.mdx` (22 pages au `check.mjs`), ancres `quant`/`balance`/`distill`/`scaling` dans `Efficiency.lean` ; glossaires FR/EN, index FR/EN, README (cible `ch18`), ROADMAP (ligne Efficacité + Phase 4 « fait »), CI (`build-args` + smoke `ch18`).
+- **`scripts/check.mjs`** : allow-list enrichie des tactiques noyau citées dans les pages (`exact_mod_cast`, `push_cast`, `norm_cast`, `funext`, `congr`, `rw`) — ce sont des tactiques de Lean 4 core, pas des noms LeanDL.
+
+Limites honnêtes documentées dans la page : quantification scalaire seulement (clip/plage/calibrage = ingénierie) ; le routeur est un vecteur de poids, pas un réseau appris ; distillation sur distributions finies ; la loi d'échelle prouvée est la **forme** (`C/N` décroissant, moitiés), pas les coefficients empiriques.

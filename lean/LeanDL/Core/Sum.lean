@@ -68,6 +68,28 @@ theorem vsum_comm : ∀ {m n : Nat} (f : Fin m → Fin n → α),
     simp only [vsum]
     rw [ih]
 
+
+
+section RatLaws
+
+/-- The sum of a constant. -/
+theorem vsum_const : ∀ (n : Nat) (c : Rat), vsum (fun _ : Fin n => c) = (n : Rat) * c
+  | 0, c => by simp only [vsum]; grind
+  | n + 1, c => by
+      rw [vsum, vsum_const n c]
+      push_cast
+      grind
+
+/-- A sum of nonnegative rationals is nonnegative. -/
+theorem vsum_nonneg : ∀ (n : Nat) (f : Fin n → Rat), (∀ i, 0 ≤ f i) → 0 ≤ vsum f
+  | 0, f, h => by simp only [vsum]; grind
+  | n + 1, f, h => by
+      rw [vsum]
+      exact Rat.add_nonneg (h ⟨0, Nat.succ_pos n⟩)
+        (vsum_nonneg n (fun i => f i.succ) (fun i => h i.succ))
+
+end RatLaws
+
 end Laws
 
 end LeanDL

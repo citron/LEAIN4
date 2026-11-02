@@ -106,3 +106,7 @@ root = "Demos.Ch17"
 name = "figures"
 root = "Demos.Figures"
 
+
+[[lean_exe]]
+name = "ch18"
+root = "Demos.Ch18"

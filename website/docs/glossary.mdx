@@ -208,3 +208,11 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Temperature**: The divisor on the scores that sets how peaked the softmax is: small temperature amplifies small differences.
 - **Collapse floor**: The loss of a flat embedding — every candidate tied — is exactly log (n + 1): the number chance also achieves, and the baseline every contrastive curve must cross.
 - **Hard negative**: A negative that grabbed a large share of the softmax mass: the gradient p − onehot pushes it away the hardest.
+
+## Chapter 18 — Efficiency
+
+- **Quantization grid**: Replace each weight by a point of a coarse grid of step s; the floor pass errs by less than one cell, the round-to-nearest pass by at most half a cell, and grid points are fixed.
+- **Load-balance loss**: Sum of p_i squared over experts — the probability two routings pick the same expert; it is always at least 1/E, with equality at the uniform router.
+- **Collapsed router**: All routing mass on one expert; the balance loss pays exactly 1 = E times the floor, and E−1 experts sit idle.
+- **Distillation floor**: The student's cross-entropy against the teacher is the teacher's entropy plus a nonnegative KL: the loss can never go under H(teacher), and the gap is exactly the KL.
+- **Scaling shape**: The law L(N) = Linf + C/N is strictly decreasing and doubling N halves the excess C/N; optimization steps decay exponentially instead — the two curves have opposite curvature.

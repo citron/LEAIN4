@@ -120,7 +120,7 @@ This is the shape recurrent and attention updates take: the GRU mixes
 `h ← z·h + (1−z)·n` with a gate `z ∈ [0,1]` at every step, and the
 attention blend reweights bounded values every query. -/
 theorem drift_bound_seq (c : Nat → Rat) (hc : ∀ t, Rat.abs (c t) ≤ 1)
-    (ε : Rat) (hε : 0 ≤ ε)
+    (ε : Rat) (_hε : 0 ≤ ε)
     (v w : Nat → Rat) (e : Nat → Rat) (h0 : v 0 = w 0)
     (hv : ∀ t, v (t + 1) = c t * v t + e t)
     (he : ∀ t, Rat.abs (e t) ≤ ε)

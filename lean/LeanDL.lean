@@ -52,6 +52,9 @@ import LeanDL.Ch15.Solutions
 import LeanDL.Ch16.Solutions
 import LeanDL.Ch17.Contrastive
 import LeanDL.Ch17.Solutions
+import LeanDL.Ch18.Efficiency
+import LeanDL.Ch18.Exercises
+import LeanDL.Ch18.Solutions
 import LeanDL.Ch16.Tools
 import LeanDL.Core.Algebra
 import LeanDL.Core.Mat

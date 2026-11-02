@@ -1,0 +1,155 @@
+---
+sidebar_position: 19
+title: "Chapitre 18 — Efficacité : quantification, MoE, distillation, scaling"
+---
+
+# Chapitre 18 — L'efficacité : ce que font les modèles déployés, prouvé
+
+:::tip[TL;DR]
+**En bref.** Le dernier kilomètre d'un modèle moderne n'est pas l'architecture, c'est l'*efficacité* : packeter les poids en 8 bits, router les jetons vers quelques experts d'une couche géante, enseigner à un petit élève depuis un grand professeur, et budgéter données et paramètres par des lois d'échelle. Chacun de ces tricks repose sur une inégalité maîtresse, et ce chapitre prouve les quatre sur `Rat` exact : la quantification se trompe de moins d'un pas de grille (au plus la moitié d'un pas en arrondi) ; la perte de collision du routeur $\sum_i p_i^2$ est minorée par $1/E$ et un routeur effondré paie $E$ fois le plancher ; le cross-entropy de la distillation vaut l'entropie du professeur **plus** un KL positif ; et la loi d'échelle $C/N$ est strictement décroissante, doubler le budget divisant l'excès par deux.
+
+**Mots nouveaux, en termes simples :**
+
+- **Quantification** : remplacer chaque poids par le point le plus proche d'une grille grossière — 256 niveaux au lieu de flottants 32 bits. Le pas de grille $s$ est le prix payé, et le théorème dit ce qu'il achète.
+- **Mélange d'experts (MoE)** : chaque jeton est routé vers un petit nombre pondéré des $E$ experts. La perte d'équilibrage $\sum_i p_i^2$ punit un routeur qui favorise certains experts.
+- **Distillation** : entraîner l'élève sur la sortie *douce* du professeur ; la perte est $\text{CE}(\text{professeur}, \text{élève})$, et le théorème fixe son plancher à l'entropie du professeur.
+- **Loi d'échelle** : la perte en fonction du budget : $L(N) = L_{\inf} + C/N$. Le théorème prouve sa *forme* — décroissante, avec sa règle de moitiés — pas ses coefficients.
+:::
+
+Les chapitres 0 à 17 construisent des modèles qui *apprennent*. Un modèle qui part en production doit aussi être petit, rapide et abordable — et chaque astuce de déploiement de l'industrie repose sur une inégalité. Ce chapitre prouve les quatre qui comptent : toutes élémentaires sur `Rat` (aucune analyse, aucune théorie de la mesure), et leurs énoncés sont exactement le folklore du machine learning de production.
+
+## Quantification : la grille et son erreur
+
+```lean file=Ch18/Efficiency.lean#quant
+```
+
+`quant s x` accroche $x$ à la grille $s\mathbb{Z}$ par plancher, `roundq s x` au point le plus *proche*. Trois théorèmes :
+
+**L'erreur du plancher fait exactement une cellule** (`quant_le`, `quant_lt`, `quant_err_lt`) : $\text{quant}\;s\;x \le x < \text{quant}\;s\;x + s$, donc $|x - \text{quant}\;s\;x| < s$. La preuve est `Rat.floor_le` et `Rat.lt_floor_add_one` multipliés par le pas positif — tout le contenu de la fiche INT8, en neuf lignes.
+
+**L'arrondi au plus proche paie la moitié** (`roundq_err_le`) : $|x - \text{roundq}\;s\;x| \le s/2$. Le point le plus proche est à demi-cellule au plus : l'arrondi achète un facteur 2 sur le plancher, gratuitement, et la borne est atteinte (un point à mi-chemin de deux nœuds paie exactement $s/2$). La preuve encadre l'erreur entre $-s/2$ et $s/2$ via `Rat.floor_le` sur $x/s + 1/2$.
+
+**Quantifier est idempotent** (`quant_quant`) : $\text{quant}\;s\;(\text{quant}\;s\;x) = \text{quant}\;s\;x$. Les nœuds de la grille sont fixes : une seconde passe de quantification ne change rien, ce qui explique qu'un modèle quantifié se re-sauve sans perte. La preuve annule $s$ contre $s^{-1}$ (`Rat.inv_mul_cancel`) si bien que le plancher d'un entier est lui-même.
+
+Les limites honnêtes : c'est la théorie *scalaire*. La quantification INT8 réelle clusterise aussi les valeurs extrêmes (un problème d'ajustement de plage, pas de plancher), quantifie les activations (qui bougent, donc leurs statistiques demandent un calibrage), et l'erreur en sortie du réseau est la *composition* de nombreuses couches quantifiées — bornée par la machinerie de dérive du chapitre 5, pas par une seule grille. Ce qui est prouvé ici est l'atome dont toute ces argumentations partent.
+
+## Mélange d'experts : le plancher de collision
+
+```lean file=Ch18/Efficiency.lean#balance
+```
+
+Le routeur donne à l'expert $i$ un poids $p_i \ge 0$ avec $\sum_i p_i = 1$. La perte d'équilibrage est $\sum_i p_i^2$ — la probabilité que deux routages indépendants choisissent le *même* expert, ce qui est exactement pourquoi elle punit le favoritisme.
+
+**Le plancher est $1/E$** (`balance_ge`) : pour tout routage, $\sum_i p_i^2 \ge 1/E$, avec égalité pour le routeur uniforme. La preuve est une ligne d'algèbre déguisée en somme de carrés : on développe $\sum_i (p_i - 1/E)^2 \ge 0$ avec `vsum_add`, `vsum_smul`, `vsum_const` de `Core/Sum`, et le terme croisé s'effondre contre $\sum_i p_i = 1$. C'est le fait Cauchy–Schwarz / Jensen que citent tous les papiers MoE, prouvé depuis les axiomes du corps.
+
+**L'effondrement paie $E$ fois le plancher** (`balance_collapse`) : le routeur effondré `oneAt0` — toute la masse sur l'expert 0 — est une vraie distribution (`vsum_oneAt0`, par induction sur `Fin (E + 1)`), et sa perte de collision vaut exactement $1 = E \cdot (1/E)$. Un routeur effondré coûte $E$ fois plus sur la perte d'équilibrage *et* laisse $E-1$ experts au chômage : le plancher est atteint à l'uniforme et la perte n'est pas bornée au-dessus dans le coin effondré. `balance_ge` ne manque d'aucune hypothèse : c'est toute l'histoire.
+
+La démo rend la courbe visible : $E = 8$ experts, plancher $0.125$ ; l'uniforme vaut $0.125$, un routeur biaisé $0.23$, un effondré $1.0$.
+
+## Distillation : le plancher est l'entropie du professeur
+
+```lean file=Ch18/Efficiency.lean#distill
+```
+
+L'élève $s$ est entraîné sur la distribution douce $t$ du professeur en minimisant $\text{CE}(t, s)$. Le chapitre 16 a déjà prouvé l'identité `Dist.crossEntropy_eq_entropy_add_kl` : $\text{CE}(t, s) = H(t) + \text{KL}(t \,\|\, s)$, et `Dist.kl_nonneg` donne $\text{KL} \ge 0$. Deux théorèmes en découlent en une ligne chacun :
+
+**La perte de distillation vaut au moins l'entropie du professeur** (`distill_ge_entropy`) : $H(t) \le \text{CE}(t, s)$, pour tout élève. Le plancher est $H(t)$ : un professeur à 4 classes d'entropie $0.85$ ne peut pas être distillé sous $0.85$ — un élève à $1.39$ n'est pas « proche », il est au hasard. L'écart *est* le KL : lisez une courbe de distillation comme $H(t) + \text{KL}$, jamais comme un nombre brut.
+
+**Le professeur se distille à sa propre entropie** (`distill_teacher`) : $\text{CE}(t, t) = H(t)$, parce que $\text{KL}(t \,\|\, t) = 0$. Le plancher est atteint, donc l'inégalité est serrée, et l'exercice 3 (chapitre 16) montrait déjà qu'un élève peut *égaler* l'entropie du professeur.
+
+La démo distille pour de vrai : une boucle SGD de 200 pas sur le cross-entropy doux, dont le gradient est $S - T$ (le cross-entropy softmax du chapitre 5, mot pour mot), conduit l'élève de l'uniforme vers le professeur, KL vers $0$, perte vers exactement $H(t)$.
+
+## Lois d'échelle : la forme, prouvée
+
+```lean file=Ch18/Efficiency.lean#scaling
+```
+
+Empiriquement (Kaplan et al., Chinchilla), la perte suit des lois de puissance en fonction du budget : $L(N) = L_{\inf} + C/N$ en données, des lois semblables en paramètres et en calcul. Prouver les coefficients est impossible — ils se mesurent. Prouver la *forme* est facile et c'est à cela que la loi sert :
+
+**Plus de données, c'est strictement mieux** (`data_scale`, via `inv_antitone`) : $N < N'$ implique $C/N' < C/N$ pour $C > 0$ : la courbe de perte ne remonte jamais. La preuve est $N < N' \Rightarrow 1/N' < 1/N$ (on inverse, on multiplie par $a b > 0$), puis on multiplie par $C$.
+
+**Doubler divise l'excès par deux** (`data_scale_double`) : $C/(2N) = \tfrac12 \cdot C/N$, une identité. Le réflexe « doubler le jeu de données divise la perte excédentaire par deux » est de l'arithmétique, pas du folklore.
+
+**La décroissance d'optimisation est exponentielle** (`train_decay`) : après $t$ pas avec contraction $0 \le c \le 1$, la perte excédentaire est $c^t (L_0 - L_{\inf})$, entre $0$ et $L_0 - L_{\inf}$ — `Ch05.powN_le_one` lu comme courbe d'échelle. Voilà pourquoi les *pas* achètent une amélioration exponentielle et les *données* seulement une amélioration en loi de puissance : les deux courbes sur le même tracé ont des courbures opposées, et le théorème explique la règle du métier « si la courbe est plate, achetez des données, pas des pas ».
+
+## Expériences
+
+`lake exe ch18` affiche la face numérique des quatre théorèmes, en `Float` :
+
+- **Quantification**, grille $s = 2.4/255 \approx 0.009$ (une plage INT8 de $\pm 1.2$) : pire erreur du plancher `0.007 < s`, pire erreur d'arrondi `0.005 = s/2`. Les deux bornes respectées — les erreurs mesurées siègent *sous* les théorèmes, comme elles le doivent.
+- **MoE**, $E = 8$ : plancher $1/E = 0.125$ ; uniforme `0.125` (l'atteint), biaisé `0.23`, effondré `1.0` — exactement $E$ fois le plancher, la ligne `balance_collapse` en chiffres.
+- **Distillation** : professeur $T = [0.7, 0.2, 0.08, 0.02]$, $H(T) = 0.85$ ; un élève uniforme vaut $\text{CE} = 1.39 = 0.85 + 0.53$, un élève pointu $1.47 = 0.85 + 0.61$, la copie $0.85 = 0.85 + 0$. L'identité $\text{CE} = H + \text{KL}$ tient au chiffre imprimé sur chaque ligne. Puis 200 pas SGD : l'élève converge vers $T$, KL vers $0$, perte vers $H(T)$ — et jamais en dessous, `true` à chaque pas.
+- **Scaling**, $L(N) = 0.10 + 16/N$ : de $N = 100 \to 800$, l'excès tombe de $0.16$ à $0.02$ ; chaque doublement le divise par deux, `data_scale_double` en tableau.
+
+## Exercices
+
+1. Prouvez que **la quantification est monotone** : $x \le y$ implique $\text{quant}\;s\;x \le \text{quant}\;s\;y$ — un poids plus grand ne se quantifie jamais en un point de grille plus petit.
+2. Prouvez que **translater d'un pas de grille translate le code d'un cran** : $\text{quant}\;s\;(x + s) = \text{quant}\;s\;x + s$ — la grille est parfaitement invariante par translation.
+3. Prouvez que **le routeur uniforme atteint le plancher exactement** : avec $p_i = 1/E$, la perte de collision vaut exactement $1/E$ — `balance_ge` est serré, pas lâche.
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch18/Exercises.lean` contient les énoncés ci-dessous, avec `sorry` à remplacer. Les corrigés prouvés sont dans `Solutions.lean` à côté : essayez d'abord.
+
+```lean file=Ch18/Exercises.lean#ex1
+```
+
+```lean file=Ch18/Exercises.lean#ex2
+```
+
+```lean file=Ch18/Exercises.lean#ex3
+```
+
+<details>
+<summary>Indice 1</summary>
+
+Réécrivez les divisions en multiplications par l'inverse (`Rat.div_def`), transportez l'inégalité à travers $s^{-1} > 0$ (`Rat.inv_pos`, `Rat.mul_le_mul_of_nonneg_right`), appliquez `Rat.floor_monotone`, convertissez l'inégalité entière en `Rat` (`exact_mod_cast`), multipliez par $s \ge 0$.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch18/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Montrez $(x + s)/s = x/s + 1$ (`Rat.add_mul`, `Rat.mul_inv_cancel`), puis `Rat.floor_add_one` sort le $+1$ du plancher, et la conversion $(n+1) \cdot s = n \cdot s + s$ est `push_cast` plus `Rat.add_mul`.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch18/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Indice 3</summary>
+
+Le summand est la *constante* $(1/E) \cdot (1/E)$ : `vsum_const` donne $E \cdot ((1/E) \cdot (1/E))$, et annuler un $E$ contre une inverse finit.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch18/Solutions.lean#sol3
+```
+
+</details>
+
+## Ce qui est couvert, et ce qui ne l'est pas
+
+- **Quantification scalaire seulement.** Un nombre, une grille. L'ajustement des clips, les statistiques des activations, les échelles par canal et l'erreur de sortie composée d'un réseau quantifié sont de l'*ingénierie* de quantification ; l'atome dont tout cela part — l'erreur de grille — est ce qui est prouvé.
+- **Le routeur est un vecteur, pas un réseau.** `balance_ge` borne tout vecteur de poids avec $\sum p_i = 1$, il couvre donc la sortie de tout routeur sur tout jeton. Il ne dit rien sur l'*apprentissage* de $p$ ; le gradient de la perte d'équilibrage est $2p$ et le reste est la machinerie du chapitre 5.
+- **Distillation sur distributions finies.** L'identité $H(t) + \text{KL}$ est exacte ici ; la distillation par jeton (sommes sur vocabulaires et séquences) est la même identité sommée, exactement comme l'InfoNCE par échantillon du chapitre 17 s'additionne sur un batch.
+- **La forme, pas les coefficients.** $L(N) = L_{\inf} + C/N$ est le *modèle* ; les théorèmes prouvent sa monotonie et sa règle de moitiés. Les constantes empiriques, la loi de calcul jointe et le partage paramètres/données de Chinchilla sont de la mesure, pas du théorème.
+
+## Pour la suite
+
+Le chapitre 16 a construit entropie, KL et cross-entropy ; le chapitre 17 les a dépensés pour apprendre. Ce chapitre les a dépensés pour le *déploiement* : le plancher de la distillation, le plancher du routeur, la cellule de quantification, la forme du scaling. Lisez les quatre énoncés comme le folklore de l'industrie avec ses factures attachées — c'est le propos de tout le cours : les mathématiques sont la spécification, Lean 4 est la preuve.

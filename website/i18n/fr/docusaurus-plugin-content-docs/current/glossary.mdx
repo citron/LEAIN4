@@ -208,3 +208,11 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Température** : le diviseur sur les scores qui règle la pointe du softmax : une petite température amplifie les petites différences.
 - **Plancher d'effondrement** : la perte d'un embedding plat — tous les candidats à égalité — vaut exactement log (n + 1) : le nombre que le hasard atteint aussi, et la référence que toute courbe contrastive doit franchir.
 - **Négatif dur** : un négatif qui a capturé une grande part de la masse du softmax : le gradient p − onehot le repousse le plus fort.
+
+## Chapitre 18 — Efficacité
+
+- **Grille de quantification** : remplacer chaque poids par un point d'une grille de pas s ; la passe plancher se trompe de moins d'une cellule, la passe arrondi au plus proche d'au plus une demi-cellule, et les nœuds de la grille sont fixes.
+- **Perte d'équilibrage** : somme des carrés des p_i sur les experts — probabilité que deux routages choisissent le même expert ; toujours ≥ 1/E, avec égalité au routeur uniforme.
+- **Routeur effondré** : toute la masse de routage sur un seul expert ; la perte d'équilibrage paie exactement 1 = E fois le plancher, et E−1 experts sont au chômage.
+- **Plancher de distillation** : le cross-entropy de l'élève contre le professeur vaut l'entropie du professeur plus un KL positif : la perte ne descend jamais sous H(professeur), et l'écart est exactement le KL.
+- **Forme du scaling** : la loi L(N) = Linf + C/N est strictement décroissante et doubler N divise l'excès C/N par deux ; les pas d'optimisation décroissent en exponentielle — les deux courbes ont des courbures opposées.
