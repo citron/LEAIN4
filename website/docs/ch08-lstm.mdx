@@ -164,6 +164,23 @@ against central finite differences (maximum error printed as 0.000000 over
 The update-gate bias starts at $0.5$ (the analogue of the LSTM's forget bias $=1$): the
 state path starts mostly open.
 
+### The gate is a theorem
+
+The GRU's defining equation is a **convex combination**: $h_t = z_t\,h_{t-1} + (1-z_t)\,n_t$
+with $z_t \in [0,1]$ — a weighted average of the old state and the candidate. That is not
+a detail, it is a guarantee, and it is proved over exact $\mathbb{Q}$:
+
+```lean file=Ch08/Gru.lean#gru_bound
+```
+
+If the old state and the candidate live in $[-M, M]$, the new state stays in $[-M, M]$ —
+and by induction, **every hidden state of every sequence** carries the bound. The
+hypotheses are exactly what the cell computes: $\tanh$ is bounded by 1, the sigmoid is a
+probability. This is the exact-mathematics certificate behind the demo observation that
+hidden activations never blow up — and combined with `drift_bound_seq` (Core), a `Float`
+GRU run, where every update carries a rounding perturbation, tracks the exact dynamics
+within $T\varepsilon$ after $T$ steps.
+
 ### What it measures
 
 `lake exe gru` first checks every partial derivative of the 329-parameter BPTT against

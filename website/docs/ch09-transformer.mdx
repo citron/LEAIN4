@@ -6,7 +6,7 @@ title: "Chapter 9 — Attention and the Transformer"
 # Chapter 9 — Attention and the Transformer
 
 :::tip[TL;DR]
-**In short.** Attention lets every position look directly at all the others. We prove four properties (softmax weights, blindness to order, the causal mask, layer-norm shift invariance) and train a tiny Transformer.
+**In short.** Attention lets every position look directly at all the others. We prove five properties (softmax weights, blindness to order, the causal mask, layer-norm shift invariance, bounded blends) and train a tiny Transformer.
 
 **New words, in simple terms:**
 
@@ -50,7 +50,7 @@ $$
 
 A Transformer block adds this to its input (a **residual connection**) and then applies a small MLP, again with a residual connection. Real models stack many blocks, use several attention "heads" in parallel, and normalise activations with layer norm.
 
-## Four facts, proved
+## Five facts, proved
 
 ### 1. The weights are a distribution, and the softmax is shift-invariant
 
@@ -86,6 +86,15 @@ Layer norm centres its input, divides by the standard deviation, and then applie
 ```
 
 (The centring identity $\sum_i (x_i - \bar x) = 0$ is the Chapter 5 theorem `centered_sum_zero`.)
+
+### 5. A blend of bounded values stays bounded
+
+The softmax weights of fact 1 are nonnegative and sum to 1, so attention is a *weighted average* of the value vectors. Weighted averages cannot create magnitude: if every value coordinate lies in $[-M, M]$, every output coordinate does too — proved over exact $\mathbb{Q}$ in Chapter 17, where the softmax lives:
+
+```lean file=Ch17/Contrastive.lean#softmax_blend
+```
+
+The same lemma is the kernel of the GRU story in Chapter 8 (the update gate is a convex mix) and of the ensemble average in Chapter 16. It is also a stability statement with teeth: a network whose value vectors stay bounded cannot have its attention output blow up, no matter how the scores move.
 
 ## A small causal Transformer in Lean
 

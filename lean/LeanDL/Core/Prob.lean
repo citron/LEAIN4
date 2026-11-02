@@ -230,6 +230,43 @@ theorem expect_const (p : Dist n) (c : Rat) : p.expect (fun _ => c) = c := by
   grind
 -- ANCHOR_END: expect_laws
 
+-- ANCHOR: convex_bound
+/-- **Convex combination of bounded values stays bounded.** If the
+weights are nonnegative and sum to 1 — a gate, a softmax, an ensemble
+vote — and every value satisfies `|f i| ≤ M`, then the blend satisfies
+`|Σ wᵢ fᵢ| ≤ M`. This is the kernel of every bridge between exact
+theorems and the recurrent/attention layers: `tanh` outputs (bounded by
+1), GRU gated updates (convex combinations of bounded states), attention
+blends (softmax-weighted averages of bounded value vectors). -/
+theorem convex_bound {n : Nat} (w f : Vec Rat n) (M : Rat)
+    (hw : ∀ i, 0 ≤ w i) (hsum : Vec.dot w (fun _ => (1 : Rat)) = 1)
+    (hb : ∀ i, Rat.abs (f i) ≤ M) :
+    Rat.abs (Vec.dot w f) ≤ M := by
+  have hup : Vec.dot w f ≤ Vec.dot w (fun _ => M) := dot_mono w f (fun _ => M) hw (fun i => by
+    have := hb i
+    grind [Rat.abs.eq_1])
+  have hneg : Vec.dot w (fun _ => -M) ≤ Vec.dot w f := dot_mono w (fun _ => -M) f hw (fun i => by
+    have := hb i
+    grind [Rat.abs.eq_1])
+  have hsm : Vec.dot w (fun _ => M) = M * Vec.dot w (fun _ => (1 : Rat)) :=
+    dot_smul_const w M
+  have hsm2 : Vec.dot w (fun _ => -M) = -M * Vec.dot w (fun _ => (1 : Rat)) :=
+    dot_smul_const w (-M)
+  rw [hsm, hsum] at hup
+  rw [hsm2, hsum] at hneg
+  have h2 : -M * 1 = -M := by grind
+  rw [h2] at hneg
+  grind [Rat.abs.eq_1]
+
+/-- The expectation version: under a distribution, a bounded random
+variable has bounded mean. Softmax attention over values in `[-M, M]`
+blends to a vector of mean-coordinate in `[-M, M]`; an ensemble of
+models each within `M` of the target is itself within `M`. -/
+theorem expect_abs_bound (p : Dist n) (f : Vec Rat n) (M : Rat)
+    (hb : ∀ i, Rat.abs (f i) ≤ M) : Rat.abs (p.expect f) ≤ M :=
+  convex_bound p.w f M (fun i => Rat.le_of_lt (p.pos i)) p.sum1 hb
+-- ANCHOR_END: convex_bound
+
 end ExpectLaws
 
 -- ANCHOR: variance

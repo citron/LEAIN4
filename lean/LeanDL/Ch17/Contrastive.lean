@@ -169,6 +169,19 @@ theorem softmax_dist {n : Nat} (hn : 0 < n) (z : Vec Rat n) :
       show Vec.dot (fun _ : Fin n => (1 : Rat)) (fun i => HasExp.exp (z i)) = vsum z from rfl,
       inv_mul_cancel' (Rat.ne_of_gt hZ)]
 
+-- ANCHOR: softmax_blend
+/-- **An attention blend of bounded values stays bounded.** The softmax
+weights are nonnegative and sum to 1 (`softmax_dist`), so blending value
+vectors whose every coordinate lies in `[-M, M]` produces a coordinate
+again in `[-M, M]` — the attention output of the `lake exe gpt` demo is
+carried by this exact bound, not by hope. The same lemma is the
+ensemble-average case of Chapter 16's bias-variance story. -/
+theorem softmax_blend_bound {n : Nat} (hn : 0 < n) (z v : Vec Rat n) (M : Rat)
+    (hb : ∀ i, Rat.abs (v i) ≤ M) : Rat.abs (Vec.dot (softmax z) v) ≤ M := by
+  obtain ⟨hpos, hsum⟩ := softmax_dist hn z
+  exact Dist.convex_bound (softmax z) v M (fun i => Rat.le_of_lt (hpos i)) hsum hb
+-- ANCHOR_END: softmax_blend
+
 /-- **`log` is monotone** on positive rationals: for `x ≤ y`, the ratio `y / x ≥ 1`, its
 inverse is `≤ 1`, the tangent bounds `log (y/x)⁻¹` below 0, and `log_inv` flips the sign. -/
 theorem log_mono {x y : Rat} (hx : 0 < x) (hy : 0 < y) (h : x ≤ y) :

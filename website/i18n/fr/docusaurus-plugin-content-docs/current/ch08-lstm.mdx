@@ -155,6 +155,15 @@ L'implémentation suit les équations sur des tableaux plats, comme celle du LST
 
 Le biais de la porte de mise à jour démarre à $0.5$ (l'analogue du biais d'oubli $=1$ du LSTM) : le chemin de l'état démarre largement ouvert.
 
+### La porte est un théorème
+
+L'équation de définition du GRU est une **combinaison convexe** : $h_t = z_t\,h_{t-1} + (1-z_t)\,n_t$ avec $z_t \in [0,1]$ — une moyenne pondérée de l'ancien état et du candidat. Ce n'est pas un détail, c'est une garantie, et elle est prouvée sur $\mathbb{Q}$ exact :
+
+```lean file=Ch08/Gru.lean#gru_bound
+```
+
+Si l'ancien état et le candidat vivent dans $[-M, M]$, le nouvel état reste dans $[-M, M]$ — et par récurrence, **chaque état caché de chaque séquence** porte la borne. Les hypothèses sont exactement ce que la cellule calcule : $\tanh$ est bornée par 1, le sigmoid est une probabilité. C'est le certificat de mathématiques exactes derrière l'observation de la démo — les activations cachées n'explosent jamais — et combiné à `drift_bound_seq` (Core), une exécution GRU en `Float`, où chaque mise à jour porte une perturbation d'arrondi, suit la dynamique exacte à $T\varepsilon$ près après $T$ pas.
+
 ### Ce que ça mesure
 
 `lake exe gru` vérifie d'abord toutes les dérivées partielles du BPTT de 329 paramètres contre des différences finies centrales : **erreur maximale $2\cdot 10^{-8}$** (affichée 0.000000) — la passe arrière écrite à la main est juste. Puis, sur les tailles de gradient (30 pas, poids aléatoires), `‖∂L/∂h_t‖` décroît lentement le long du chemin d'état au lieu de s'effondrer comme le RNN simple du chapitre 7 — le carrousel en action.

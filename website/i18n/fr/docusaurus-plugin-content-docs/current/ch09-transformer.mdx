@@ -6,7 +6,7 @@ title: "Chapitre 9 — L'attention et le Transformer"
 # Chapitre 9 — L'attention et le Transformer
 
 :::tip[En bref (TL;DR)]
-**En bref.** L’attention permet à chaque position de regarder directement toutes les autres. Nous prouvons quatre propriétés (poids softmax, insénsibilité à l’ordre, masque causal, invariance de la normalisation de couche par décalage) et entraînons un petit Transformer.
+**En bref.** L’attention permet à chaque position de regarder directement toutes les autres. Nous prouvons cinq propriétés (poids softmax, insénsibilité à l’ordre, masque causal, invariance de la normalisation de couche par décalage, mélanges bornés) et entraînons un petit Transformer.
 
 **Mots nouveaux, en termes simples:**
 
@@ -50,7 +50,7 @@ $$
 
 Un bloc Transformer ajoute ceci à son entrée (une **connexion résiduelle**) puis applique un petit MLP, de nouveau avec une connexion résiduelle. Les vrais modèles empilent de nombreux blocs, utilisent plusieurs « têtes » d'attention en parallèle et normalisent les activations par normalisation de couche.
 
-## Quatre faits, démontrés
+## Cinq faits, démontrés
 
 ### 1. Les poids forment une distribution, et le softmax est invariant par translation
 
@@ -86,6 +86,15 @@ La normalisation de couche centre son entrée, divise par l'écart-type, puis ap
 ```
 
 (L'identité de centrage $\sum_i (x_i - \bar x) = 0$ est le théorème `centered_sum_zero` du chapitre 5.)
+
+### 5. Un mélange de valeurs bornées reste borné
+
+Les poids du softmax du fait 1 sont positifs et somment à 1, donc l'attention est une *moyenne pondérée* des vecteurs de valeurs. Une moyenne pondérée ne peut pas créer d'amplitude : si chaque coordonnée de chaque valeur vit dans $[-M, M]$, chaque coordonnée de la sortie aussi — prouvé sur $\mathbb{Q}$ exact au chapitre 17, là où vit le softmax :
+
+```lean file=Ch17/Contrastive.lean#softmax_blend
+```
+
+Le même lemme est le noyau de l'histoire du GRU au chapitre 8 (la porte de mise à jour est un mélange convexe) et de la moyenne d'ensemble du chapitre 16. C'est aussi une affirmation de stabilité qui a des dents : un réseau dont les vecteurs de valeurs restent bornés ne peut pas voir sa sortie d'attention exploser, quels que soient les scores.
 
 ## Un petit Transformer causal en Lean
 

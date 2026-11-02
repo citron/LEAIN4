@@ -1,4 +1,5 @@
 import LeanDL.Ch07.Rnn
+import LeanDL.Core.Algebra
 
 /-!
 # Chapter 8, part 3 — The GRU: a lighter gated unit
@@ -156,6 +157,60 @@ def lossGrad (nh : Nat) (p : Array Float) (xs : Array Float) (y : Float) :
     dh := dhPrev
   return (loss, g, dhNorms)
 -- ANCHOR_END: bptt
+
+-- ANCHOR: gru_bound
+open Lean.Grind LeanDL
+/-- **GRU states stay bounded, exactly.** The GRU update
+`h' = z·h + (1−z)·n` is a convex mix: with the old state and the
+candidate in `[-M, M]` and the gate a probability `z ∈ [0, 1]` (it is a
+sigmoid), the new state stays in `[-M, M]`. The `tanh` candidate is
+bounded by 1 and the sigmoid gate is a probability, so these hypotheses
+are exactly what the cell computes — this is the exact-mathematics
+certificate behind the observation, in `lake exe gru`, that hidden
+activations never blow up. -/
+theorem gru_mix_bound (z h n M : Rat) (hz0 : 0 ≤ z) (hz1 : z ≤ 1)
+    (hh : Rat.abs h ≤ M) (hn : Rat.abs n ≤ M) :
+    Rat.abs (z * h + (1 - z) * n) ≤ M := by
+  have hsum : Rat.abs (z * h + (1 - z) * n) ≤
+      Rat.abs (z * h) + Rat.abs ((1 - z) * n) := LeanDL.abs_add_le _ _
+  have hzh : Rat.abs (z * h) = z * Rat.abs h := by
+    have := LeanDL.abs_mul z h
+    grind [Rat.abs.eq_1]
+  have hzn : Rat.abs ((1 - z) * n) = (1 - z) * Rat.abs n := by
+    have hnon : 0 ≤ 1 - z := by grind
+    have := LeanDL.abs_mul (1 - z) n
+    grind [Rat.abs.eq_1]
+  rw [hzh, hzn] at hsum
+  have h1 : z * Rat.abs h ≤ z * M := Rat.mul_le_mul_of_nonneg_left hh hz0
+  have h2 : (1 - z) * Rat.abs n ≤ (1 - z) * M :=
+    Rat.mul_le_mul_of_nonneg_left hn (by grind)
+  have hA : z * Rat.abs h + (1 - z) * Rat.abs n ≤
+      z * M + (1 - z) * Rat.abs n :=
+    (Rat.add_le_add_right (c := (1 - z) * Rat.abs n)).mpr h1
+  have hB : z * M + (1 - z) * Rat.abs n ≤ z * M + (1 - z) * M :=
+    (Rat.add_le_add_left (c := z * M)).mpr h2
+  have htotal : z * M + (1 - z) * M = M := by grind
+  rw [← htotal]
+  exact Rat.le_trans (Rat.le_trans hsum hA) hB
+
+/-- By induction, **every hidden state of every sequence** carries the
+bound: the GRU is non-expansive on bounded states. Together with
+`drift_bound_seq` (Core), a `Float` GRU run — where each update carries
+a rounding perturbation — tracks the exact dynamics within `T·ε` after
+`T` steps. -/
+theorem gru_state_bound (M : Rat) (h n : Nat → Rat) (z : Nat → Rat)
+    (hz0 : ∀ t, 0 ≤ z t) (hz1 : ∀ t, z t ≤ 1)
+    (hn : ∀ t, Rat.abs (n t) ≤ M)
+    (hstep : ∀ t, h (t + 1) = z t * h t + (1 - z t) * n t)
+    (h0b : Rat.abs (h 0) ≤ M) :
+    ∀ t, Rat.abs (h t) ≤ M := by
+  intro t
+  induction t with
+  | zero => exact h0b
+  | succ t ih =>
+      rw [hstep]
+      exact gru_mix_bound (z t) (h t) (n t) M (hz0 t) (hz1 t) ih (hn t)
+-- ANCHOR_END: gru_bound
 
 def batchLossGrad (nh : Nat) (p : Array Float) (data : Array (Array Float × Float)) :
     Float × Array Float := Id.run do
