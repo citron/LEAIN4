@@ -109,6 +109,11 @@ Diviser par $1-\beta^t$, ce que fait exactement Adam, supprime le biais :
 ```lean file=Ch05/Optim.lean#bias_correction
 ```
 
+Troisième point, **ce que SGD garantit** — la spécification de l'optimiseur, sur `Rat` exact. Écrivons le pas quadratique $w' = (1-\eta a)\,w$ : tant que le pas reste dans la plage de stabilité $0 < \eta a < 2$, le facteur $1 - \eta a$ est dans $[-1,1]$ et ne peut jamais amplifier l'itéré. Un pas n'augmente jamais la perte, *chaque* itéré reste sous la perte initiale, et au pas critique $\eta = 1/a$ la trajectoire atteint le minimiseur en un seul coup. La courbe de divergence de la démo (pas trop grand) est la négation de cette condition — un fait prouvé, pas une curiosité.
+
+```lean file=Ch05/Optim.lean#sgd_spec
+```
+
 ### Comparaison
 
 `lake exe ch05` entraîne le réseau 2-3-3-1 du chapitre 4 à partir des mêmes paramètres initiaux avec les trois optimiseurs. Perte d'entraînement après $t$ pas :

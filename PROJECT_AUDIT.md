@@ -170,6 +170,7 @@ CI existante (`.github/workflows/ci.yml`) : build Lake + `lake env lean scripts/
 Contraintes d'exécution validées par l'audit : Lean 4.35.0, zéro Mathlib, `grind`/`omega`/`norm_cast`/`decide` (pas de `ring`/`linarith`/`norm_num`/`field_simp`), `native_decide` interdit, ancres `ANCHOR/ANCHOR_END` obligatoires, parité FR/EN à chaque ajout.
 
 - **M4 — RÉSOLU.** La théorie des probabilités finies de Ch16 (`LawfulLog`, `Dist`, lois de `dot`, `expect`/`variance`/`entropy`/`kl`/`crossEntropy`, Gibbs, décomposition CE, décomposition biais-variance d'ensemble) est promue en **`Core/Prob.lean`** (couche 1) ; `Ch16/Tools.lean` devient la page pédagogique qui ré-exporte cette couche, sans aucune modification des preuves. Les ancres du site FR/EN ont suivi (`Core/Prob.lean#…`) ; `check.mjs` est vert.
+- **M2 — RÉSOLU pour SGD.** Nouveau bloc `sgd_spec` dans `Ch05/Optim.lean` (sur `Rat` exact, hypotheses explicites `0 < a`, `0 < η`, `η·a < 2`) : `sgd_step_contract` (un pas n'augmente jamais la perte), `sgd_loss_decreases` (chaque itéré reste sous la perte initiale — stabilité de toute la trajectoire), `sgd_critical_step` (au pas `η = 1/a`, convergence en un coup sur le minimiseur). Momentum/Adam gardent leurs théorèmes existants (`ema_const`, `bias_correction`). Docs FR/EN mises à jour (ancre `sgd_spec`) ; audit axiomes : 1754 déclarations, `using sorry: []`.
 
 ### Avancement (même jour, après audit)
 

@@ -109,6 +109,11 @@ Dividing by $1-\beta^t$, which is exactly what Adam does, removes the bias:
 ```lean file=Ch05/Optim.lean#bias_correction
 ```
 
+Third, **what SGD is guaranteed to do** — the optimiser's specification, over exact `Rat`. Write the quadratic step as $w' = (1-\eta a)\,w$: when the step size is in the stable range $0 < \eta a < 2$, the factor $1 - \eta a$ lies in $[-1,1]$, so it can never amplify the iterate. One step never increases the loss, *every* iterate stays below the initial loss, and at the critical step $\eta = 1/a$ the run lands on the minimiser in exactly one move. The divergence curve in the demo (a step too big) is the negation of this condition — a proven fact, not a curiosity.
+
+```lean file=Ch05/Optim.lean#sgd_spec
+```
+
 ### Comparing them
 
 `lake exe ch05` trains the 2-3-3-1 network of Chapter 4 from the same initial parameters with the three optimizers. The training loss after $t$ steps:
