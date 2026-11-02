@@ -96,7 +96,7 @@ const rootImports = read(path.join(root, 'lean', 'LeanDL.lean'));
 for (const f of leanFiles) {
   if (f.endsWith('Exercises.lean')) continue;
   const mod = 'LeanDL.' + f.replace(/\.lean$/, '').replaceAll('\\', '.').replaceAll('/', '.');
-  if (!rootImports.includes(`import ${mod}\n`)) errors.push(`lean/LeanDL.lean does not import ${mod}`);
+  if (!rootImports.replace(/\r\n/g, '\n').includes(`import ${mod}\n`)) errors.push(`lean/LeanDL.lean does not import ${mod}`);
 }
 
 // 6. SVG well-formedness (balanced tags, one root, no NaN/inf)

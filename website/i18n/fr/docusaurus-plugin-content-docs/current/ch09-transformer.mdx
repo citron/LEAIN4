@@ -113,9 +113,22 @@ La passe arrière est écrite à la main. Ses étapes reflètent la passe avant 
 ```lean file=Ch09/Gpt.lean#backward
 ```
 
+## L'attention multi-têtes
+
+Une carte d'attention produit une moyenne pondérée par position — une décision de routage. Les Transformers réels exécutent $h$ cartes d'attention **en parallèle**, chacune sur son propre sous-espace du modèle, et concatènent les résultats : la tête $k$ voit le $k$-ème bloc de `dh` coordonnées des projections, et la lecture consomme la concaténation. La disposition est toute l'idée, et c'est exactement ce que les types rendent précis :
+
+```lean file=Ch09/Attention.lean#multihead
+```
+
+`headVec` découpe une projection plate de largeur `dh * h` en ses têtes ; `concatVec` recolle les sorties des têtes en un seul vecteur. Les deux théorèmes disent que la colle et la découpe sont inverses : lire l'indice plat `k * dh + j` de la concaténation renvoie la sortie de la tête `k` à la coordonnée `j` (`concat_head`), et découper la concaténation retrouve chaque tête intacte (`head_concat`). Un bug de disposition — un décalage d'un dans l'arithmétique des indices, un pas échangé avec une largeur — est exactement la classe d'erreur numérique silencieuse qu'une preuve élimine : la division et le modulo qui implémentent la disposition sont verrouillés par les lemmes `Nat.add_div`, `Nat.mul_div_left`, `Nat.add_mul_mod_self_right`, pas par un test sur un exemple.
+
+Le code exécutable (`lean/Demos/MHead.lean`, `lake exe mhead`) est un bloc de exactement cette forme : $h = 4$ têtes causales de largeur `dh = 4` (projections Q/K/V, scores normalisés par $1/\sqrt{dh}$, softmax causal, concaténation), une lecture linéaire et un softmax, entraînés sur la tâche de délai avec une passe arrière écrite à la main.
+
 ## Expériences
 
 `lake exe gpt` commence par comparer le gradient des 171 paramètres d'un minuscule modèle à des différences finies centrées (erreur maximale inférieure à $10^{-6}$, affichée 0.000000).
+
+`lake exe mhead` fait de même pour le bloc à quatre têtes : la passe arrière écrite à la main du Transformer multi-têtes (918 paramètres plus 128 entrées d'embedding) coïncide avec les différences finies centrées à 0.000000 sur chaque coordonnée — la découpe et la concaténation des têtes de la section ci-dessus sont implémentées exactement à la disposition que les théorèmes verrouillent.
 
 ### L'attention peut-elle trouver un jeton à une distance donnée ?
 
@@ -127,6 +140,10 @@ La *tâche de délai* : des jetons aléatoires d'un alphabet de 8, et la cible �
 | sans plongements de position | 36,2 % |
 
 Le hasard donne $12{,}5\%$. Avec les positions, l'attention apprend à regarder exactement deux pas en arrière. Sans elles, le modèle n'y arrive pas de façon fiable, ce qui est cohérent avec le théorème 2. Mais il fait *mieux que le hasard*, et la raison est instructive : le théorème 2 porte sur l'attention sur un ensemble, alors qu'un modèle **causal** voit des préfixes différents à des positions différentes ; le *nombre* de jetons visibles laisse donc fuir un peu d'information sur la position (par exemple, les toutes premières positions se distinguent). Les modèles causaux peuvent en partie retrouver la position sans qu'on la leur donne ; la tâche de délai montre que cela ne suffit pas. Une graine, une configuration.
+
+### Le bloc à quatre têtes
+
+`lake exe mhead exp 1500 20` entraîne le bloc multi-têtes de ce chapitre — $h = 4$ têtes causales de largeur 8, séquences de 12 jetons sur un alphabet de 8, cible au décalage 3 — avec la même recette : Adam, lot de 16 séquences fraîches par pas, test sur 200 séquences fraîches. Taux d'apprentissage $0.02$ : précision de test **100 %** dès le premier relevé (pas 300) jusqu'au dernier. Taux $0.05$ : 100 % aussi. Les théorèmes de disposition disent que la concaténation est bien câblée ; la vérification par différences finies dit que la passe arrière l'est aussi ; la campagne d'entraînement dit que le bloc apprend.
 
 ### Un minuscule modèle de langage
 
@@ -141,14 +158,14 @@ Le texte a les bons mots, espaces et ponctuation, et des formes de phrases du co
 ## Ce qui est couvert et ce qui ne l'est pas
 
 - Les quatre théorèmes portent sur les *abstractions* (un softmax sur des scores, l'attention sur un ensemble, un masque, la normalisation de couche) ; le code tableau du modèle est vérifié par différences finies, pas démontré.
-- L'attention multi-têtes (plusieurs cartes d'attention parallèles dont les sorties sont concaténées), les encodages de position sinusoïdaux et l'empilement de blocs sont décrits mais pas implémentés.
+- L'attention multi-têtes est implémentée (disposition formelle dans `Ch09/Attention.lean`, bloc exécutable dans `Demos/MHead.lean`) ; les encodages de position sinusoïdaux et l'empilement de blocs sont décrits mais pas implémentés.
 
 ## Exercices
 
 1. Démontrez que les poids de `weights_sum` sont positifs lorsque `exp` est positif (ajoutez une hypothèse `0 < exp x`).
 2. Montrez que `attendM (causal t)` avec tous les scores égaux est la *moyenne* des valeurs visibles.
 3. Ajoutez la normalisation de couche au code (passes avant et arrière) et comparez la vitesse d'apprentissage sur la tâche de délai.
-4. Implémentez une seconde tête d'attention et concaténez les deux sorties. Cela aide-t-il sur une tâche qui exige deux retards différents ?
+4. Implémentez une seconde tête d'attention et concaténez les deux sorties. Cela aide-t-il sur une tâche qui exige deux retards différents ? (`lean/Demos/MHead.lean` est une version traitée de exactement cet exercice, à $h = 4$.)
 
 **Exercices en Lean.** Le fichier `lean/LeanDL/Ch09/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
 
@@ -156,6 +173,9 @@ Le texte a les bons mots, espaces et ponctuation, et des formes de phrases du co
 ```
 
 ```lean file=Ch09/Exercises.lean#ex2
+```
+
+```lean file=Ch09/Exercises.lean#ex3
 ```
 
 <details>
@@ -184,6 +204,21 @@ Dépliez `causal`. La condition `j.val ≤ t` contredit `t < j.val` ; `omega` le
 <summary>Corrigé 2</summary>
 
 ```lean file=Ch09/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Indice 3</summary>
+
+Les deux côtés sont des fonctions `Fin dh → α` ; démontrez-les point par point avec `funext j`, puis le but est l'identité coordonnée de `concat_head` appliquée en `j`.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch09/Solutions.lean#sol3
 ```
 
 </details>

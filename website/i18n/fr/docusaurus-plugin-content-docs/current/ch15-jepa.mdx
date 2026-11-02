@@ -55,6 +55,10 @@ flowchart LR
 
 ## Le piège : l'effondrement
 
+:::info[Lire le chapitre 17 d'abord]
+L'effondrement a un pendant arithmétique que ce chapitre ne peut pas prouver seul : pour la perte **contrastive** (InfoNCE), un embedding plat ne vaut pas $0$ — il vaut exactement $\log (n + 1)$, le plancher d'effondrement démontré au [chapitre 17](ch17-contrastive). JEPA contourne ce plancher en prédisant des distances plutôt qu'en classant des candidats, et c'est exactement pour cela qu'ici le plancher *est* zéro : une somme de carrés n'a pas de log à payer. Les deux chapitres décrivent le même ennemi de deux côtés — le chapitre 17 prouve ce que l'effondrement coûte, le chapitre 15 prouve pourquoi un prédicteur simple est heureux de le payer.
+:::
+
 Il y a une façon évidente d'annuler cette perte : faire en sorte que les deux encodeurs renvoient **la même constante**. Prédire le plongement cible devient trivial, et la représentation ne porte aucune information.
 
 Les théorèmes le disent précisément. `collapse_zero` : l'effondrement a une perte exactement nulle sur toute paire d'entrées. `collapse_is_minimal` : une somme de carrés étant positive, **l'effondrement est un minimiseur global** (sur les rationnels). La descente de gradient sur cette seule perte a donc de bonnes raisons d'y aboutir, et le reste du chapitre porte sur les moyens de l'éviter.

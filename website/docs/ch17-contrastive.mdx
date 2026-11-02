@@ -1,0 +1,120 @@
+---
+sidebar_position: 18
+title: "Chapter 17 — Contrastive learning: InfoNCE, exactly"
+---
+
+# Chapter 17 — Contrastive learning: the InfoNCE loss, exactly
+
+:::tip[TL;DR]
+**In short.** Contrastive methods learn an embedding by *contrasting* a positive pair against negatives. The standard loss — InfoNCE — is the cross-entropy of the question "which candidate is the positive?", so the whole cross-entropy machinery of Chapter 5 and the probability tools of Chapter 16 apply verbatim. Four theorems explain every contrastive training curve: the softmax is a genuine distribution; the loss is $\ge 0$ and vanishes only at total confidence; a **collapsed** embedding — every candidate scoring the same — loses exactly $\log (n + 1)$, so each extra negative raises the floor; and the gradient is $p - \text{onehot}$.
+
+**New words, in simple terms:**
+
+- **Contrastive learning**: Learn "similar" and "dissimilar" by comparing pairs: pull the positive pair together, push the negatives away.
+- **InfoNCE**: The loss: classify which of the $n+1$ candidates is the positive, and pay the negative log of the probability you assign to the right answer.
+- **Temperature** $\tau$: Dividing the scores by $\tau$ sets how peaked the softmax is: small $\tau$ amplifies small score differences.
+- **Representation collapse**: All embeddings become (nearly) identical; every candidate ties; the loss sits exactly at $\log (n+1)$.
+:::
+
+Chapter 15 penalises collapse in JEPA with a variance term but never proves what the *loss* of a collapsed model must be — because contrastive learning was not in the course. That gap is this chapter: the loss itself, defined over exact `Rat`, with the four facts every practitioner quotes as theorems, not folklore.
+
+## The loss
+
+```lean file=Ch17/Contrastive.lean#infonce
+```
+
+A sample is a query, a positive, and $n$ negatives; the score of candidate $i$ is the product with the query (a cosine in practice — a plain product keeps everything exact). InfoNCE is the negative log of the softmax mass on index 0, the positive. The whole file is `Rat` and the abstract laws of `Ch16` (`LawfulLog`, `LawfulExp`): the statements are theorems, not plots.
+
+Four things the block above proves:
+
+**The softmax is a distribution** (`softmax_dist`): every mass is *strictly* positive, and the masses sum to exactly 1. The proof needs `vsum_pos` — the partition function $Z = \sum_i e^{z_i}$ is strictly positive as soon as there is one score — so the division is legal, no mass is zero, and $\log$ of every mass is defined. The `Dist` record of Chapter 16 accepts the softmax as input: cross-entropy, entropy and KL all apply to it.
+
+**The loss is nonnegative** (`infoNce_ge_zero`): the positive's numerator $e^{z_0}$ is at most the whole $Z$ (the other terms are positive), so the mass is $\le 1$, and the tangent law $\log x \le x - 1$ gives $-\log p \ge 0$.
+
+**Collapse costs exactly $\log (n+1)$** (`infoNce_collapse`): give every candidate the same score $c \ne 0$ and the loss is exactly $\log (n + 1)$ — the uniform mass $1/(n+1)$, no approximation. This is the number to read off any training curve: *chance* gives the same baseline, $\log(n+1)$, because the uniform distribution is the classifier that knows nothing. More negatives raise the floor — exercise 1 computes the marginal cost of the next negative, $\log\frac{n+2}{n+1}$.
+
+**The gradient is $p - \text{onehot}$** (`infonce_grad`): InfoNCE *is* Chapter 5's cross-entropy loss with a one-hot label on index 0, so its gradient is inherited from `ceLoss_grad` in one line: the gradient on the logit of candidate $i$ is its current mass $p_i$, minus $1$ for the positive. Each candidate is pushed with exactly the probability mass it should give up: a negative that grabbed $60\,\%$ of the mass is pushed away the hardest; a negative already at $0.01\,\%$ is barely touched. This one identity explains the whole dynamics of contrastive training — and why hard negatives (mass $=$ big) dominate the signal.
+
+## Experiments
+
+`lake exe ch17` prints the numeric face of the four theorems. On `Float`:
+
+- a softmax of five logits sums to `1.000000` (the theorem says *exactly* 1; `Float` says it to the last bit it can keep);
+- a flat embedding of $n+1$ candidates scores `1.39 / 2.08 / 2.77` for $n = 3, 7, 15$ negatives, against $\log (n+1) = 1.39, 2.08, 2.77$ — gap `0.00` at every size: the floor is not a metaphor, it is arithmetic;
+- a discriminative embedding (score 4 on the positive, 0 on the four negatives) loses `0.07` where the floor is `1.61`: the loss *can* go under the floor — that is what learning is;
+- the gradient `[-0.77, 0.05, 0.01, 0.62, 0.08]` sums to 0, with the positive's entry negative: pushed up, and the massiest negative pushed down the hardest.
+
+Then a real training run: five items on a circle, fixed queries at radius 1.5, embeddings on the unit sphere, cosine scores at temperature $\tau = 0.5$, plain SGD with a projection back to the sphere after every step (an unnormalised embedding runs away — the classic contrastive blow-up, caught in the open). The run *starts at the collapse floor*: every score is 1.5, the loss is $\log 5 = 1.61$ exactly. After 500 epochs the mean loss is **0.24**, and it stays at $0.23$–$0.25$ to epoch 2000; the mean cosine between each learned embedding and its target item is **1.00**. The embedding did not merely beat the floor — it recovered the items.
+
+## Exercises
+
+1. Prove that **adding one more negative raises the collapsed floor by exactly** $\log \frac{n+2}{n+1}$: the collapsed loss is the log of the number of candidates, so the marginal cost of a negative is the log of the ratio.
+2. Prove **zero loss means total confidence on the positive**: if the InfoNCE loss is $0$, the positive's softmax mass is exactly $1$.
+3. State and prove that the softmax of *any* score vector `z : Vec Rat (n + 1)` sums to $1$ — the temperature-free form of `softmax_dist`'s second half.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch17/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch17/Exercises.lean#ex1
+```
+
+```lean file=Ch17/Exercises.lean#ex2
+```
+
+```lean file=Ch17/Exercises.lean#ex3
+```
+
+<details>
+<summary>Hint 1</summary>
+
+Rewrite both losses with `infoNce_collapse`: the goal becomes pure `log` arithmetic, `log (n + 2) = log (n + 1) + log ((n + 2) / (n + 1))`. The division law `log_div` is in Chapter 16, and `(n + 2) = (n + 1) * ((n + 2) / (n + 1))` — read division as multiplication by the inverse.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch17/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+`0 = -log p` means `log p = 0`. The tangent law gives `log p ≤ p - 1`, so `0 ≤ p - 1`, i.e. `1 ≤ p`. And `p ≤ 1` is exactly the inequality `infoNce_ge_zero`'s proof builds (`softmax z 0 ≤ 1`).
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch17/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+`n + 1` is strictly positive for every `n` (`Nat.succ_pos`); feed that to `softmax_dist` and keep the second half of the conjunction.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch17/Solutions.lean#sol3
+```
+
+</details>
+
+## What is and is not covered
+
+- **A sample, not a batch.** The theorems are about one query with $n$ negatives. Real runs pool negatives across a batch (the SupCon / SimCLR layout); the loss is then a sum of $n+1$-candidate losses, and every theorem here applies to each row.
+- **Scores are products, not cosines.** Exact cosines need square roots and the Cauchy–Schwarz inequality — analysis-adjacent. A product keeps the model finite and rational; the demo does the cosine in `Float`.
+- **No Information-Maximising bound.** The name "InfoNCE" comes from a bound on mutual information; proving it needs measure-theoretic entropy. What this chapter proves is the loss's *skeleton*: floor, sign, gradient — the parts every curve shows.
+- **Temperature is a parameter, not a theory.** The theorems hold for every $\tau > 0$; the empirical literature on temperature (it interacts with the number of negatives, the batch, the projection head) is experiment, not theorem.
+
+## Next
+
+Chapter 15 (JEPA) assumed everything this chapter proves. Read it again with the floor $\log (n+1)$ in hand: the "variance term prevents collapse" story now has its arithmetic counterpart — collapse is not a vague degeneration, it is a number you can subtract from a training curve.

@@ -96,4 +96,23 @@ theorem prodF_le_one (f : Nat → Rat) (h0 : ∀ t, 0 ≤ f t) (h1 : ∀ t, f t 
 
 end Bounds
 
+-- ANCHOR: gru
+section Gru
+
+variable {α : Type} [CommRing α] [HasAct α]
+
+/-- **The GRU obeys the same recurrence as the cell state.** Its update
+`h_{t+1} = z_t · h_t + (1 − z_t) · n_t` is the additive path `cE` with forget factor
+`f_t = z_t` (the update gate *keeps* the old state) and update `u_t = (1 − z_t) · n_t`.
+So every theorem above applies verbatim to the hidden state itself: the GRU buys the
+LSTM's constant-error carousel with two gates instead of four. -/
+def gruStep (z n : Nat → α) : Nat → Expr α 1 := cE z (fun t => (1 - z t) * n t)
+
+/-- The gradient of the GRU state path is the product of update gates. -/
+theorem deriv_gru (z n : Nat → α) (x : Vec α 1) :
+    ∀ t, ((gruStep z n t).deriv 0).eval x = prodF z t := deriv_cE z _ x
+
+end Gru
+-- ANCHOR_END: gru
+
 end LeanDL.Ch08

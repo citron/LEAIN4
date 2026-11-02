@@ -188,3 +188,23 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Stop-gradient**: Treat a value as a constant during backpropagation, so no learning flows into it.
 - **Variance regulariser**: A penalty that punishes embeddings for being too similar to each other.
 - **Linear probe**: A simple linear model trained to read a quantity out of an embedding, used to test what the embedding contains.
+
+## Chapter 16 — Mathematical tools
+
+- **Distribution (finite)**: A list of positive weights that add up to 1: the odds of each of finitely many outcomes.
+- **Expectation**: The weighted average of a quantity under a distribution: what you get on average.
+- **Variance**: The average squared distance from the mean: how spread out a quantity is. A constant has variance zero.
+- **Entropy**: The average surprise of a draw from a distribution: zero when one outcome is certain, larger as the mass spreads out.
+- **Cross-entropy**: The average surprise of the true distribution when scored with a model distribution: what training minimises.
+- **KL divergence**: The extra surprise of coding with the model instead of the truth: always non-negative (Gibbs), zero exactly when the two distributions agree.
+- **Gibbs inequality**: KL(p‖q) ≥ 0: no model predicts the data as well as the data predicts itself.
+- **Tangent inequality**: log x ≤ x − 1, equality only at x = 1: the one analytic fact from which Gibbs follows.
+- **Bias–variance decomposition**: risk of a draw = squared bias of the ensemble mean + variance of the family: averaging hypotheses kills variance, never bias.
+
+## Chapter 17 — Contrastive learning
+
+- **Contrastive learning**: Learn similarity by comparing pairs: pull the positive pair together, push the negatives away.
+- **InfoNCE**: The loss that asks "which of these n + 1 candidates is the positive?" and pays the negative log of the probability on the right answer.
+- **Temperature**: The divisor on the scores that sets how peaked the softmax is: small temperature amplifies small differences.
+- **Collapse floor**: The loss of a flat embedding — every candidate tied — is exactly log (n + 1): the number chance also achieves, and the baseline every contrastive curve must cross.
+- **Hard negative**: A negative that grabbed a large share of the softmax mass: the gradient p − onehot pushes it away the hardest.

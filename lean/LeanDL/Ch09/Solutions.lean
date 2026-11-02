@@ -24,4 +24,9 @@ theorem exercise_causal_future_solution {n : Nat} (t : Nat) (j : Fin n) (h : t <
   · rfl
 -- ANCHOR_END: sol2
 
+-- ANCHOR: sol3
+theorem exercise_head_concat_solution (h dh : Nat) (o : Fin h → Vec α dh) (k : Fin h) :
+    headVec h dh (concatVec h dh o) k = o k := head_concat h dh o k
+-- ANCHOR_END: sol3
+
 end LeanDL.Ch09

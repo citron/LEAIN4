@@ -55,6 +55,10 @@ flowchart LR
 
 ## The catch: collapse
 
+:::info[Read Chapter 17 first]
+Collapse has an arithmetic counterpart this chapter cannot prove on its own: for the **contrastive** loss (InfoNCE), a flat embedding does not score $0$ — it scores exactly $\log (n + 1)$, the collapse floor proved in [Chapter 17](ch17-contrastive). JEPA sidesteps that floor by predicting distances instead of classifying candidates, and that is exactly why the floor *is* zero here: the sum of squares has no log to pay. The two chapters describe the same enemy from two sides — Ch17 proves what collapse costs, Ch15 proves why a plain predictor is happy to pay it.
+:::
+
 There is an obvious way to make this loss zero: let both encoders output the **same constant**. Then predicting the target embedding is trivial, and the representation carries no information.
 
 The theorems say it precisely. `collapse_zero`: collapse has loss exactly $0$ on every pair of inputs. `collapse_is_minimal`: since a sum of squares is non-negative, **collapse is a global minimiser** (over the rationals). So gradient descent on this loss alone has a perfectly good reason to end up there, and the rest of the chapter is about the ways to prevent it.

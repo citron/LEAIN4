@@ -188,3 +188,23 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Arrêt du gradient (stop-gradient)**: Traiter une valeur comme une constante pendant la rétropropagation, pour qu’aucun apprentissage n’y entre.
 - **Régularisateur de variance**: Une pénalité qui punit des plongements trop semblables entre eux.
 - **Sonde linéaire**: Un modèle linéaire simple entraîné à lire une quantité dans un plongement, utilisé pour tester ce que le plongement contient.
+
+## Chapitre 16 — Outils mathématiques
+
+- **Distribution (finie)**: Une liste de poids positifs dont la somme vaut 1 : les chances de chacune d'un nombre fini d'issues.
+- **Espérance**: La moyenne pondérée d'une quantité sous une distribution : ce que l'on gagne en moyenne.
+- **Variance**: L'écart quadratique moyen à la moyenne : l'étalement d'une quantité. Une constante a une variance nulle.
+- **Entropie**: La surprise moyenne d'un tirage dans une distribution : nulle quand une issue est certaine, plus grande à mesure que la masse s'étale.
+- **Entropie croisée**: La surprise moyenne de la vraie distribution notée avec une distribution modèle : ce que l'entraînement minimise.
+- **Divergence KL**: La surprise supplémentaire due au code du modèle au lieu du vrai : toujours positive (Gibbs), nulle exactement quand les deux distributions coïncident.
+- **Inégalité de Gibbs**: KL(p‖q) ≥ 0 : aucun modèle ne prédit les données aussi bien que les données se prédisent elles-mêmes.
+- **Inégalité tangente**: log x ≤ x − 1, égalité seulement en x = 1 : le seul fait d'analyse dont découle Gibbs.
+- **Décomposition biais–variance**: risque d'un tirage = biais au carré de la moyenne d'ensemble + variance de la famille : moyenner des hypothèses tue la variance, jamais le biais.
+
+## Chapitre 17 — Apprentissage contrastif
+
+- **Apprentissage contrastif** : apprendre la similarité en comparant des paires : rapprocher la paire positive, éloigner les négatifs.
+- **InfoNCE** : la perte qui demande « lequel de ces n + 1 candidats est le positif ? » et paie le logarithme négatif de la probabilité sur la bonne réponse.
+- **Température** : le diviseur sur les scores qui règle la pointe du softmax : une petite température amplifie les petites différences.
+- **Plancher d'effondrement** : la perte d'un embedding plat — tous les candidats à égalité — vaut exactement log (n + 1) : le nombre que le hasard atteint aussi, et la référence que toute courbe contrastive doit franchir.
+- **Négatif dur** : un négatif qui a capturé une grande part de la masse du softmax : le gradient p − onehot le repousse le plus fort.

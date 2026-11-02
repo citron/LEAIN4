@@ -36,9 +36,14 @@ flowchart LR
   c5 --> c13["13 Reinforcement learning"] --> c14["14 World models"]
   c10 --> c15["15 JEPA"]
   c14 --> c15
+  c5 -.->|losses| c16["16 Tools: entropy, KL"]
+  c16 -->|cross-entropy| c17["17 Contrastive: InfoNCE"]
+  c17 -.->|read before| c15
+  c10 -.-> c16
+  c13 -.-> c16
 ```
 
-*The course at a glance: a common trunk (chapters 0 to 5), then three branches (images and sequences, generative models, decision making) that meet in the last chapters.*
+*The course at a glance: a common trunk (chapters 0 to 5), then three branches (images and sequences, generative models, decision making) that meet in the last chapters. Chapter 16 collects the probability and information tools the losses of chapters 5, 10, 11 and 13 assume, and proves them; Chapter 17 spends them on contrastive learning (InfoNCE), and is the natural companion of Chapter 15 (JEPA).*
 
 ## Syllabus
 
@@ -60,5 +65,7 @@ flowchart LR
 | 13 | Reinforcement learning | recursion, ring identities | Bellman updates, Q-learning, REINFORCE with a baseline |
 | 14 | World models | induction with hypotheses on functions, the triangle inequality | learning dynamics, imagined rollouts, compounding error, training a controller in a dream |
 | 15 | JEPA | `Prop`-level reasoning about minimisers, geometric sequences | predicting in representation space, collapse, EMA targets, variance regularisation |
+| 16 | Mathematical tools: probability, entropy, KL | induction over `Nat` on dot products, abstract type classes (`LawfulLog`), inequalities over `Rat` | expectation, variance, entropy, cross-entropy = entropy + KL, Gibbs inequality KL ≥ 0 |
+| 17 | Contrastive learning: InfoNCE, exactly | reusing Chapter 5's cross-entropy gradient, exact `Rat` softmax | softmax as a distribution, loss ≥ 0, collapse floor `log (n+1)`, gradient `p − onehot`, a trained embedding |
 
 Start with [Chapter 0](ch00-setup).

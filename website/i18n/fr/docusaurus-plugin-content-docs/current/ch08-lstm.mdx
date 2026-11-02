@@ -124,23 +124,66 @@ La même tâche qu'au chapitre 7 : l'étiquette est le premier bit d'une suite a
 
 Que conclure ? Que le meilleur flux de gradient **n'est pas le seul obstacle** dans cette tâche : trouver la règle de zéro dans une longue séquence bruitée est un problème d'optimisation difficile même quand le gradient atteint le premier pas, et un petit curriculum le résout pour les deux architectures. Tout ceci est un jouet : 8 unités, une graine, de petits budgets. L'avantage du LSTM sur de vraies tâches (langage, parole, dépendances longues structurées) est bien documenté dans la littérature, mais l'expérience de ce tutoriel ne le démontre pas, et nous préférons le dire.
 
-## Le GRU, en bref
+## Le GRU, implémenté
 
-L'**unité récurrente à portes** (Cho et al., 2014) fusionne cellule et état caché et utilise une seule porte $z_t$ : $h_t = (1-z_t)\odot h_{t-1} + z_t\odot\tilde h_t$. Le chemin direct de $h_{t-1}$ à $h_t$ a pour facteur $1-z_t$ ; le théorème ci-dessus s'applique donc avec $f_t = 1-z_t$.
+L'**unité récurrente à portes** (Cho et al., 2014) fusionne la cellule et l'état caché : pas de ligne mémoire séparée, l'état lui-même est mis à jour comme un *mélange convexe* de l'ancien état et d'un nouveau candidat, sous le contrôle d'une porte de mise à jour $z_t$ et d'une porte de réinitialisation $r_t$ sur le candidat :
+
+$$
+\begin{aligned}
+r_t &= \sigma(W_r[h_{t-1},x_t]+b_r) & &\text{porte de réinitialisation}\\
+z_t &= \sigma(W_z[h_{t-1},x_t]+b_z) & &\text{porte de mise à jour}
+\end{aligned}
+\qquad
+\begin{aligned}
+n_t &= \tanh(b_n + r_t \odot W_n h_{t-1} + W_x x_t) & &\text{candidat}\\
+h_t &= (1-z_t)\odot n_t + z_t \odot h_{t-1} & &\text{état}
+\end{aligned}
+$$
+
+Deux portes par unité au lieu de quatre, environ un quart de paramètres en moins que le LSTM à largeur égale — et le même truc. Le chemin direct de $h_{t-1}$ à $h_t$ a pour facteur $z_t$ : la mise à jour de l'état est *exactement* la récurrence additive $c_{t+1} = f_t c_t + u_t$ du théorème, avec $f_t := z_t$ et $u_t := (1-z_t)\,n_t$. L'autoroute est un **produit de portes de mise à jour** :
+
+```lean file=Ch08/CellPath.lean#gru
+```
+
+L'implémentation suit les équations sur des tableaux plats, comme celle du LSTM, et la passe arrière est écrite à la main porte par porte ; `lake exe gru` vérifie toutes ses dérivées partielles contre des différences finies centrales (erreur maximale affichée 0.000000 sur `nParams nh` = 329 paramètres avec `nh = 8`) :
+
+```lean file=Ch08/Gru.lean#forward
+```
+
+```lean file=Ch08/Gru.lean#bptt
+```
+
+Le biais de la porte de mise à jour démarre à $0.5$ (l'analogue du biais d'oubli $=1$ du LSTM) : le chemin de l'état démarre largement ouvert.
+
+### Ce que ça mesure
+
+`lake exe gru` vérifie d'abord toutes les dérivées partielles du BPTT de 329 paramètres contre des différences finies centrales : **erreur maximale $2\cdot 10^{-8}$** (affichée 0.000000) — la passe arrière écrite à la main est juste. Puis, sur les tailles de gradient (30 pas, poids aléatoires), `‖∂L/∂h_t‖` décroît lentement le long du chemin d'état au lieu de s'effondrer comme le RNN simple du chapitre 7 — le carrousel en action.
+
+Sur la **tâche mémoire** (l'étiquette est le premier bit d'une séquence aléatoire), le même protocole de curriculum que le LSTM (`lake exe gru exp` : 8 unités, Adam, taux $0.005$, 1500 pas par palier, lots renouvelés de 32, paliers $T = 10, 20, 30, 40$, 300 séquences de test) :
+
+| $T$ | 10 | 20 | 30 | 40 |
+|-----|----|----|----|----|
+| GRU (curriculum) | 100 % | 100 % | 100 % | 100 % |
+| LSTM (curriculum, `lake exe lstm curr`) | 100 % | 100 % | 100 % | 100 % |
+
+**Le GRU résout la tâche à chaque palier avec deux portes de moins** — il égale le LSTM avec environ un quart de paramètres en moins par unité. Sans curriculum (entraînement simple à $T$ fixe) le GRU reste près du hasard à $T \ge 20$, exactement comme le LSTM et le RNN : sur cette tâche, c'est le curriculum, pas le nombre de portes, qui fait la différence. Tout ceci est un jouet : 8 unités, une graine, de petits budgets.
 
 ## Exercices
 
-1. Implémentez le GRU sur des tableaux et vérifiez son gradient par différences finies.
+1. Implémentez le GRU sur des tableaux et vérifiez son gradient par différences finies. (Fait : il est dans `lean/LeanDL/Ch08/Gru.lean`.)
 2. Démontrez `prodF_ge` et `prodF_le_one` pour un corps ordonné quelconque au lieu de `Rat` (indication : la preuve n'utilise que quelques lemmes d'ordre).
 3. Faites de la valeur initiale du biais de la porte d'oubli un paramètre. Pour $T=60$ avec entraînement simple, $b_f = 2$ ou $b_f = 0$ changent-ils le résultat ?
 4. Combinez le théorème du chemin de la cellule avec la dépendance des portes : écrivez le $\partial c_T/\partial c_0$ complet pour un LSTM à 2 pas et identifiez les termes supplémentaires.
 
-**Exercices en Lean.** Le fichier `lean/LeanDL/Ch08/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch08/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d'abord.
 
 ```lean file=Ch08/Exercises.lean#ex1
 ```
 
 ```lean file=Ch08/Exercises.lean#ex2
+```
+
+```lean file=Ch08/Exercises.lean#ex3
 ```
 
 <details>
@@ -169,6 +212,21 @@ Récursion sur `t` : le cas de base est `0 ≤ 1` ; le pas est `Rat.mul_nonneg` 
 <summary>Corrigé 2</summary>
 
 ```lean file=Ch08/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Indice 3</summary>
+
+Récursion sur `t` : en `0` les deux côtés valent `1` ; en `t+1` les deux côtés valent `w * (… t)`, donc on réécrit avec l'hypothèse de récurrence.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch08/Solutions.lean#sol3
 ```
 
 </details>

@@ -36,11 +36,11 @@
 |---|---|
 | Fondements mathématiques (algèbre linéaire, analyse, probabilités, statistiques, information) | absents : seulement des rappels épars ; `Mat.mul` et ses lois ajoutés |
 | Perceptron, MLP, activations, pertes, descente de gradient, rétropropagation, autodiff | couverts (Ch 1-5) |
-| Optimisation stochastique, régularisation | couverts ; **généralisation** limitée à « surapprentissage » (pas de décomposition biais-variance, pas de théorie) |
-| CNN, RNN, LSTM | couverts ; **GRU** seulement esquissé, non implémenté |
-| Attention, Transformers | couverts (une tête, un bloc) ; multi-têtes et empilement décrits, non implémentés |
+| Optimisation stochastique, régularisation | couverts ; **généralisation** : décomposition biais-variance démontrée sur distributions finies (Ch16, `ensemble_risk_decomp`) + démo numérique ; pas de théorie asymptotique (hors périmètre, analyse) |
+| CNN, RNN, LSTM, GRU | couverts ; **GRU** implémenté (Ch08/Gru.lean, gradient vérifié 2·10⁻⁸, curriculum 100 % à T=10..40) |
+| Attention, Transformers | couverts ; **attention multi-têtes implémentée** (layout démontré en `Ch09/Attention.lean` : `concat_head`/`head_concat`, bloc exécutable `Demos/MHead.lean`, gradient vérifié 0.000000) ; empilement de blocs décrit, non implémenté |
 | Autoencodeurs, VAE, GAN, diffusion | couverts |
-| Apprentissage contrastif et auto-supervisé | **absent** (JEPA est traité sans son contexte) |
+| Apprentissage contrastif et auto-supervisé | couverts ; **InfoNCE formalisé** (Ch17) : softmax distribution (`softmax_dist`), perte ≥ 0 (`infoNce_ge_zero`), plancher d'effondrement `log (n+1)` exact (`infoNce_collapse`), gradient `p − onehot` hérité de `ceLoss_grad` (`infonce_grad`) ; démo `lake exe ch17` : effondrement → perte 0.24 < log 5, cosinus 1.00 |
 | Apprentissage par renforcement | couvert (bandit, Q-learning, REINFORCE) ; MDP général non formalisé |
 | World models, JEPA | couverts |
 | Architectures multimodales | **absentes** |
@@ -78,17 +78,17 @@ Progression Lean proposée (chaque notion à son premier besoin) : types et fonc
 | Phase | Contenu | Critère d'acceptation |
 |---|---|---|
 | 0 (fait) | Audit ; corrigés et indices ; Coin Lean manquants ; graphe des prérequis ; ce plan | build, audit des axiomes et `check.mjs` verts |
-| 1 | Chapitre « Outils mathématiques » (Lean + FR/EN) ; recaps de prérequis liés depuis les chapitres 3, 5, 9, 10 | 6 théorèmes dont Gibbs ; exécutable ; exercices avec corrigés |
-| 2 | GRU implémenté ; généralisation (biais-variance démontré sur distributions finies, expérience de surapprentissage) ; multi-têtes d'attention | passes arrière vérifiées par différences finies ; propriétés démontrées |
-| 3 | Apprentissage contrastif (InfoNCE) puis réordonnancement de JEPA | expérience avec sonde linéaire ; théorèmes sur la perte |
+| 1 (fait) | Chapitre 16 « Outils mathématiques » (Lean + FR/EN) : distributions finies sur `Rat`, espérance, variance, entropie, KL, Gibbs, CE = H + KL ; exécutable `lake exe ch16` (écart d'arrondi `Rat`/`Float` imprimé) ; 5 exercices + corrigés prouvés | build complet vert avec `ch16` ; théorèmes dont Gibbs et biais-variance ; exercices avec corrigés compilés |
+| 2 | GRU implémenté (fait) ; généralisation : biais-variance démontré sur distributions finies, `ensemble_risk_decomp`, exercé dans `lake exe ch16` (fait) ; **multi-têtes d'attention implémentées** (layout prouvé `concat_head`/`head_concat`, bloc exécutable `lake exe mhead`, gradient 0.000000) (fait) | passes arrière vérifiées par différences finies ; propriétés démontrées |
+| 3 | Apprentissage contrastif (InfoNCE) formalisé (fait) : Ch17 — softmax distribution, perte ≥ 0, plancher `log (n+1)`, gradient `p − onehot` ; 3 exercices + corrigés prouvés ; démo entraînée `lake exe ch17` (loss 1.61 → 0.24, cosinus 1.00). **Reste : réordonnancement de JEPA** (lire Ch15 après Ch17) et sonde linéaire |
 | 4 | Passage à l'échelle : MoE (routage, équilibrage), quantification (borne d'erreur démontrée), distillation (température), scaling laws (régression en loi de puissance, limites) | chaque propriété exacte séparée des mesures |
 | 5 | Multimodal (deux modalités jouets alignées) ; projets de synthèse | projets exécutables de bout en bout |
 | 6 | Infrastructure : tenseur générique ; passe arrière sur tableaux avec preuve de correction (ou vérification systématique) ; script qui exige les sections du gabarit pédagogique dans chaque chapitre | `check.mjs` étendu |
 
 ## 4. Questions à valider
 
-1. Numérotation : insérer les nouveaux chapitres dans l'ordre pédagogique (renumérotation de tous les fichiers, glossaire et liens) ou les ajouter à la suite (16 et plus) en ajustant seulement le graphe des prérequis ?
-2. Outils mathématiques : se limiter aux distributions **finies** (rigoureux sans Mathlib) acceptable, ou souhaitez-vous aussi l'analyse réelle (hors de portée sans Mathlib) ?
+1. Numérotation : **tranché (phase 1)** — nouveaux chapitres ajoutés à la suite (16 et plus), pas de renumérotation ; le graphe des prérequis renvoie Ch16 depuis les chapitres 3, 5, 9, 10, 11, 13.
+2. Outils mathématiques : **tranché (phase 1)** — distributions finies sur `Rat`, logarithme abstrait à lois nommées ; analyse réelle explicitement hors périmètre, écart `Rat`/`Float` affiché par la démo.
 3. Ordre de priorité des phases 1 à 5.
 4. Phase 6 (correction prouvée des passes arrière sur tableaux) : à lancer, sachant que c'est le chantier le plus lourd et que les tests par différences finies actuels couvrent déjà le besoin pratique ?
 5. Les performances (GPU, gros modèles) restent hors périmètre : confirmé ?

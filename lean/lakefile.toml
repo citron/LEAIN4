@@ -49,10 +49,18 @@ root = "Demos.Rnn"
 name = "lstm"
 root = "Demos.Lstm"
 
+[[lean_exe]]
+name = "gru"
+root = "Demos.Gru"
+
 
 [[lean_exe]]
 name = "gpt"
 root = "Demos.Gpt"
+
+[[lean_exe]]
+name = "mhead"
+root = "Demos.MHead"
 
 
 [[lean_exe]]
@@ -83,6 +91,15 @@ root = "Demos.WorldModel"
 [[lean_exe]]
 name = "jepa"
 root = "Demos.Jepa"
+
+
+[[lean_exe]]
+name = "ch16"
+root = "Demos.Ch16"
+
+[[lean_exe]]
+name = "ch17"
+root = "Demos.Ch17"
 
 
 [[lean_exe]]

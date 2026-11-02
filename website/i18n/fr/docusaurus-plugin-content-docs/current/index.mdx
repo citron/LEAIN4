@@ -36,9 +36,14 @@ flowchart LR
   c5 --> c13["13 Apprentissage par renforcement"] --> c14["14 Modèles du monde"]
   c10 --> c15["15 JEPA"]
   c14 --> c15
+  c5 -.->|pertes| c16["16 Outils : entropie, KL"]
+  c16 -->|entropie croisée| c17["17 Contrastif : InfoNCE"]
+  c17 -.->|à lire avant| c15
+  c10 -.-> c16
+  c13 -.-> c16
 ```
 
-*Le cours en un coup d’œil : un tronc commun (chapitres 0 à 5), puis trois branches (images et séquences, modèles génératifs, prise de décision) qui se rejoignent dans les derniers chapitres.*
+*Le cours en un coup d'œil : un tronc commun (chapitres 0 à 5), puis trois branches (images et séquences, modèles génératifs, prise de décision) qui se rejoignent dans les derniers chapitres. Le chapitre 16 rassemble et démontre les outils de probabilité et d'information que les pertes des chapitres 5, 10, 11 et 13 supposent ; le chapitre 17 les dépense sur l'apprentissage contrastif (InfoNCE) et est le compagnon naturel du chapitre 15 (JEPA).*
 
 ## Programme
 
@@ -60,5 +65,7 @@ flowchart LR
 | 13 | Apprentissage par renforcement | récursion, identités d'anneau | mises à jour de Bellman, Q-learning, REINFORCE avec ligne de base |
 | 14 | Modèles du monde | récurrence avec hypothèses sur des fonctions, inégalité triangulaire | apprendre la dynamique, trajectoires imaginées, accumulation d'erreur, entraîner un contrôleur dans un rêve |
 | 15 | JEPA | raisonnement sur les minimiseurs, suites géométriques | prédire dans l'espace des représentations, effondrement, cibles EMA, régularisation de variance |
+| 16 | Outils mathématiques : probabilité, entropie, KL | récursion sur `Nat` pour les produits scalaires, classes de types abstraites (`LawfulLog`), inégalités sur `Rat` | espérance, variance, entropie, entropie croisée = entropie + KL, inégalité de Gibbs KL ≥ 0 |
+| 17 | Apprentissage contrastif : InfoNCE, exactement | réutilisation du gradient cross-entropy du chapitre 5, `Rat` exact | softmax distribution, perte ≥ 0, plancher d'effondrement `log (n+1)`, gradient `p − onehot`, un embedding entraîné |
 
 Commencez par le [chapitre 0](ch00-setup).

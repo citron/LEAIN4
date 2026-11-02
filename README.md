@@ -13,7 +13,7 @@ Un cours bilingue qui enseigne Lean 4 et le deep learning ensemble. Tous les mod
 ## Build
 
 ```bash
-cd lean && lake build LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gpt vae gan diffusion rl worldmodel jepa figures && lake exe ch05
+cd lean && lake build LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 figures && lake exe ch05
 cd ../website && npm install && npm start          # English
 npm run start:fr                                    # Français
 node ../scripts/check.mjs
@@ -31,7 +31,7 @@ node ../scripts/check.mjs
 | 5 Losses, optimizers, regularisation, MNIST | done | done | done |
 | 6 CNN | done | done | done |
 | 7 RNN | done | done | done |
-| 8 LSTM | done | done | done |
+| 8 LSTM + GRU | done | done | done |
 | 9 Transformer | done | done | done |
 | 10 VAE | done | done | done |
 | 11 GAN | done | done | done |
@@ -39,3 +39,5 @@ node ../scripts/check.mjs
 | 13 Reinforcement learning | done | done | done |
 | 14 World models | done | done | done |
 | 15 JEPA | done | done | done |
+| 16 Mathematical tools: entropy, KL, Gibbs | done | done | done |
+| 17 Contrastive learning: InfoNCE, exactly | done | done | done |

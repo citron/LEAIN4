@@ -113,9 +113,22 @@ The backward pass is written by hand. Its stages mirror the forward pass in reve
 ```lean file=Ch09/Gpt.lean#backward
 ```
 
+## Multi-head attention
+
+One attention map produces one weighted average per position — one routing decision. Real Transformers run $h$ attention maps **in parallel**, each on its own subspace of the model, and concatenate the results: head $k$ sees the $k$-th block of `dh` coordinates of the projections, and the read-out consumes the concatenation. The layout is the whole idea, and it is exactly what the types make precise:
+
+```lean file=Ch09/Attention.lean#multihead
+```
+
+`headVec` slices a flat projection of width `dh * h` into its heads; `concatVec` glues the head outputs back into one vector. The two theorems say the glue and the slicing are inverse: reading the flat index `k * dh + j` of the concatenation returns the output of head `k` at coordinate `j` (`concat_head`), and slicing the concatenation recovers every head intact (`head_concat`). A layout bug — an off-by-one in the index arithmetic, a stride swapped for a width — is exactly the class of silent numerical error a proof removes: the division and modulo that implement the layout are pinned down by the lemmas `Nat.add_div`, `Nat.mul_div_left`, `Nat.add_mul_mod_self_right`, not by a test on one example.
+
+The running code (`lean/Demos/MHead.lean`, `lake exe mhead`) is one block of exactly this shape: $h = 4$ causal heads of width `dh = 4` (Q/K/V projections, scores scaled by $1/\sqrt{dh}$, causal softmax, concatenation), a linear read-out and a softmax, trained on the delay task with hand-written backward.
+
 ## Experiments
 
 `lake exe gpt` first checks the gradient of all 171 parameters of a tiny model against central finite differences (maximum error below $10^{-6}$, printed as 0.000000).
+
+`lake exe mhead` does the same for the four-head block: the hand-written backward of the multi-head Transformer (918 parameters plus 128 embedding entries) matches central finite differences to 0.000000 on every coordinate — the head slicing and concatenation of the section above are implemented at exactly the layout the theorems pin down.
 
 ### Can attention find a token at a given distance?
 
@@ -127,6 +140,10 @@ The *delay task*: random tokens from an alphabet of 8, and the target at positio
 | without position embeddings | 36.2 % |
 
 Chance is $12.5\%$. With positions the attention learns to look exactly two steps back. Without them the model cannot do it reliably, which agrees with theorem 2. But it is *better than chance*, and the reason is instructive: theorem 2 is about attention over a set, whereas a **causal** model sees different prefixes at different positions, so the *number* of visible tokens leaks some information about position (for instance, the very first positions can be told apart). Causal models can partly recover position without being told; the delay task shows it is not enough. One seed, one configuration.
+
+### The four-head block
+
+`lake exe mhead exp 1500 20` trains the multi-head block of this chapter — $h = 4$ causal heads of width 8, 12-token sequences from an alphabet of 8, target at lag 3 — on the same recipe: Adam, batch of 16 fresh sequences per step, test on 200 fresh sequences. Learning rate $0.02$: test accuracy **100 %** from the first report (step 300) to the last. Learning rate $0.05$: 100 % as well. The layout theorems say the concatenation is wired correctly; the finite-difference check says the backward is; the training run says the block learns.
 
 ### A tiny language model
 
@@ -141,14 +158,14 @@ The text has the right words, spaces and punctuation, and sentence shapes from t
 ## What is and is not covered
 
 - The four theorems are about the *abstractions* (a softmax over scores, attention over a set, a mask, layer norm); the array code of the model is checked by finite differences, not proved.
-- Multi-head attention (several parallel attention maps whose outputs are concatenated), sinusoidal position encodings and stacked blocks are described but not implemented.
+- Multi-head attention is implemented (formal layout in `Ch09/Attention.lean`, running block in `Demos/MHead.lean`); sinusoidal position encodings and stacked blocks are described but not implemented.
 
 ## Exercises
 
 1. Prove that the weights of `weights_sum` are non-negative when the `exp` is positive (add a hypothesis `0 < exp x`).
 2. Show that `attendM (causal t)` with all scores equal is the *average* of the visible values.
 3. Add layer norm to the code (forward and backward) and compare training speed on the delay task.
-4. Implement a second attention head and concatenate the two outputs. Does it help on a task that needs two different lags?
+4. Implement a second attention head and concatenate the two outputs. Does it help on a task that needs two different lags? (`lean/Demos/MHead.lean` is a worked version of exactly this exercise, at $h = 4$.)
 
 **Exercises in Lean.** The file `lean/LeanDL/Ch09/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
 
@@ -156,6 +173,9 @@ The text has the right words, spaces and punctuation, and sentence shapes from t
 ```
 
 ```lean file=Ch09/Exercises.lean#ex2
+```
+
+```lean file=Ch09/Exercises.lean#ex3
 ```
 
 <details>
@@ -184,6 +204,21 @@ Unfold `causal`. The condition `j.val ≤ t` contradicts `t < j.val`; `omega` pr
 <summary>Solution 2</summary>
 
 ```lean file=Ch09/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Both sides are functions `Fin dh → α`; prove them pointwise with `funext j`, then the goal is the coordinate identity of `concat_head` applied at `j`.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch09/Solutions.lean#sol3
 ```
 
 </details>

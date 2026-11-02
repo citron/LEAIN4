@@ -25,6 +25,7 @@ import LeanDL.Ch07.Gradient
 import LeanDL.Ch07.Rnn
 import LeanDL.Ch07.Solutions
 import LeanDL.Ch08.CellPath
+import LeanDL.Ch08.Gru
 import LeanDL.Ch08.Lstm
 import LeanDL.Ch08.Solutions
 import LeanDL.Ch09.Attention
@@ -48,6 +49,10 @@ import LeanDL.Ch14.WorldModel
 import LeanDL.Ch15.Jepa
 import LeanDL.Ch15.Model
 import LeanDL.Ch15.Solutions
+import LeanDL.Ch16.Solutions
+import LeanDL.Ch17.Contrastive
+import LeanDL.Ch17.Solutions
+import LeanDL.Ch16.Tools
 import LeanDL.Core.Algebra
 import LeanDL.Core.Mat
 import LeanDL.Core.Plot

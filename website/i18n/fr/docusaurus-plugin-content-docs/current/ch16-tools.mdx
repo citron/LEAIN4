@@ -1,0 +1,243 @@
+---
+sidebar_position: 17
+title: "Chapitre 16 — Outils mathématiques : probabilité, entropie, KL"
+---
+
+# Chapitre 16 — Outils mathématiques : probabilité finie, entropie, KL
+
+:::tip[En bref (TL;DR)]
+**En bref.** Les pertes de ce cours se construisent à partir de trois quantités : espérance, entropie, divergence KL. Nous les définissons exactement (sur les rationnels), prouvons les faits que tout le monde cite — l'entropie d'un événement certain est $0$, entropie croisée $=$ entropie $+$ KL, et l'**inégalité de Gibbs** $\mathrm{KL}(p\|q)\ge 0$ — et exécutons les mêmes formules en `Float` pour voir où s'arrête l'exactitude.
+
+**Mots nouveaux, en termes simples:**
+
+- **Distribution**: Une liste de poids positifs dont la somme vaut 1 — les chances de chaque issue.
+- **Espérance**: La moyenne pondérée d'une quantité sous une distribution : « en moyenne, qu'est-ce que je gagne ? »
+- **Variance**: La distance quadratique moyenne à la moyenne : l'étalement d'une quantité.
+- **Entropie**: La surprise moyenne d'un tirage dans une distribution. Un événement certain ne surprend personne : entropie 0.
+- **Entropie croisée**: La surprise moyenne de la *vraie* distribution notée avec une distribution *modèle*. L'entraînement la minimise.
+- **Divergence KL**: La surprise *supplémentaire* due au code du modèle au lieu du vrai. Toujours $\ge 0$ ; égale à $0$ exactement quand les deux coïncident.
+- **Inégalité de Gibbs**: $\mathrm{KL}(p\|q) \ge 0$ : aucun modèle ne prédit jamais les données aussi bien que les données se prédisent elles-mêmes.
+:::
+
+
+Les chapitres 3, 6, 9 et suivants minimisent tous une perte en **entropie croisée**, les chapitres 11 et 13 mesurent des distances entre distributions avec la **KL**, le chapitre 15 punit les plongements effondrés avec une **variance**. À chaque fois nous avons cité une propriété — « l'entropie croisée vaut au moins l'entropie », « la KL est positive » — sans la prouver. Ce chapitre paie ces dettes : il est la boîte à outils que le reste du cours suppose en silence.
+
+Le chapitre est aussi un tournant méthodologique. Dès ici, tout scalaire d'un *théorème* est un **`Rat`** — un rationnel exact, le modèle dans lequel ce cours prouve (comme l'algèbre du perceptron du chapitre 2 le fait déjà). Les distributions sont finies, sur `n` points : assez pour toutes les pertes du cours, et assez petit pour qu'une « somme » n'exige aucune analyse — pas de limites, pas d'intégrales, pas d'epsilon-delta. Ce que les théorèmes disent est exactement vrai *dans ce modèle* ; les expériences en `Float` ne le satisfont qu'à l'arrondi près, et la démo imprime l'écart.
+
+## Les distributions, exactement
+
+```lean file=Ch16/Tools.lean#dist
+```
+
+Une `Dist n` est un vecteur de poids `w : Vec Rat n` avec deux champs : chaque poids est positif (`pos`), et les poids somment à 1 (`sum1`, écrit comme produit scalaire avec le vecteur de tous les 1). Le champ `n` est un nombre au niveau des *types* : une distribution sur 4 issues est un type différent d'une distribution sur 5 — une incompatibilité de taille est une erreur de type, pas un plantage à l'exécution.
+
+Le logarithme est la seule pièce d'analyse du chapitre, et nous ne faisons pas semblant de le construire : `LawfulLog` est une **opération abstraite à lois nommées** (le même style que `LawfulExp` dans le noyau d'algèbre) :
+
+```lean file=Ch16/Tools.lean#haslog
+```
+
+Quatre lois : la multiplication devient addition, les inverses deviennent négation, et l'inégalité tangente $\log x \le x - 1$, égalité seulement en $1$. Tout théorème du chapitre vaut pour *toute* structure obéissant à ces lois. Le logarithme réel les obéit — c'est un théorème d'analyse, hors de ce cours — et `Float` ne les obéit qu'à l'arrondi près, ce qui est exactement pourquoi les énoncés portent sur `Rat`.
+
+## Espérance et variance
+
+```lean file=Ch16/Tools.lean#expect
+```
+
+L'espérance est un produit scalaire avec les poids ; la variance est $E[f^2] - (Ef)^2$. Quatre lois viennent gratuitement du produit scalaire — constante, additive, monotone, et $E[1] = 1$ (la probabilité totale se conserve) :
+
+```lean file=Ch16/Tools.lean#expect_laws
+```
+
+et le nom « variance » est justifié par la forme centrée :
+
+```lean file=Ch16/Tools.lean#variance
+```
+
+`variance_eq_centered` prouve que la définition de calcul égale le sens : l'écart quadratique moyen à la moyenne. Une constante a une variance $0$ (exercice 3) : une quantité non aléatoire ne s'étale pas.
+
+## Entropie, entropie croisée, KL
+
+Trois quantités d'un seul motif (somme pondérée de logarithmes) :
+
+- $H(p) = \sum_i -p_i \log p_i$ — entropie : surprise moyenne de `p`.
+- $\mathrm{CE}(p, q) = \sum_i -p_i \log q_i$ — entropie croisée : surprise des données `p` notées avec le modèle `q`. **C'est ce que l'entraînement minimise.**
+- $\mathrm{KL}(p \| q) = \sum_i p_i \log (p_i / q_i)$ — la surprise *supplémentaire* du code du modèle.
+
+La première identité les relie :
+
+```lean file=Ch16/Tools.lean#ce_decomp
+```
+
+**Entropie croisée = entropie + KL.** L'entropie des données ne dépend pas du modèle, donc minimiser l'entropie croisée revient *exactement* à minimiser la KL : ajuster le modèle, pas les données. Voilà pourquoi l'entropie croisée est la perte de classification, et non un choix décoratif.
+
+## Inégalité de Gibbs : KL ≥ 0
+
+Le théorème qui donne un sens à l'entraînement :
+
+```lean file=Ch16/Tools.lean#gibbs
+```
+
+La preuve est celle du manuel, entièrement vérifiée. La borne ponctuelle $\log q - \log p \le (q-p)/p$ est l'inégalité tangente $\log x \le x-1$ appliquée à $x = q/p$ et réécrite avec `log_div` ; sommer contre des poids $p_i \ge 0$ préserve l'inégalité (`dot_mono`) ; le côté droit **télescope** — $\sum_i p_i (q_i - p_i)/p_i = \sum_i q_i - \sum_i p_i = 1 - 1 = 0$ — via l'annulation exacte $p \cdot p^{-1} = 1$ qui vaut sur `Rat` et *échoue* sur `Float` ; nier retourne le signe. Quatre étapes, chacune une ligne de Lean.
+
+**Conséquences :** la KL vaut $0$ exactement quand $p = q$ (l'inégalité tangente est stricte ailleurs qu'en $1$) ; l'entropie croisée est bornée en dessous par $H(p)$, il y a un plancher qu'aucun modèle ne bat ; et un modèle qui donne une probabilité quasi nulle à un événement qui *se produit* paie une perte quasi infinie — la ligne « sûre et fausse » de la démo.
+
+## Généralisation : biais, variance, et pourquoi les ensembles marchent
+
+Pourquoi un modèle qui colle parfaitement aux données d'entraînement échoue-t-il parfois sur des données nouvelles ? La réponse a une forme exacte — et ici c'est un théorème, pas un graphique. Tire une hypothèse d'une famille (le hasard de l'entraînement : ordre des données, graines, minibatchs), note chaque hypothèse sur chaque entrée contre la cible, fais la moyenne. L'identité :
+
+$$\mathbb{E}_{k}\[(f_{k}(x)-t(x))^{2}\] = (\bar f(x)-t(x))^{2} + \mathbb{E}_{k}\[(f_{k}(x)-\bar f(x))^{2}\], \qquad \bar f(x) = \mathbb{E}_{k}\[f_{k}(x)\]$$
+
+**risque = biais au carré de la moyenne + variance de la famille.** Aucune théorie des probabilités au-delà de deux sommes pondérées, pas de limites, pas d'asymptotique — c'est l'algèbre des moyennes, valable entrée par entrée :
+
+```lean file=Ch16/Tools.lean#generalization
+```
+
+Le moteur tient en un raisonnement : développe $(f_k - t)^2 = (f_k - \bar f + \bar f - t)^2$, et le terme croisé $2(\bar f - t)\,\mathbb{E}[f_k - \bar f]$ meurt car **l'écart moyen à la moyenne est nul** (`wavg_dev_zero`). Sommer l'identité ponctuelle contre la distribution des entrées donne `ensemble_risk_decomp`.
+
+Ce que ça achète, exactement :
+
+- **Moyenner des hypothèses combat la variance.** Le risque d'un tirage est le risque de la moyenne *plus* la variance — la moyenne n'est jamais pire. Dropout, bagging, model soups et moyennes de checkpoints encaissent ce chèque ; le théorème explique pourquoi ils marchent.
+- **Seule la moyenne combat le biais.** Moyenner trois modèles sous-ajustés donne une moyenne sous-ajustée : le biais est l'écart $\bar f - t$, et aucun moyennage de bruit ne le referme. Le sous-ajustement est un problème de capacité, pas de chance.
+- **La variance est une propriété de la famille, le biais de la moyenne.** Un entraînement à forte variance (peu de données, réseaux surparamétrés, taux d'apprentissage agressifs) gonfle le second terme ; les régularisateurs échangent surtout de la variance contre du biais — la décomposition est le livre de comptes.
+
+Le dernier bloc de la démo calcule l'identité numériquement : trois modèles bruités autour d'une droite, et `risque − (biais² + variance)` affiche `0.000000` — l'identité exacte survit à l'arrondi.
+
+## Expérience
+
+`lake exe ch16` évalue les mêmes formules en `Float` pour quatre distributions — les données $p$ et trois modèles — et imprime l'identité $\mathrm{CE} = H + \mathrm{KL}$ en chiffres :
+
+```
+p  (data)   : [0.700000, 0.200000, 0.080000, 0.020000]
+q1 (good)   : [0.600000, 0.250000, 0.100000, 0.050000]
+q2 (uniform): [0.250000, 0.250000, 0.250000, 0.250000]
+q3 (wrong)  : [0.050000, 0.100000, 0.250000, 0.600000]
+
+H(p)          = 0.851859
+CE(p,q1)   = 0.878958   KL = 0.027099   H+KL = 0.878958   gap = 0.000000
+CE(p,q2)   = 1.386294   KL = 0.534436   H+KL = 1.386294   gap = 0.000000
+CE(p,q3)   = 2.678650   KL = 1.826791   H+KL = 2.678650   gap = -0.000000
+
+E[p ]·r = 0.740000   Var[p ]·r = 0.242400
+E[q1]·r = 0.625000   Var[q1]·r = 0.346875
+E[q2]·r = 0.000000   Var[q2]·r = 0.625000
+E[q3]·r = -0.625000   Var[q3]·r = 0.346875
+
+Ensemble de 3 modèles, poids uniformes sur les hypothèses :
+  risque total      = 0.017500
+  biais² (moyenne)  = 0.000278
+  variance          = 0.017222
+  biais² + variance = 0.017500   écart = -0.000000
+```
+
+À lire : le bon modèle `q1` coûte $0.027$ nat de KL — peu de surprise supplémentaire. Le modèle uniforme paie $\log 4 - H(p)$ : ne rien savoir coûte exactement l'entropie manquante. Le `q3` sûr et faux paie $1.83$ : quasi infini quand l'événement vrai reçoit un poids quasi nul. La colonne `gap` est la partie honnête : l'identité $\mathrm{CE} = H + \mathrm{KL}$ est un **théorème sur `Rat`** ; sur `Float` elle vaut à l'arrondi près, et l'écart imprimé (ici $\sim 10^{-7}$) est la taille de cet arrondi. Les espérances et variances d'un vecteur de récompense montrent les mêmes formules faisant le travail du RL (chapitre 13) : le modèle sur lequel on moyenne change la variance de nos estimations.
+
+:::warning Ce qui est prouvé, et ce qui ne l'est pas
+Prouvé, sur `Rat` avec un logarithme abstrait : $E$, la variance, $H$, CE et KL satisfont les quatre lois de l'espérance, l'identité de variance centrée, $\mathrm{CE} = H + \mathrm{KL}$, Gibbs $\mathrm{KL} \ge 0$, $H = 0$ sur une masse ponctuelle, variance nulle des constantes, et la décomposition biais–variance du risque d'ensemble (ponctuelle et sommée sur les entrées). **Non prouvé :** que le logarithme réel satisfait `LawfulLog` (analyse, hors du cours), que les programmes `Float` satisfont quoi que ce soit (ils arrondissent), et que les chiffres imprimés se reproduisent sur d'autres distributions au-delà de l'arrondi. Entre le théorème et l'expérience se tient un écart explicite et non refermé — cet écart est le sujet de l'analyse numérique, pas de ce cours.
+:::
+
+## Exercices
+
+1. Prouvez que l'espérance se distribue sur la soustraction : $\mathbb{E}[f-g] = \mathbb{E}f - \mathbb{E}g$.
+2. Prouvez que deux distributions sur **un point** ont $\mathrm{KL} = 0$.
+3. Prouvez qu'une constante a une variance $0$.
+4. Prouvez $H = 0$ sur une distribution à un point.
+5. Prouvez qu'un **ensemble d'un seul** a un terme de variance nul : avec une unique hypothèse de poids $1$, $\sum_k p_k (f_k(x) - \bar f(x))^2 = 0$.
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch16/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d'abord.
+
+```lean file=Ch16/Exercises.lean#ex1
+```
+
+```lean file=Ch16/Exercises.lean#ex2
+```
+
+```lean file=Ch16/Exercises.lean#ex3
+```
+
+```lean file=Ch16/Exercises.lean#ex4
+```
+
+```lean file=Ch16/Exercises.lean#ex5
+```
+
+<details>
+<summary>Indice 1</summary>
+
+Dépliez `expect` en produit scalaire : le produit scalaire se distribue sur une différence (`dot_sub` est dans le fichier).
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch16/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Dépliez `Vec.dot` en `n = 1` : `sum1` devient `w 0 * 1 = 1`, donc les deux poids valent `1` et les deux logarithmes valent `log 1 = 0`.
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch16/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Indice 3</summary>
+
+Utilisez `expect_const` deux fois, une fois en `c` et une fois en `c * c`.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch16/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Indice 4</summary>
+
+Comme l'exercice 2 : le seul poids vaut $1$, et $\log 1 = 0$.
+
+</details>
+
+<details>
+<summary>Corrigé 4</summary>
+
+```lean file=Ch16/Solutions.lean#sol4
+```
+
+</details>
+
+<details>
+<summary>Indice 5</summary>
+
+Sur `Fin 1`, `Vec.dot` est une seule multiplication : `p.w 0 * (·)`. `p.sum1` force `p.w 0 = 1`, donc la moyenne `p.wavg f i` n'est autre que `f 0 i` — l'écart vaut `f 0 i - f 0 i = 0`.
+
+</details>
+
+<details>
+<summary>Corrigé 5</summary>
+
+```lean file=Ch16/Solutions.lean#sol5
+```
+
+</details>
+
+## Limites et variantes
+
+- **Finie est une vraie restriction.** Les densités continues (la KL gaussienne du VAE, chapitre 11 ; l'entropie de politiques continues) exigent des intégrales ; rien ici ne s'y étend sans analyse. Les formules se transposent en remplaçant les sommes par des intégrales — pas les preuves.
+- **Le logarithme est supposé, pas construit.** `LawfulLog` isole exactement quelles propriétés de $\log$ le chapitre utilise ; construire $\log$ (séries, intégrales) et prouver les quatre lois est de l'analyse.
+- **Changement de base exclu.** Tout est en « unités naturelles » (nats) : $\log$ base $e$. Les bits (base 2) reformatent $H$ et KL d'une constante ; les preuves sont sans base.
+- **`Float` est le far west.** Chaque loi utilisée ici tombe pour `Float` au dernier bit : $(p \cdot q)/p \ne q$ en général. C'est pourquoi les théorèmes portent sur `Rat` et la démo imprime l'écart au lieu de le cacher.
