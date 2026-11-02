@@ -9,6 +9,14 @@ Code in this course is written once, generically over a scalar type `α`.
 
 namespace LeanDL
 
+/-- `0 ≤ x * x` for rationals: the base inequality every variance argument uses.
+Lives in Core so later chapters (Ch02, Ch16) import it, not the reverse. -/
+theorem sq_nonneg (x : Rat) : 0 ≤ x * x := by
+  rcases Rat.le_total (a := 0) (b := x) with h | h
+  · exact Rat.mul_nonneg h h
+  · have := Rat.mul_nonneg (a := -x) (b := -x) (by grind) (by grind)
+    grind
+
 -- ANCHOR: hasexp
 /-- Types with an exponential function. -/
 class HasExp (α : Type) where

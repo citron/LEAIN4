@@ -1,5 +1,6 @@
-import LeanDL.Ch06.Conv
 import LeanDL.Ch05.Loss
+import LeanDL.Ch05.Norm
+import LeanDL.Core.Sum
 import LeanDL.Ch04.Autodiff
 
 /-!
@@ -15,7 +16,7 @@ Four facts about the building blocks of a Transformer:
 
 namespace LeanDL.Ch09
 
-open Lean.Grind LeanDL.Ch05 LeanDL.Ch04 LeanDL.Ch06
+open Lean.Grind LeanDL.Ch05 LeanDL.Ch04
 
 variable {α : Type} {n : Nat}
 

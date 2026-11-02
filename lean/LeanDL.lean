@@ -57,4 +57,5 @@ import LeanDL.Core.Algebra
 import LeanDL.Core.Mat
 import LeanDL.Core.Plot
 import LeanDL.Core.Rng
+import LeanDL.Core.Sum
 import LeanDL.Core.Vec

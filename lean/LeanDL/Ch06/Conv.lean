@@ -1,4 +1,5 @@
 import LeanDL.Ch05.Norm
+import LeanDL.Core.Sum
 
 /-!
 # Chapter 6 — Convolution
@@ -27,46 +28,6 @@ def conv1d [Add α] [Mul α] [OfNat α 0] {m k : Nat} (ker : Vec α (k + 1)) (x 
 section Laws
 
 variable [CommRing α]
-
-theorem vsum_add : ∀ {n : Nat} (f g : Fin n → α),
-    vsum (fun i => f i + g i) = vsum f + vsum g
-  | 0, f, g => by simp only [vsum]; grind
-  | n + 1, f, g => by
-    have ih := vsum_add (fun i : Fin n => f i.succ) (fun i => g i.succ)
-    simp only [vsum]
-    rw [ih]
-    grind
-
-theorem vsum_smul : ∀ {n : Nat} (c : α) (f : Fin n → α),
-    vsum (fun i => c * f i) = c * vsum f
-  | 0, c, f => by simp only [vsum]; grind
-  | n + 1, c, f => by
-    have ih := vsum_smul c (fun i : Fin n => f i.succ)
-    simp only [vsum]
-    rw [ih]
-    grind
-
-/-- Exchanging the order of a double sum. -/
-theorem vsum_zero : ∀ {n : Nat}, vsum (fun _ : Fin n => (0 : α)) = 0
-  | 0 => rfl
-  | n + 1 => by
-    have ih := vsum_zero (n := n)
-    simp only [vsum]
-    rw [ih]
-    grind
-
-theorem vsum_comm : ∀ {m n : Nat} (f : Fin m → Fin n → α),
-    vsum (fun i => vsum (f i)) = vsum (fun j => vsum (fun i => f i j))
-  | 0, n, f => by
-    simp only [vsum]
-    exact vsum_zero.symm
-  | m + 1, n, f => by
-    have ih := vsum_comm (fun (i : Fin m) => f i.succ)
-    have h : (fun j : Fin n => vsum (fun i : Fin (m + 1) => f i j)) =
-        fun j => f 0 j + vsum (fun i : Fin m => f i.succ j) := rfl
-    rw [h, vsum_add]
-    simp only [vsum]
-    rw [ih]
 
 -- ANCHOR: conv_linear
 /-- Convolution is linear in the input… -/

@@ -1,5 +1,5 @@
 import LeanDL.Core.Vec
-import LeanDL.Ch02.Perceptron
+import LeanDL.Core.Algebra
 
 /-!
 # Chapter 16 — Mathematical tools: finite probability, entropy, KL
@@ -134,7 +134,7 @@ theorem weighted_sq_nonneg : ∀ {n : Nat} (w f : Vec Rat n), (∀ i, 0 < w i) �
       intro w f hw
       have ih' := ih (fun i => w i.succ) (fun i => f i.succ) (fun i => hw i.succ)
       have h0 : 0 ≤ w 0 * (f 0 * f 0) :=
-        Rat.mul_nonneg (Rat.le_of_lt (hw 0)) (Ch02.sq_nonneg (f 0))
+        Rat.mul_nonneg (Rat.le_of_lt (hw 0)) (LeanDL.sq_nonneg (f 0))
       simp only [Vec.dot]
       grind
 
