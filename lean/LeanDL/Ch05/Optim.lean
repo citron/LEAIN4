@@ -155,6 +155,47 @@ theorem sgd_critical_step (a w : Rat) (ha : a ≠ 0) :
   show w - a⁻¹ * (a * w) = 0
   have h : a⁻¹ * a = 1 := Rat.inv_mul_cancel a ha
   grind
+
+/-- **Rounding drift of SGD — the bridge to the `Float` demos.** Run the
+quadratic SGD iteration in any *perturbed* arithmetic: each step deviates
+from the exact update `w − η·(a·w)` by an error of size at most `ε`
+(what `Float` rounding does, among other perturbations). If the step
+size is in the stable range `0 < ηa < 2`, the perturbed run never drifts
+more than `t·ε` from the exact run after `t` steps. Exact maths bounds
+the floating-point run — linearly, never exponentially, while the exact
+dynamics are stable. -/
+theorem sgd_rounding_drift (η a w₀ ε : Rat) (ha : 0 < a) (hη : 0 < η) (hb : η * a < 2)
+    (hε : 0 ≤ ε)
+    (v : Nat → Rat) (e : Nat → Rat) (h0 : v 0 = w₀)
+    (hv : ∀ t, v (t + 1) = v t - η * (a * v t) + e t)
+    (he : ∀ t, Rat.abs (e t) ≤ ε) :
+    ∀ t, Rat.abs (v t - sgdQuad η a w₀ t) ≤ (t : Rat) * ε := by
+  intro t
+  have hpos : 0 ≤ η * a := Rat.mul_nonneg (Rat.le_of_lt hη) (Rat.le_of_lt ha)
+  have hc : Rat.abs (1 - η * a) ≤ 1 :=
+    abs_le_one_of_interval (1 - η * a) (by grind)
+      ((Rat.sub_right_le_iff_le_add (a := (1 : Rat))).mpr (by grind))
+  have hv' : ∀ t, v (t + 1) = (1 - η * a) * v t + e t := by
+    intro t
+    rw [hv]
+    have hstepv : v t - η * (a * v t) = (1 - η * a) * v t := by
+      have hqa : η * a * v t = η * (a * v t) := by grind
+      grind
+    grind
+  have hw' : ∀ t, powN (1 - η * a) (t + 1) * w₀ =
+      (1 - η * a) * (powN (1 - η * a) t * w₀) := by
+    intro t
+    show (1 - η * a) * powN (1 - η * a) t * w₀ = (1 - η * a) * (powN (1 - η * a) t * w₀)
+    rw [Rat.mul_assoc]
+  have h0' : v 0 = powN (1 - η * a) 0 * w₀ := by
+    rw [h0]
+    have : powN (1 - η * a) 0 = (1 : Rat) := rfl
+    rw [this]
+    grind
+  have h := drift_bound (1 - η * a) hc ε hε v (fun t => powN (1 - η * a) t * w₀) e
+    h0' hv' he hw' t
+  rw [sgdQuad_closed η a t w₀]
+  exact h
 -- ANCHOR_END: sgd_spec
 
 end Laws

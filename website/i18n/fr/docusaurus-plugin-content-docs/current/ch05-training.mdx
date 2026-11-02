@@ -114,6 +114,8 @@ Troisième point, **ce que SGD garantit** — la spécification de l'optimiseur,
 ```lean file=Ch05/Optim.lean#sgd_spec
 ```
 
+Quatrième point, **le pont vers la virgule flottante**. Les démos tournent en `Float`, l'arithmétique machine de Lean, qui n'a aucune loi exacte. Le pont est un *budget* : exécutons l'itération avec une perturbation par pas $e_t$ de taille au plus $\varepsilon$ — ce qu'est l'arrondi, parmi d'autres perturbations — et le théorème de dérive (`Core/Algebra.lean`, `drift_bound`) prouve par récurrence que tant que la dynamique exacte est stable ($|c| \le 1$), la trajectoire perturbée ne s'écarte jamais de plus de $t\varepsilon$ de la trajectoire exacte après $t$ pas : l'erreur croît **linéairement, jamais exponentiellement**. `sgd_rounding_drift` l'instancie pour SGD dans la plage stable. Une courbe Float qui suit la courbe exacte au cheveu près devient une attente garantie par un théorème, pas un espoir.
+
 ### Comparaison
 
 `lake exe ch05` entraîne le réseau 2-3-3-1 du chapitre 4 à partir des mêmes paramètres initiaux avec les trois optimiseurs. Perte d'entraînement après $t$ pas :

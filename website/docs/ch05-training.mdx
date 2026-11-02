@@ -114,6 +114,8 @@ Third, **what SGD is guaranteed to do** — the optimiser's specification, over 
 ```lean file=Ch05/Optim.lean#sgd_spec
 ```
 
+Fourth, **the bridge to floating point.** The demos run `Float`, Lean's machine arithmetic, which has no exact laws. The bridge is a *budget*: run the iteration with a per-step perturbation $e_t$ of size at most $\varepsilon$ — which is all rounding does, among other perturburations — and the drift theorem (`Core/Algebra.lean`, `drift_bound`) proves by induction that while the exact dynamics are stable ($|c| \le 1$), the perturbed run never drifts more than $t\varepsilon$ from the exact run after $t$ steps: the error grows **linearly, never exponentially**. `sgd_rounding_drift` instantiates this for SGD in the stable range. A Float curve that tracks the exact curve to within a hair is now a theorem-backed expectation, not a hope.
+
 ### Comparing them
 
 `lake exe ch05` trains the 2-3-3-1 network of Chapter 4 from the same initial parameters with the three optimizers. The training loss after $t$ steps:
