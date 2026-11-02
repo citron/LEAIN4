@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "LeanDL",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "LeanDL",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Course": {
+    "message": "Cours",
+    "description": "Navbar item with label Course"
+  }
+}

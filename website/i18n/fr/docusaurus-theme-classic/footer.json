@@ -1,0 +1,6 @@
+{
+  "copyright": {
+    "message": "Deep Learning en Lean 4. Le code et les preuves compilent avec Lean 4 (sans Mathlib).",
+    "description": "The footer copyright"
+  }
+}
