@@ -84,8 +84,17 @@ Backpropagation, by stages:
 ```lean file=Ch06/Cnn.lean#backward
 ```
 
+### The flat loop *is* the convolution
+
+The network above stores images and kernels in flat arrays: the kernel sits in `K[c*9 + a*3 + b]`, the image in `x[i*28 + j]`, and each conv cell is a hand-written double loop. Is that layout the mathematics of the first half of this chapter, or only shaped like it? It is, and the bridge is proved over exact $\mathbb{Q}$:
+
+```lean file=Ch06/Conv.lean#cnn_row
+```
+
+Feed the 28-wide image row to the 3-tap kernel row and `conv1d` produces exactly the 26 output columns — the type-checker enforces the shape ($28 - 3 + 1 = 26$), and `cnn_row` shows the cell at column `j` equals the net's loop term for term. Summing the three kernel rows, `cnn_cell_rows` identifies the net's full double loop with three formal `conv1d` applications. This is the same round-trip shape as Chapter 9's `concat_head`/`head_concat` for multi-head attention.
+
 :::warning What is proved here, and what is not
-Theorems 1–3 are about the one-dimensional layer. The two-dimensional code above is a direct generalisation but is *not* itself proved. We check it numerically instead: the demo compares the kernel gradient with a central finite difference of the loss.
+Theorems 1–3 and the row bridge above are about the one-dimensional layer. The two-dimensional code above is a direct generalisation: one conv cell is proved equal to the flat loop, the pooling and dense stages are *not* proved. We check them numerically instead: the demo compares the kernel gradient with a central finite difference of the loss.
 :::
 
 ## Run it

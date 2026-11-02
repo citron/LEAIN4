@@ -102,6 +102,48 @@ theorem conv1d_adjoint {m k : Nat} (ker : Vec α (k + 1)) (s : Vec α m) (x : Ve
   grind
 -- ANCHOR_END: corr
 
+-- ANCHOR: cnn_row
+/-- One row of the 3-row top band of the 28-wide flat image: the strip a
+3×3 kernel slides over. -/
+def imgRow (x : Vec Rat (3 * 28)) (a : Fin 3) : Vec Rat 28 :=
+  fun b => x ⟨a.val * 28 + b.val, by omega⟩
+
+/-- Row `a` of the 9-tap flat kernel, in the `c*9 + a*3 + b` layout of the
+network. -/
+def kwin (K : Vec Rat 9) (a : Fin 3) : Vec Rat 3 :=
+  fun b => K ⟨a.val * 3 + b.val, by omega⟩
+
+theorem xEq2 {n : Nat} (v : Vec Rat n) {e1 e2 : Nat} (h1 : e1 < n) (h2 : e2 < n)
+    (he : e1 = e2) : v ⟨e1, h1⟩ = v ⟨e2, h2⟩ := congrArg v (Fin.ext he)
+
+/-- **A row of the CNN conv layer is a formal `conv1d`.** The demo net
+(`Ch06/Cnn.lean`) computes each pre-activation with a flat double loop
+`Σ a b, K[c*9 + a*3 + b] * x[(i+a)*28 + (j+b)]`. Kernel row `a` over
+image row `a` is exactly `conv1d (kwin K a) (imgRow x a)` — a length-28
+input with a length-3 kernel, giving exactly the 26 output columns —
+and the cell at column `j` matches the net's loop termwise. -/
+theorem cnn_row (K : Vec Rat 9) (x : Vec Rat (3 * 28)) (a : Fin 3) (j : Fin 26) :
+    Ch06.conv1d (kwin K a) (imgRow x a) j =
+      vsum (fun b : Fin 3 => K ⟨a.val * 3 + b.val, by omega⟩ *
+        x ⟨a.val * 28 + j.val + b.val, by omega⟩) := by
+  simp only [conv1d, imgRow, kwin]
+  congr 1
+  funext b
+  have hb1 : a.val * 28 + (j.val + b.val) < 3 * 28 := by omega
+  have hb2 : a.val * 28 + j.val + b.val < 3 * 28 := by omega
+  congr 1
+  exact xEq2 x hb1 hb2 ((Nat.add_assoc _ _ _).symm)
+
+/-- The net's double loop over the kernel equals the sum of the three
+formal `conv1d` rows: the flat layout and the type-checked convolution
+agree, cell by cell, at every column of the conv layer. -/
+theorem cnn_cell_rows (K : Vec Rat 9) (x : Vec Rat (3 * 28)) (j : Fin 26) :
+    vsum (fun a : Fin 3 => conv1d (kwin K a) (imgRow x a) j) =
+      vsum (fun a : Fin 3 => vsum (fun b : Fin 3 =>
+        K ⟨a.val * 3 + b.val, by omega⟩ * x ⟨a.val * 28 + j.val + b.val, by omega⟩)) := by
+  congr 1
+-- ANCHOR_END: cnn_row
+
 end Laws
 
 end LeanDL.Ch06

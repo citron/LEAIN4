@@ -84,8 +84,17 @@ La rétropropagation, par étapes :
 ```lean file=Ch06/Cnn.lean#backward
 ```
 
+### La boucle à plat *est* la convolution
+
+Le réseau ci-dessus range images et noyaux dans des tableaux plats : le noyau est dans `K[c*9 + a*3 + b]`, l'image dans `x[i*28 + j]`, et chaque cellule de convolution est une double boucle écrite à la main. Cette disposition est-elle les mathématiques de la première moitié du chapitre, ou seulement leur forme ? Elle les est, et le pont est prouvé sur $\mathbb{Q}$ exact :
+
+```lean file=Ch06/Conv.lean#cnn_row
+```
+
+Nourrissez la rangée d'image de largeur 28 avec la rangée de noyau à 3 taps et `conv1d` produit exactement les 26 colonnes de sortie — le type-vérificateur impose la forme ($28 - 3 + 1 = 26$), et `cnn_row` montre que la cellule de colonne `j` égale terme à terme le terme de la boucle du réseau. En sommant les trois rangées du noyau, `cnn_cell_rows` identifie la double boucle complète du réseau à trois applications formelles de `conv1d`. C'est la même forme d'aller-retour que `concat_head`/`head_concat` du chapitre 9 pour l'attention multi-têtes.
+
 :::warning Ce qui est démontré ici, et ce qui ne l'est pas
-Les théorèmes 1 à 3 portent sur la couche en dimension un. Le code en deux dimensions en est une généralisation directe mais n'est *pas* lui-même démontré. Nous le vérifions numériquement : la démo compare le gradient du noyau à une différence finie centrée de la perte.
+Les théorèmes 1 à 3 et le pont de rangée ci-dessus portent sur la couche en dimension un. Le code en deux dimensions en est une généralisation directe : une cellule de convolution est prouvée égale à la boucle à plat ; les étages de pooling et de couche dense ne sont *pas* démontrés. Nous les vérifions numériquement : la démo compare le gradient du noyau à une différence finie centrée de la perte.
 :::
 
 ## Exécution
