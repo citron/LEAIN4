@@ -61,6 +61,15 @@ So to train at a random time $t$ we do not simulate $t$ steps. We prove the coef
 
 (We prove the *algebra of the coefficients*. That a sum of independent Gaussians is a Gaussian, which is what turns these coefficients into a statement about distributions, is not formalised.)
 
+## The forward process is monotone, proved
+
+A diffusion schedule is *designed* so that noise accumulates: $lpha_t$ decreases with $t$, so $arlpha_t$ decreases, so the noise variance $1-arlpha_t^2$ grows. That design choice is usually an axiom of the schedule. It is actually a theorem of the step algebra: appending one more variance-preserving step $(a,s)$ with $0\le a\le 1$ to any chain of steps can never decrease the noise variance of clean data.
+
+```lean file=Ch12/Diffusion.lean#monotone
+```
+
+`noise_monotone` reads: signal coefficient of the whole process is `cumA l`; the new step multiplies it by $a\in[0,1]$, so the squared signal shrinks ($a^2\le 1$ on the nonnegative factor `cumA l * cumA l`, via `cumA_nonneg`), and $1-arlpha^2$ grows. No Gaussian measure theory is needed — the bookkeeping of `noiseVar_closed` plus monotone arithmetic over `Rat` is enough. What is *not* proved: that the composition of independent Gaussians is Gaussian (that lives in measure theory, outside this course's algebraic scope — same honesty boundary as Chapter 16's finite model).
+
 ## Learning to denoise
 
 The network $\varepsilon_\theta(x_t,t)$ looks at a noisy point and the time, and predicts **the noise** $\varepsilon$ that was mixed in. The loss is the squared error, averaged over random data points, times and noise:

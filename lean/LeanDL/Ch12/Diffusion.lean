@@ -59,6 +59,51 @@ theorem noiseVar_from_clean (l : List (α × α)) (hl : ∀ p ∈ l, p.1 * p.1 +
     noiseVar l 0 = 1 - cumA l * cumA l := by
   rw [noiseVar_closed l hl]
   grind
+/-- With nonnegative signal coefficients, the cumulative product `ā` is nonnegative. -/
+theorem cumA_nonneg (l : List (Rat × Rat)) (hl : ∀ p ∈ l, 0 ≤ p.1) : 0 ≤ cumA l := by
+  induction l with
+  | nil => simp only [cumA]; grind
+  | cons p rest ih =>
+      obtain ⟨a, s⟩ := p
+      have ha : 0 ≤ a := hl (a, s) (by simp)
+      have hr : ∀ q ∈ rest, 0 ≤ q.1 := fun q hq => hl q (by simp [hq])
+      simp only [cumA]
+      exact Rat.mul_nonneg ha (ih hr)
+
+-- ANCHOR: monotone
+/-- **The forward process is monotone: signal down, noise up.** Appending one more
+noising step `(a, s)` with `0 ≤ a ≤ 1` never *decreases* the noise variance of clean
+data: `1 − ā² ≤ 1 − (ā·a)²`. The signal coefficient of the whole process can only
+shrink, so the corruption is cumulative — this is the property the schedule design
+(`α_t` decreasing in `t`) encodes, here proved from the step algebra alone. -/
+theorem noise_monotone (l : List (Rat × Rat)) (a s : Rat)
+    (hl : ∀ p ∈ l, p.1 * p.1 + p.2 * p.2 = 1 ∧ 0 ≤ p.1)
+    (ha : 0 ≤ a) (ha1 : a ≤ 1) (hs : a * a + s * s = 1) :
+    noiseVar l 0 ≤ noiseVar ((a, s) :: l) 0 := by
+  have hcons : ∀ p ∈ (a, s) :: l, p.1 * p.1 + p.2 * p.2 = 1 := by
+    intro p hp
+    cases hp with
+    | head => show a * a + s * s = 1; exact hs
+    | tail _ hq => exact (hl p hq).1
+  rw [noiseVar_from_clean l (fun p hp => (hl p hp).1),
+      noiseVar_from_clean ((a, s) :: l) hcons]
+  simp only [cumA]
+  have key : (cumA l * a) * (cumA l * a) ≤ cumA l * cumA l := by
+    rw [show (cumA l * a) * (cumA l * a) = (cumA l * cumA l) * (a * a) from
+          by grind [Rat.mul_assoc, Rat.mul_comm]]
+    have hc : 0 ≤ cumA l := cumA_nonneg l (fun p hp => (hl p hp).2)
+    have hsq : 0 ≤ cumA l * cumA l := Rat.mul_nonneg hc hc
+    have h1 : a * a ≤ a := by
+      have := Rat.mul_le_mul_of_nonneg_left ha1 ha
+      rw [Rat.mul_one] at this
+      exact this
+    have h : a * a ≤ 1 := Rat.le_trans h1 ha1
+    have h2 := Rat.mul_le_mul_of_nonneg_left h hsq
+    rw [Rat.mul_one] at h2
+    exact h2
+  grind
+-- ANCHOR_END: monotone
+
 -- ANCHOR_END: schedule
 
 end Schedule
