@@ -53,4 +53,28 @@ theorem exercise_uniform_attains_solution {E : Nat} (hE : 0 < E) :
     omega
 -- ANCHOR_END: sol3
 
+-- ANCHOR: sol4
+/-- Solution 4: induct on `u`. The base is `powN b 0 = 1`; the step unfolds both sides
+one power and reassociates. -/
+theorem exercise_pow_add_solution (b : Rat) (t u : Nat) :
+    Ch05.powN b (t + u) = Ch05.powN b t * Ch05.powN b u := by
+  induction u with
+  | zero => show Ch05.powN b t = Ch05.powN b t * Ch05.powN b 0; rw [Ch05.powN]; grind
+  | succ u ih =>
+      show Ch05.powN b ((t + u) + 1) = Ch05.powN b t * Ch05.powN b (u + 1)
+      rw [Ch05.powN, Ch05.powN, ih]
+      grind [Rat.mul_assoc]
+-- ANCHOR_END: sol4
+
+-- ANCHOR: sol5
+variable [LawfulLog]
+
+/-- Solution 5: the Core identity `crossEntropy = entropy + kl` is the whole proof;
+subtract the entropy. -/
+theorem exercise_distill_gap_solution {n : Nat} (t s : Dist n) :
+    t.crossEntropy s - t.entropy = t.kl s := by
+  have h := Dist.crossEntropy_eq_entropy_add_kl t s
+  grind
+-- ANCHOR_END: sol5
+
 end LeanDL.Ch18

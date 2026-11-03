@@ -91,6 +91,9 @@ Empiriquement (Kaplan et al., Chinchilla), la perte suit des lois de puissance e
 2. Prouvez que **translater d'un pas de grille translate le code d'un cran** : $\text{quant}\;s\;(x + s) = \text{quant}\;s\;x + s$ — la grille est parfaitement invariante par translation.
 3. Prouvez que **le routeur uniforme atteint le plancher exactement** : avec $p_i = 1/E$, la perte de collision vaut exactement $1/E$ — `balance_ge` est serré, pas lâche.
 
+4. Prouvez que **la loi de puissance multiplie** : $\text{powN}\;b\;(t+u) = \text{powN}\;b\;t \cdot \text{powN}\;b\;u$ — l'algèbre derrière toute loi d'échelle : les sommes d'exposants deviennent des produits de facteurs, donc doubler une durée multiplie le facteur d'erreur restante par une constante.
+5. Prouvez que **l'écart de distillation est exactement le KL** : $\text{CE}(t, s) - H(t) = \mathrm{KL}(t \| s)$ — le plancher d'entropie de `distill_ge_entropy` est la moitié d'une identité à deux sens, et le prix d'un élève erroné se mesure en nats exacts.
+
 **Exercices en Lean.** Le fichier `lean/LeanDL/Ch18/Exercises.lean` contient les énoncés ci-dessous, avec `sorry` à remplacer. Les corrigés prouvés sont dans `Solutions.lean` à côté : essayez d'abord.
 
 ```lean file=Ch18/Exercises.lean#ex1
@@ -100,6 +103,12 @@ Empiriquement (Kaplan et al., Chinchilla), la perte suit des lois de puissance e
 ```
 
 ```lean file=Ch18/Exercises.lean#ex3
+```
+
+```lean file=Ch18/Exercises.lean#ex4
+```
+
+```lean file=Ch18/Exercises.lean#ex5
 ```
 
 <details>
@@ -143,6 +152,36 @@ Le summand est la *constante* $(1/E) \cdot (1/E)$ : `vsum_const` donne $E \cdot 
 <summary>Corrigé 3</summary>
 
 ```lean file=Ch18/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Indice 4</summary>
+
+Induisez sur `u`. La base est `powN b 0 = 1` (réduisez avec `rw [powN]`, puis `grind`). L'étape déplie les deux `powN (· + 1)` (`rw [powN]`) et l'hypothèse d'induction, puis réassocie avec `grind [Rat.mul_assoc]`.
+
+</details>
+
+<details>
+<summary>Indice 5</summary>
+
+Ajoutez `variable [LawfulLog]` (l'entropie et le KL s'énoncent sur un logarithme légal). L'identité de Core `Dist.crossEntropy_eq_entropy_add_kl t s` dit `CE = H + KL` ; soustraire `H` est un `grind`.
+
+</details>
+
+<details>
+<summary>Corrigé 4</summary>
+
+```lean file=Ch18/Solutions.lean#sol4
+```
+
+</details>
+
+<details>
+<summary>Corrigé 5</summary>
+
+```lean file=Ch18/Solutions.lean#sol5
 ```
 
 </details>

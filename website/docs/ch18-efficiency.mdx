@@ -90,6 +90,9 @@ Empirically (Kaplan et al., Chinchilla), loss follows power laws in the budget: 
 2. Prove **translation by a grid step translates the code by one**: $\text{quant}\;s\;(x + s) = \text{quant}\;s\;x + s$ — the grid is perfectly translation-invariant.
 3. Prove **the uniform router attains the floor exactly**: with $p_i = 1/E$, the collision loss is exactly $1/E$ — `balance_ge` is tight, not slack.
 
+4. Prove **the power law multiplies**: $	ext{powN}\;b\;(t+u) = 	ext{powN}\;b\;t \cdot 	ext{powN}\;b\;u$ — the algebra behind every scaling law: sums of exponents become products of factors, so doubling a duration multiplies the remaining-error factor by a constant.
+5. Prove **the distillation gap is exactly the KL**: $	ext{CE}(t, s) - H(t) = \mathrm{KL}(t \| s)$ — the entropy floor of `distill_ge_entropy` is one half of a two-sided identity, and the price of a wrong student is measured in exact nats.
+
 **Exercises in Lean.** The file `lean/LeanDL/Ch18/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
 
 ```lean file=Ch18/Exercises.lean#ex1
@@ -99,6 +102,12 @@ Empirically (Kaplan et al., Chinchilla), loss follows power laws in the budget: 
 ```
 
 ```lean file=Ch18/Exercises.lean#ex3
+```
+
+```lean file=Ch18/Exercises.lean#ex4
+```
+
+```lean file=Ch18/Exercises.lean#ex5
 ```
 
 <details>
@@ -142,6 +151,36 @@ The summand is the *constant* $(1/E) \cdot (1/E)$: `vsum_const` gives $E \cdot (
 <summary>Solution 3</summary>
 
 ```lean file=Ch18/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Hint 4</summary>
+
+Induct on `u`. The base is `powN b 0 = 1` (reduce with `rw [powN]`, then `grind`). The step unfolds both `powN (· + 1)` (`rw [powN]`) and the induction hypothesis, then reassociates with `grind [Rat.mul_assoc]`.
+
+</details>
+
+<details>
+<summary>Hint 5</summary>
+
+Add `variable [LawfulLog]` (entropy and KL are stated over a lawful logarithm). The Core identity `Dist.crossEntropy_eq_entropy_add_kl t s` says `CE = H + KL`; subtracting `H` is one `grind`.
+
+</details>
+
+<details>
+<summary>Solution 4</summary>
+
+```lean file=Ch18/Solutions.lean#sol4
+```
+
+</details>
+
+<details>
+<summary>Solution 5</summary>
+
+```lean file=Ch18/Solutions.lean#sol5
 ```
 
 </details>

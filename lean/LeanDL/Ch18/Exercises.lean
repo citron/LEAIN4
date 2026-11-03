@@ -1,3 +1,4 @@
+import LeanDL.Ch05.Optim
 import LeanDL.Ch18.Efficiency
 
 /-! Exercises for Chapter 18. Replace each `sorry`; the solutions are in `Solutions.lean`. -/
@@ -35,5 +36,30 @@ theorem exercise_uniform_attains {E : Nat} (hE : 0 < E) :
     vsum (fun _ : Fin E => (E : Rat)⁻¹ * (E : Rat)⁻¹) = (E : Rat)⁻¹ := by
   sorry
 -- ANCHOR_END: ex3
+
+-- ANCHOR: ex4
+/-- Exercise 4: **the power law multiplies.** `powN b (t + u) = powN b t * powN b u` —
+the algebraic shape behind every scaling law: a factor written as a power of a fixed base
+turns *sums* of exponents into *products* of factors (so doubling training time multiplies
+the remaining-error factor by a constant).
+(Hints: induct on `u`; `powN b 0 = 1` is `rfl`-reducible via `powN`; the step is
+`Rat.mul_assoc` after rewriting both `powN (· + 1)` unfoldings.) -/
+theorem exercise_pow_add (b : Rat) (t u : Nat) :
+    Ch05.powN b (t + u) = Ch05.powN b t * Ch05.powN b u := by
+  sorry
+-- ANCHOR_END: ex4
+
+-- ANCHOR: ex5
+variable [LawfulLog]
+/-- Exercise 5: **the distillation gap is exactly the KL.** The excess cross-entropy a
+student pays over the teacher's entropy is *precisely* `kl t s` — so `distill_ge_entropy`
+is one half of a two-sided identity: distillation cannot beat the entropy floor, and the
+price of a wrong student is measured in exact nats.
+(Hint: `variable [LawfulLog]` is needed; `Dist.crossEntropy_eq_entropy_add_kl` is the
+identity, and the rest is `grind`.) -/
+theorem exercise_distill_gap {n : Nat} (t s : Dist n) :
+    t.crossEntropy s - t.entropy = t.kl s := by
+  sorry
+-- ANCHOR_END: ex5
 
 end LeanDL.Ch18
