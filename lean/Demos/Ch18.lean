@@ -1,5 +1,8 @@
-import LeanDL
+import LeanDL.Ch18.Efficiency
 import LeanDL.Core.Plot
+/-! Import only what this demo uses. `import LeanDL` would drag in the
+Exercises modules (whose data definitions are `sorry` on purpose), and the
+compiled runtime panics when a `sorry`-valued `def` is initialized. -/
 
 /-!
 # Chapter 18 demo — efficiency in numbers
@@ -74,8 +77,10 @@ def main : IO Unit := do
   for x in ws do
     let ef := Float.abs (x - floorQ s x)
     let er := Float.abs (x - roundQ s x)
-    if ef > maxFloor then maxFloor := ef
-    if er > maxRound then maxRound := er
+    -- Float comparisons as Props are not decidable in compiled code, so the
+    -- `if`s go through the native Bool helpers (see `geB` above).
+    if ltB maxFloor ef then maxFloor := ef
+    if ltB maxRound er then maxRound := er
   IO.println s!"    grid step s = {fmt3 s}"
   IO.println s!"    max |x - floor-quant| = {fmt3 maxFloor}   (bound s = {fmt3 s})"
   IO.println s!"    max |x - round-quant| = {fmt3 maxRound}   (bound s/2 = {fmt3 (s / 2)})"
