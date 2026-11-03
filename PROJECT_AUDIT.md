@@ -235,3 +235,12 @@ Preuves sur corps exact `α` avec `HasAct`/`HasExp` ; la démo `gpt` calcule la 
 structure en `Float`. Audit après intégration : 1928 déclarations, aucun `sorry` hors
 Exercises, aucun axiome non standard. Docs FR/EN Ch09 complétées (ancre
 `#transformer_props`).
+
+## Phase 4.7 — Finitions du plan de correction (RÉSOLU)
+
+- **Tests de propriétés** (`lean/Demos/Props.lean`, cible `props`, étape CI) : les théorèmes prouvés sont exercés sur des entrées pseudo-aléatoires à graine fixe. Vérifications `Rat` exactes via `decide` (forme fermée `sgdQuad` = `powN`, contraction `η·a ≤ 1` ; bornes `|x−quant| < s`, `|x−roundq| ≤ s/2` ; `Σp² ≥ 1/8`), miroirs `Float` avec tolérances (softmax, layerNorm mean0/var1/invariance au décalage, lignes d'attention causales `j > t` invisibles) via les aides natives `Float.beq`/`Float.abs` — jamais de `Decidable` sur des propositions `Float` (réduction runtime à `sorry`). 6/6 PASS en local.
+- **Allow-list `check.mjs`** externalisée dans `scripts/tactic-allowlist.json` (édition sans toucher au script).
+- **Figures Ch18** calculées par le Lean lui-même (`lake exe figures`) : `quantization.svg` (dents de scie plancher vs arrondi — les deux profils des bornes prouvées) et `moe_balance.svg` (`E·Σp²` selon le biais du routeur, départ au plancher prouvé 1) ; insérées dans les pages FR/EN.
+- **Exercices Ch18 4-5** : `exercise_pow_add` (loi de puissance multiplicative — le socle algébrique des lois d'échelle) et `exercise_distill_gap` (l'écart de distillation est *exactement* le KL), corrigés prouvés (`sol4`, `sol5`), docs FR/EN appariées (liste, ancres, indices, corrigés).
+
+Vérifications : `lake build` 87 jobs ; audit `checked 1933 declarations; using sorry: []; non-standard axioms: []` ; `lake exe props` 6/6 PASS ; `node scripts/check.mjs` 22 pages FR/EN.
