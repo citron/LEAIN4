@@ -50,7 +50,25 @@ $$ \mathcal L \;=\; \underbrace{\mathbb E\,\|x-\hat x\|^2}_{\text{reconstruction
 
 Après l'entraînement, générer est simple : tirer $z\sim\mathcal N(0,1)$ et décoder.
 
-(La forme close du terme KL est une intégrale gaussienne classique ; nous la prenons comme définition et démontrons ses propriétés. Montrer que la perte minore la log-vraisemblance des données demande des intégrales et n'est pas formalisé ici.)
+(La forme close du terme KL est une intégrale gaussienne classique ; nous la prenons comme définition et démontrons ses propriétés. La *structure* de la perte — une borne inférieure de la log-vraisemblance des données — ne demande pas d'intégrales : c'est une identité en sommes finies, prouvée exactement sur `Rat` dans `Ch10/Elbo.lean`, ci-dessous.)
+
+## L'ELBO, prouvé
+
+L'objectif du VAE n'est pas une heuristique : c'est une **borne inférieure de la log-vraisemblance**, et le terme KL est le prix de l'approximation de l'encodeur. Pour un espace latent *fini*, avec une loi jointe $P$ (poids $p(z_i,x)>0$, non normalisée), un facteur de vraisemblance $e_i$, l'évidence $m=\sum_i p(z_i,x)\,e_i = p(x)$, et tout encodeur $q$ :
+
+$$\mathbb{E}_q[\log e] \;-\; \mathrm{KL}(q \,\|\, P) \;\le\; \log m .$$
+
+```lean file=Ch10/Elbo.lean#elbo
+```
+
+*Preuve, en mots.* On applique l'inégalité tangente $\log t \le t-1$ aux poids d'importance $t_i = p(z_i,x)e_i/(q_i m) > 0$ ; on développe le log ; on prend l'espérance sous $q$ ; on utilise l'annulation exacte $\sum_i q_i\cdot p(z_i,x)e_i/(q_i m) = 1$ (sur `Rat`, $q_i\cdot q_i^{-1}=1$, sans arrondi). L'espérance du membre de gauche est $\le 1-1=0$. La seule entrée analytique est l'inégalité tangente, portée par la classe `LawfulLog` — le logarithme réel y obéit, `Float` seulement en approximation.
+
+L'écart est exactement le KL de $q$ vers la postérieure vraie $p(z\mid x) = P_i e_i / m$ ; il est donc $\ge 0$ et s'annule précisément quand l'encodeur est exact :
+
+```lean file=Ch10/Elbo.lean#elbo_gap
+```
+
+La version gaussienne de ce chapitre est l'analogue continu de la même identité ; le théorème fini ci-dessus est ce que la perte *signifie*.
 
 ## L'astuce de reparamétrisation
 

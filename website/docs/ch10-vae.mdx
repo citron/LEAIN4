@@ -50,7 +50,25 @@ $$ \mathcal L \;=\; \underbrace{\mathbb E\,\|x-\hat x\|^2}_{\text{reconstruction
 
 After training, generating is simple: draw $z\sim\mathcal N(0,1)$ and decode.
 
-(The closed form of the KL term is a standard Gaussian integral; we take it as the definition and prove properties of it. Showing that the loss is a lower bound on the data log-likelihood needs integrals and is not formalised here.)
+(The closed form of the KL term is a standard Gaussian integral; we take it as the definition and prove properties of it. The *shape* of the loss — a lower bound on the data log-likelihood — does not need integrals: it is a finite-sum identity, and it is proved exactly over `Rat` in `Ch10/Elbo.lean`, below.)
+
+## The ELBO, proved
+
+The VAE objective is not a heuristic: it is a **lower bound on the log-likelihood**, and the KL term is the price of the encoder's approximation. For a *finite* latent space, with a joint $P$ (weights $p(z_i,x)>0$, unnormalised), a likelihood factor $e_i$, evidence $m=\sum_i p(z_i,x)\,e_i = p(x)$, and any encoder $q$:
+
+$$\mathbb{E}_q[\log e] \;-\; \mathrm{KL}(q \,\|\, P) \;\le\; \log m .$$
+
+```lean file=Ch10/Elbo.lean#elbo
+```
+
+*Proof, in words.* Apply the tangent inequality $\log t \le t-1$ to the importance weights $t_i = p(z_i,x)e_i/(q_i m) > 0$; expand the log; take the $q$-expectation; use the exact cancellation $\sum_i q_i\cdot p(z_i,x)e_i/(q_i m) = 1$ (over `Rat`, $q_i\cdot q_i^{-1}=1$, no rounding). The expectation of the left side is $\le 1-1=0$. The only analytic input is the tangent inequality, carried by the `LawfulLog` class — the real logarithm obeys it, `Float` only approximately.
+
+The gap equals the KL from $q$ to the true posterior $p(z\mid x) = P_i e_i / m$, so it is $\ge 0$ and vanishes exactly when the encoder is exact:
+
+```lean file=Ch10/Elbo.lean#elbo_gap
+```
+
+The Gaussian version of this chapter is the continuous analogue of the same identity; the finite theorem above is what the loss *means*.
 
 ## The reparameterisation trick
 

@@ -133,6 +133,7 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Espace latent**: L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
 - **Autoencodeur**: Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
 - **VAE**: Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
+- **ELBO (borne inférieure de l’évidence)**: L’objectif du VAE ; démontrée (Ch10, `Elbo.lean`) comme borne inférieure de la log-vraisemblance des données, le terme KL étant l’écart à la postérieure vraie.
 - **A priori**: La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
 - **Divergence KL**: Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
 - **Astuce de reparamétrisation**: Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.

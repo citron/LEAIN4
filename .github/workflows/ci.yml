@@ -20,6 +20,15 @@ jobs:
         run: lake exe ch05 && lake exe ch16 && lake exe ch17 && lake exe ch18
         working-directory: lean
         timeout-minutes: 10
+      - name: MNIST integration test (seeded SGD, accuracy must reach 90%)
+        run: |
+          ../scripts/get-mnist.sh
+          out=$(lake exe mnist 10000 5000 3 | tail -1)
+          echo "$out"
+          acc=$(echo "$out" | sed 's/.*= //')
+          awk -v a="$acc" 'BEGIN { exit !(a >= 0.90) }' || { echo "MNIST regression: $acc < 0.90"; exit 1; }
+        working-directory: lean
+        timeout-minutes: 10
 
   website:
     runs-on: ubuntu-latest

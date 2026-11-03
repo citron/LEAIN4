@@ -32,6 +32,7 @@ import LeanDL.Ch09.Attention
 import LeanDL.Ch09.Gpt
 import LeanDL.Ch09.Solutions
 import LeanDL.Ch10.Model
+import LeanDL.Ch10.Elbo
 import LeanDL.Ch10.Solutions
 import LeanDL.Ch10.Vae
 import LeanDL.Ch11.Gan

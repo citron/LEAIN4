@@ -202,3 +202,17 @@ Le contrat Phase 4 (MoE, quantification, distillation, scaling laws) est bouclé
 - **`scripts/check.mjs`** : allow-list enrichie des tactiques noyau citées dans les pages (`exact_mod_cast`, `push_cast`, `norm_cast`, `funext`, `congr`, `rw`) — ce sont des tactiques de Lean 4 core, pas des noms LeanDL.
 
 Limites honnêtes documentées dans la page : quantification scalaire seulement (clip/plage/calibrage = ingénierie) ; le routeur est un vecteur de poids, pas un réseau appris ; distillation sur distributions finies ; la loi d'échelle prouvée est la **forme** (`C/N` décroissant, moitiés), pas les coefficients empiriques.
+
+---
+
+## Phase 5 (partielle) — Ch10 : l'ELBO formalisé (RÉSOLU)
+
+Le trou « la perte VAE est une borne inférieure de la log-vraisemblance, non prouvée » (signalé dans les docs Ch10 FR/EN) est comblé par **`Ch10/Elbo.lean`**, prouvé sur `Rat` exact, sans Mathlib, sans `sorry` :
+
+- **`evidence_bound`** (ancre `elbo`) : pour une jointe finie `P` (poids `p(zᵢ,x) > 0`, non normalisée), un facteur de vraisemblance `e`, l'évidence `m = Σᵢ P.w i · e i = p(x)` et tout encodeur `q` : `q.expect (log e) − q.kl P ≤ log m`. Preuve : inégalité tangente `log t ≤ t − 1` (`LawfulLog.log_le`) appliquée aux poids d'importance `P.w i · e i · (q.w i)⁻¹ · m⁻¹ > 0`, monotonie du dot (`dot_mono`), développement exact du log (`LawfulLog.log_mul`/`log_inv`), puis l'annulation exacte `elbo_usum` (`Σ qᵢ·Pᵢeᵢ/qᵢ/m = (Σ Pᵢeᵢ)/m = 1` — sur `Rat`, `qᵢ·qᵢ⁻¹ = 1`, sans arrondi).
+- **`elbo_gap`** : identité — la borne est exactement `−KL(q ‖ postérieure)` : `log m − (E_q[log e] − KL(q‖P)) = Σ qᵢ log(qᵢ / (Pᵢeᵢ/m))`. Développée via `dot_sub`/`dot_add_right`/`dot_smul_const` et `q.sum1`.
+- **`elbo_gap_ge_zero`** : conséquence de Gibbs (`Dist.kl_nonneg q post`) — l'écart est `≥ 0`, zéro ssi l'encodeur est la postérieure. Le terme KL de la perte est le prix de l'approximation variationnelle, pas un régulariseur arbitraire.
+- Lemmes utilitaires du fichier : `dot_congr` (annulation sous le dot par induction sur `Fin`), `dot_pos` (une évidence stricte est `> 0`), `elbo_usum`.
+- Intégré dans `LeanDL.lean` ; build LeanDL 86 jobs `EXIT=0` ; audit : **1919 déclarations, `using sorry: []; non-standard axiomes: []`** ; docs FR/EN `ch10-vae.mdx` : la phrase « non formalisé ici » est remplacée par la section « The ELBO, proved / L'ELBO, prouvé » avec ancres `#elbo` et `#elbo_gap` ; `node scripts/check.mjs` → `OK: 22 pages… CHECK=0`.
+
+Limite honnête : le chapitre 10 gaussien (continume) reste l'analogue continu ; le théorème prouvé couvre l'espace latent fini (identités en sommes finies) — c'est la signification exacte de la perte, la version à intégrales gaussiennes garde ses hypothèses déclarées.

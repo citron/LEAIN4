@@ -133,6 +133,7 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Latent space**: The space of all possible codes. If a code has 2 numbers, the latent space is a plane, and every point of it decodes into a possible data point. Points that are close should decode into similar data. (Chapter 15 calls the same idea a representation or embedding space.)
 - **Autoencoder**: An encoder squeezes the data into a code, and a decoder rebuilds the data from the code.
 - **VAE**: An autoencoder whose codes are pushed to follow a known distribution, so we can sample new codes and decode them.
+- **ELBO (evidence lower bound)**: The VAE objective; proved (Ch10, `Elbo.lean`) to be a lower bound on the data log-likelihood, with the KL term as the gap to the true posterior.
 - **Prior**: The distribution we want the codes to follow, here a standard bell curve.
 - **KL divergence**: A number measuring how different one distribution is from another. It is zero when they are the same.
 - **Reparameterisation trick**: Draw the random noise first, then compute the sample from it with ordinary maths, so that gradients can flow.
