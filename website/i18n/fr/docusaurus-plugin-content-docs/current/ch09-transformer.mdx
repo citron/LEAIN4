@@ -133,6 +133,27 @@ Une carte d'attention produit une moyenne pondérée par position — une décis
 
 Le code exécutable (`lean/Demos/MHead.lean`, `lake exe mhead`) est un bloc de exactement cette forme : $h = 4$ têtes causales de largeur `dh = 4` (projections Q/K/V, scores normalisés par $1/\sqrt{dh}$, softmax causal, concaténation), une lecture linéaire et un softmax, entraînés sur la tâche de délai avec une passe arrière écrite à la main.
 
+
+## Le bloc, assemblé et prouvé
+
+Ce qui précède sont les pièces ; un Transformer réel est le **bloc** qui les assemble — normalisation par couche, attention multi-têtes causale, réseau feed-forward et les deux connexions résiduelles, dans le câblage pré-norme que toute implémentation utilise :
+
+```
+y = layerNorm (x + Attention(layerNorm x))     -- sous-couche d'attention
+z = layerNorm (y + FFN(y))                     -- sous-couche feed-forward
+```
+
+`Ch09/Transformer.lean` assemble exactement cela sur une séquence de lignes (`Mat α T d` : `T` positions de `d` caractéristiques — les formes sont dans le type) et démontre les deux propriétés que l'architecture existe pour garantir, **pour le bloc entier**, pas seulement pour ses parties :
+
+```lean file=Ch09/Transformer.lean#transformer_props
+```
+
+**`blockOut_no_leak` — le bloc ne voit jamais le futur.** Si deux séquences d'entrée coïncident sur les lignes aux positions `j ≤ t`, le bloc renvoie le même vecteur à la position `t`, quoi que contiennent les lignes cachées. La preuve est une remontée de congruence : la normalisation par ligne est congruente, la sortie de chaque tête est figée par le lemme de masque `causal_no_leak`, la concaténation et la projection de sortie sont congruentes, la résiduelle et le feed-forward sont congruents — donc le bloc entier l'est. C'est le théorème qui autorise l'entraînement en parallèle sur des séquences entières : la position `t` ne peut pas prouvablement tricher en lisant `t+1`.
+
+**`blockOut_shift` — le bloc ignore les décalages absolus.** Ajouter une constante à chaque caractéristique de chaque ligne laisse chaque sortie inchangée. La normalisation par couche supprime le décalage dans les entrées normalisées (`layerNorm_shift`), l'attention n'est construite qu'à partir de lignes normalisées, et la résiduelle `x + attn` ne récupère la constante qu'une fois, où la seconde normalisation la supprime. Un modèle fait de ces blocs représente une structure *relative*, pas des niveaux absolus — une des raisons pour lesquelles la normalisation n'est pas une astuce d'optimisation mais un changement de ce que le réseau peut exprimer.
+
+L'exécutable GPT (`lake exe gpt`) calcule exactement cette structure en `Float`, avec ReLU pour `σ` — les théorèmes portent sur un corps exact, la démo tourne en virgule flottante, et c'est le même bloc dans les deux cas.
+
 ## Expériences
 
 `lake exe gpt` commence par comparer le gradient des 171 paramètres d'un minuscule modèle à des différences finies centrées (erreur maximale inférieure à $10^{-6}$, affichée 0.000000).

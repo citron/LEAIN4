@@ -133,6 +133,27 @@ One attention map produces one weighted average per position — one routing dec
 
 The running code (`lean/Demos/MHead.lean`, `lake exe mhead`) is one block of exactly this shape: $h = 4$ causal heads of width `dh = 4` (Q/K/V projections, scores scaled by $1/\sqrt{dh}$, causal softmax, concatenation), a linear read-out and a softmax, trained on the delay task with hand-written backward.
 
+
+## The block, assembled and proved
+
+The pieces above are the parts; a real Transformer is the **block** that assembles them — layer norm, causal multi-head attention, feed-forward network, and the two residual connections, in the pre-norm wiring every implementation uses:
+
+```
+y = layerNorm (x + Attention(layerNorm x))     -- attention sub-layer
+z = layerNorm (y + FFN(y))                     -- feed-forward sub-layer
+```
+
+`Ch09/Transformer.lean` assembles exactly this over a sequence of rows (`Mat α T d`: `T` positions of `d` features — the shapes are in the type) and proves the two properties the architecture exists to guarantee, **for the whole block**, not just its parts:
+
+```lean file=Ch09/Transformer.lean#transformer_props
+```
+
+**`blockOut_no_leak` — the block never sees the future.** If two input sequences agree on the rows at positions `j ≤ t`, the block outputs the same vector at position `t`, whatever the hidden rows contain. The proof is a congruence climb: row-wise layer norm is congruent, each head's output is fixed by the mask lemma `causal_no_leak`, the concatenation and output projection are congruent, the residual and the feed-forward network are congruent — so the whole block is. This is the theorem that licenses training on whole sequences in parallel: position `t` provably cannot cheat by reading `t+1`.
+
+**`blockOut_shift` — the block ignores absolute offsets.** Adding one constant to every feature of every row leaves every output unchanged. Layer norm kills the offset in the normalised inputs (`layerNorm_shift`), the attention is built from normalised rows only, and the residual `x + attn` picks the constant up exactly once, where the second layer norm removes it. A model built from these blocks represents *relative* structure, not absolute levels — one reason normalisation is not an optimisation trick but a change of what the network can express.
+
+The GPT executable (`lake exe gpt`) computes exactly this structure in `Float`, with ReLU for `σ` — the theorems are over an exact field, the demo runs in floating point, and both are the same block.
+
 ## Experiments
 
 `lake exe gpt` first checks the gradient of all 171 parameters of a tiny model against central finite differences (maximum error below $10^{-6}$, printed as 0.000000).

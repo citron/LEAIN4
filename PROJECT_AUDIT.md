@@ -216,3 +216,22 @@ Le trou « la perte VAE est une borne inférieure de la log-vraisemblance, non p
 - Intégré dans `LeanDL.lean` ; build LeanDL 86 jobs `EXIT=0` ; audit : **1919 déclarations, `using sorry: []; non-standard axiomes: []`** ; docs FR/EN `ch10-vae.mdx` : la phrase « non formalisé ici » est remplacée par la section « The ELBO, proved / L'ELBO, prouvé » avec ancres `#elbo` et `#elbo_gap` ; `node scripts/check.mjs` → `OK: 22 pages… CHECK=0`.
 
 Limite honnête : le chapitre 10 gaussien (continume) reste l'analogue continu ; le théorème prouvé couvre l'espace latent fini (identités en sommes finies) — c'est la signification exacte de la perte, la version à intégrales gaussiennes garde ses hypothèses déclarées.
+
+## Phase 4.6 — Ch09 : le bloc Transformer assemblé et prouvé (RÉSOLU)
+
+`lean/LeanDL/Ch09/Transformer.lean` assemble le bloc complet (layerNorm pré-norme,
+attention multi-têtes causale avec projection de sortie sur la concaténation prouvée
+`concat_head`/`head_concat`, FFN à activation abstraite `σ`, deux résiduelles) sur une
+séquence typée `Mat α T d`, et démontre pour le bloc entier :
+
+- `blockOut_no_leak` : si deux séquences coïncident sur les lignes `j ≤ t`, la sortie en
+  `t` est identique — remontée de congruence (seqNorm, `causal_no_leak` par tête,
+  concaténation, projection, résiduelle, FFN). C'est ce qui licence l'entraînement
+  parallèle sur séquences entières.
+- `blockOut_shift` : ajouter une constante à toute la séquence laisse la sortie inchangée
+  (`layerNorm_shift` propagé ; la résiduelle ne récupère la constante qu'une fois).
+
+Preuves sur corps exact `α` avec `HasAct`/`HasExp` ; la démo `gpt` calcule la même
+structure en `Float`. Audit après intégration : 1928 déclarations, aucun `sorry` hors
+Exercises, aucun axiome non standard. Docs FR/EN Ch09 complétées (ancre
+`#transformer_props`).

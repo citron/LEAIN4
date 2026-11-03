@@ -29,6 +29,7 @@ import LeanDL.Ch08.Gru
 import LeanDL.Ch08.Lstm
 import LeanDL.Ch08.Solutions
 import LeanDL.Ch09.Attention
+import LeanDL.Ch09.Transformer
 import LeanDL.Ch09.Gpt
 import LeanDL.Ch09.Solutions
 import LeanDL.Ch10.Model
