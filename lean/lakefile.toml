@@ -110,3 +110,7 @@ root = "Demos.Figures"
 [[lean_exe]]
 name = "ch18"
 root = "Demos.Ch18"
+
+[[lean_exe]]
+name = "props"
+root = "Demos.Props"

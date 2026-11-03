@@ -12,12 +12,15 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: lean
-          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 figures
+          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 props figures
       - name: "Audit axioms (expects: using sorry #[])"
         run: lake env lean ../scripts/audit_axioms.lean
         working-directory: lean
       - name: Smoke-run fast demos (ch05, ch16, ch17, ch18)
         run: lake exe ch05 && lake exe ch16 && lake exe ch17 && lake exe ch18
+
+      - name: Property tests (theorems exercised on seeded pseudorandom inputs)
+        run: lake exe props
         working-directory: lean
         timeout-minutes: 10
       - name: MNIST integration test (seeded SGD, accuracy must reach 90%)
