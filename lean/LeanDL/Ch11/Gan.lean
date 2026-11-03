@@ -1,5 +1,6 @@
 import LeanDL.Ch04.Correct
 import LeanDL.Ch02.Perceptron
+import LeanDL.Ch18.Efficiency
 
 /-!
 # Chapter 11 — GANs: the optimal discriminator
@@ -91,5 +92,44 @@ theorem ganObj_critical (hinv : ∀ x : α, HasAct.inv x = x⁻¹) (a b : α)
 -- ANCHOR_END: log_gan
 
 end Log
+
+section TwoModes
+variable {α : Type}
+
+/-! **The two-mode toy.** The data lives on two equal modes (mass `a` each);
+the generator spreads its mass `b` over them. `lsLoss_value` shows the optimal
+discriminator pays the generator `a·m·(a+m)⁻¹` at a mode carrying generator
+mass `m` — so the total reward is *increasing* in how evenly `m` is spread. -/
+
+/-- Reward when the generator **collapses**: all its mass `b` on one mode, zero
+on the other (one matching pair, one pure-data mode). -/
+def collapseReward (a b : Rat) : Rat := a * b * (a + b)⁻¹
+
+/-- Reward when the generator **covers**: mass `b/2` on each mode (two partial
+matches). -/
+def coverReward (a b : Rat) : Rat := a * (b / 2) * (a + b / 2)⁻¹ + a * (b / 2) * (a + b / 2)⁻¹
+
+/-- The covered reward simplifies: two equal partial matches are one product. -/
+theorem cover_simplify (a b : Rat) : coverReward a b = a * b * (a + b / 2)⁻¹ := by
+  show a * (b / 2) * (a + b / 2)⁻¹ + a * (b / 2) * (a + b / 2)⁻¹ = a * b * (a + b / 2)⁻¹
+  rw [show (b : Rat) / 2 = b * (2 : Rat)⁻¹ from by rw [Rat.div_def]]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_mul, Rat.mul_inv_cancel]
+
+/-- **Mode collapse loses, exactly.** The LS-GAN game rewards *covering* both
+modes over *collapsing* on one: `a·b/(a+b) < a·b/(a+b/2)`. The reward formula
+is `lsLoss_value` applied per mode; the inequality is the inverse's strict
+antitonicity (`Ch18.inv_antitone`) with a fixed numerator. This is the toy
+version of the classic failure mode — and it is a theorem, not a demo. -/
+-- ANCHOR: collapse
+theorem mode_collapse_reward (a b : Rat) (ha : 0 < a) (hb : 0 < b) :
+    collapseReward a b < coverReward a b := by
+  rw [cover_simplify, collapseReward]
+  have hpos : 0 < a * b := Rat.mul_pos ha hb
+  have hinv : (a + b)⁻¹ < (a + b / 2)⁻¹ :=
+    Ch18.inv_antitone (by grind) (by grind)
+  exact Rat.mul_lt_mul_of_pos_left hinv hpos
+-- ANCHOR_END: collapse
+
+end TwoModes
 
 end LeanDL.Ch11

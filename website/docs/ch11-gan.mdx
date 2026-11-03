@@ -69,6 +69,22 @@ Notice what the theorem does **not** say: it does not say $d^\star$ is a maximum
 Optimality proofs often become easy once you *guess the minimiser* and prove an identity of the form "loss = minimum + a square". The identity is a ring computation that `grind` finishes; positivity of the square does the rest.
 :::
 
+## Mode collapse, proved
+
+Mode collapse — the generator parking all its mass on one mode of the data — is usually a slogan. On the two-mode toy it is a theorem.
+
+The data sits on two equal modes, mass $a$ each; the generator spreads mass $b$ over them. The least-squares analysis above (`lsLoss_value`) says the optimal discriminator pays the generator $a\,m\,(a+m)^{-1}$ at a mode carrying generator mass $m$. Two options:
+
+- **Collapse**: all of $b$ on one mode — reward $\dfrac{a\,b}{a+b}$.
+- **Cover**: $b/2$ on each — reward $\dfrac{a\,b}{a+b/2}$ (the two partial matches merge into one product, `cover_simplify`).
+
+Same numerator, and $a + b/2 < a + b$, so the smaller denominator wins:
+
+```lean file=Ch11/Gan.lean#collapse
+```
+
+`mode_collapse_reward` is the classic failure mode with a proof attached: in this game, covering strictly beats collapsing, for every $a, b > 0$ — the inverse's strict antitonicity (`Ch18.inv_antitone`) doing the work. The general statement (multi-mode, continuous densities) needs the full GAN variational machinery; what is proved here is the algebraic skeleton every collapse argument rests on.
+
 ## Two networks, one autodiff
 
 Both networks have one hidden layer of 8 tanh units: 50 parameters in total (the first 25 belong to $G$, the last 25 to $D$). Both losses are `Expr`s, so both gradients come from `backprop`.

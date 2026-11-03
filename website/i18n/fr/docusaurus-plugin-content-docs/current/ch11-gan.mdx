@@ -69,6 +69,20 @@ Remarquez ce que le théorème **ne dit pas** : il ne dit pas que $d^\star$ est 
 Les preuves d'optimalité deviennent souvent faciles quand on *devine le minimiseur* et qu'on prouve une identité de la forme « perte = minimum + un carré ». L'identité est un calcul d'anneau que `grind` termine ; la positivité du carré fait le reste.
 :::
 
+## L’effondrement de modes, prouvé
+
+Les données vivent sur deux modes égaux, de masse $a$ chacun ; le générateur répartit sa masse $b$ dessus. L’analyse des moindres carrés ci-dessus (`lsLoss_value`) dit que le discriminateur optimal paie le générateur $a\,m\,(a+m)^{-1}$ sur un mode portant la masse générée $m$. Deux options :
+
+- **Effondrement** : tout $b$ sur un seul mode — récompense $\dfrac{a\,b}{a+b}$.
+- **Couverture** : $b/2$ sur chacun — récompense $\dfrac{a\,b}{a+b/2}$ (les deux appariements partiels se fusionnent en un seul produit, `cover_simplify`).
+
+Même numérateur, et $a + b/2 < a + b$, donc le dénominateur le plus petit gagne :
+
+```lean file=Ch11/Gan.lean#collapse
+```
+
+`mode_collapse_reward` est le mode de défaillance classique avec sa preuve attachée : dans ce jeu, couvrir bat strictement s’effondrer, pour tous $a, b > 0$ — l’antitonicité stricte de l’inverse (`Ch18.inv_antitone`) fait le travail. L’énoncé général (multi-modes, densités continues) demande l’appareil variationnel complet des GAN ; ce qui est prouvé ici est le squelette algébrique sur lequel repose tout argument d’effondrement.
+
 ## Deux réseaux, une seule différentiation automatique
 
 Les deux réseaux ont une couche cachée de 8 unités tanh : 50 paramètres au total (les 25 premiers pour $G$, les 25 derniers pour $D$). Les deux pertes sont des `Expr` : les deux gradients viennent de `backprop`.
