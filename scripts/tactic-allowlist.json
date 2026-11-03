@@ -1,0 +1,19 @@
+[
+  "grind",
+  "omega",
+  "decide",
+  "simp",
+  "rfl",
+  "induction",
+  "cases",
+  "lake",
+  "elan",
+  "sorry",
+  "by_cases",
+  "exact_mod_cast",
+  "push_cast",
+  "norm_cast",
+  "funext",
+  "congr",
+  "rw"
+]
