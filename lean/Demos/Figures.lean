@@ -134,4 +134,20 @@ def main : IO Unit := do
   let ws := grid 0.0 2.0 20
   save "collapse_penalty" <| lineSvg 480 280 0.0 2.0 0.0 2.0 "Objective of a perfect predictor (gamma = 1)" "penalty weight w" "total objective"
     [("collapsed (spread 0)", orange, curve ws fun w => w), ("informative (spread >= gamma)", green, curve ws fun _ => 0.0)]
+  -- Chapter 18: quantization error of the two grids, floor (error in [0, s)) and
+  -- round-to-nearest (error in (-s/2, s/2]) — the bounds of quant_bound / roundq_err_le.
+  save "quantization" <| lineSvg 480 260 (-4.0) 4.0 (-0.8) 1.2 "Quantization error, step s = 1" "value x" "x - Q(x)"
+    [("floor grid", orange, curve (grid (-4.0) 4.0 160) fun x => x - Float.floor x),
+     ("round grid", blue, curve (grid (-4.0) 4.0 160) fun x => x - Float.round x)]
+  -- Chapter 18: MoE load balance. The collision probability sum p^2 of a router
+  -- p_i proportional to (i+1)^alpha over E = 9 experts, times E (so the floor of
+  -- balance_ge sits at 1.0): uniform (alpha = 0) attains it; skew raises it.
+  let collide (alpha : Float) : Float :=
+    let e := (9 : Nat)
+    let Z := (Array.range e).foldl (fun acc j => acc + Float.pow (j.toFloat + 1.0) alpha) 0.0
+    (Array.range e).foldl (fun acc j =>
+      let p := Float.pow (j.toFloat + 1.0) alpha / Z
+      acc + p * p) 0.0
+  save "moe_balance" <| lineSvg 480 260 0.0 4.0 0.8 6.0 "MoE collision probability E * sum p^2 (floor = 1)" "router skew alpha" "E * sum p^2"
+    [("collision probability", blue, curve (grid 0.0 4.0 40) collide)]
   IO.println "figures written to ../website/static/img/"

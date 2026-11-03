@@ -32,6 +32,8 @@ Chapters 0–17 build models that *learn*. A model that ships must also be small
 
 The honest limits: this is the *scalar* theory. Real INT8 quantization also clips outliers (a range-fitting problem, not a floor problem), quantizes activations (which move, so their statistics need calibration), and the network's output error is the *composition* of many quantized layers — bounded by the drift machinery of Chapter 5, not by one grid. What is proved here is the atom every one of those arguments starts from.
 
+<Figure src="quantization.svg" alt="Sawtooth quantization error of the floor grid (in [0, s)) and the round grid (in (-s/2, s/2])" caption="The two error profiles of the proved bounds: the floor grid pays a full cell, the round grid pays half." />
+
 ## Mixture of experts: the collision floor
 
 ```lean file=Ch18/Efficiency.lean#balance
@@ -44,6 +46,8 @@ The router gives expert $i$ a weight $p_i \ge 0$ with $\sum_i p_i = 1$. The load
 **Collapse pays $E$ times the floor** (`balance_collapse`): the collapsed router `oneAt0` — all mass on expert 0 — is a genuine distribution (`vsum_oneAt0`, by induction over `Fin (E + 1)`), and its collision loss is exactly $1 = E \cdot (1/E)$. A collapsed router is $E$ times more expensive on the balance loss *and* leaves $E-1$ experts idle: the floor is attained at uniform and the loss is unbounded above in the collapsed corner. No hypothesis is missing from `balance_ge`: it is the whole story.
 
 The demo makes the curve visible: $E = 8$ experts, floor $0.125$; uniform scores $0.125$, a skewed router $0.23$, a collapsed router $1.0$.
+
+<Figure src="moe_balance.svg" alt="Collision probability E times sum p squared versus router skew, starting at the floor 1 for the uniform router" caption="Skew buys specialization and pays in collisions: E * sum p^2 rises from the proved floor 1 as the router gets uneven." />
 
 ## Distillation: the floor is the teacher's entropy
 

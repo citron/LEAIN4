@@ -33,6 +33,8 @@ Les chapitres 0 à 17 construisent des modèles qui *apprennent*. Un modèle qui
 
 Les limites honnêtes : c'est la théorie *scalaire*. La quantification INT8 réelle clusterise aussi les valeurs extrêmes (un problème d'ajustement de plage, pas de plancher), quantifie les activations (qui bougent, donc leurs statistiques demandent un calibrage), et l'erreur en sortie du réseau est la *composition* de nombreuses couches quantifiées — bornée par la machinerie de dérive du chapitre 5, pas par une seule grille. Ce qui est prouvé ici est l'atome dont toute ces argumentations partent.
 
+<Figure src="quantization.svg" alt="Erreurs en dents de scie de la grille plancher (dans [0, s)) et de la grille arrondie (dans (-s/2, s/2])" caption="Les deux profils d’erreur des bornes démontrées : la grille plancher paie une cellule entière, la grille arrondie paie la moitié." />
+
 ## Mélange d'experts : le plancher de collision
 
 ```lean file=Ch18/Efficiency.lean#balance
@@ -45,6 +47,8 @@ Le routeur donne à l'expert $i$ un poids $p_i \ge 0$ avec $\sum_i p_i = 1$. La 
 **L'effondrement paie $E$ fois le plancher** (`balance_collapse`) : le routeur effondré `oneAt0` — toute la masse sur l'expert 0 — est une vraie distribution (`vsum_oneAt0`, par induction sur `Fin (E + 1)`), et sa perte de collision vaut exactement $1 = E \cdot (1/E)$. Un routeur effondré coûte $E$ fois plus sur la perte d'équilibrage *et* laisse $E-1$ experts au chômage : le plancher est atteint à l'uniforme et la perte n'est pas bornée au-dessus dans le coin effondré. `balance_ge` ne manque d'aucune hypothèse : c'est toute l'histoire.
 
 La démo rend la courbe visible : $E = 8$ experts, plancher $0.125$ ; l'uniforme vaut $0.125$, un routeur biaisé $0.23$, un effondré $1.0$.
+
+<Figure src="moe_balance.svg" alt="Probabilité de collision E fois somme p au carré selon le biais du routeur, partant du plancher 1 pour le routeur uniforme" caption="Le biais achète la spécialisation et se paie en collisions : E * somme p² s’élève au-dessus du plancher démontré 1 quand le routeur devient inégal." />
 
 ## Distillation : le plancher est l'entropie du professeur
 
