@@ -3,6 +3,7 @@ import LeanDL.Ch17.Contrastive
 import LeanDL.Ch18.Efficiency
 import LeanDL.Core.Rng
 import LeanDL.Core.Algebra
+import LeanDL.Core.Tensor
 
 /-!
 # Property tests — the theorems, exercised on pseudorandom inputs
@@ -28,7 +29,7 @@ instances on `Float` propositions are avoided: they can reduce to `sorry` at exe
 A failure here means an implementation drifted from the specification it proves.
 -/
 
-open LeanDL LeanDL.Ch05 LeanDL.Ch18
+open LeanDL LeanDL.Ch05 LeanDL.Ch18 Tensors
 
 /-- Native boolean comparisons for `Float` (no `Decidable` on `Float` propositions). -/
 def geB (x b : Float) : Bool := Float.beq (x - b) (Float.abs (x - b))
@@ -90,6 +91,34 @@ def prop_moe (n : Nat) : Bool := Id.run do
   return ok
 
 end RatChecks
+
+/-- Core.Tensor: the flat emulation equals the formal `Mat.mulVec`, entry for
+entry, on random exact tensors (m = 3, n = 4); flatten/matricize round-trips. -/
+def cells (g : Rng) (k : Nat) (acc : List Rat) : Rng × List Rat :=
+  match k with
+  | 0 => (g, acc)
+  | k + 1 =>
+      let (w, g') := word g
+      cells g' k ((Rat.ofInt (Int.ofNat (w % 4001)) / Rat.ofInt 100 - 20) :: acc)
+
+def prop_tensor (n : Nat) : Bool := Id.run do
+  let mut g := Rng.seed 0xC0FFEE123456789
+  let mut ok := true
+  for _ in [0:n] do
+    let (g1, cellsA) := cells g 12 []
+    let (g2, cellsV) := cells g1 4 []
+    g := g2
+    let A : Tensor Rat 3 4 := fun i => cellsA.getD i.val 0
+    let v : Fin 4 → Rat := fun j => cellsV.getD j.val 0
+    -- the flat loop == the proved matrix product, on every output row
+    ok := ok && decide (flatMulVec A v (0 : Fin 3) == Mat.mulVec (toMat A) v (0 : Fin 3))
+      && decide (flatMulVec A v (1 : Fin 3) == Mat.mulVec (toMat A) v (1 : Fin 3))
+      && decide (flatMulVec A v (2 : Fin 3) == Mat.mulVec (toMat A) v (2 : Fin 3))
+    -- the proved round trip fromMat (toMat A) == A, exercised on every cell
+    ok := ok && (List.range 12).all fun k =>
+      fromMat (toMat A) (⟨k % 12, Nat.mod_lt _ (by omega)⟩ : Fin 12)
+        == A (⟨k % 12, Nat.mod_lt _ (by omega)⟩ : Fin 12)
+  return ok
 
 section FloatMirrors
 
@@ -168,6 +197,7 @@ def main : IO UInt32 := do
     [ ("Ch05 sgdQuad == powN closed form + contraction (200 Rat draws)", prop_sgd 200),
       ("Ch18 |x - quant s x| < s and |x - roundq s x| <= s/2 (500 Rat draws)", prop_quant 500),
       ("Ch18 MoE sum p^2 >= 1/8 (200 Rat routers)", prop_moe 200),
+      ("Core.Tensor: flatMulVec == Mat.mulVec + flatten round-trip (300 Rat tensors)", prop_tensor 300),
       ("Float softmax: positive weights, sum == 1 (500 rows)", prop_softmax_f 500),
       ("Float layerNorm: mean 0, var 1, shift-invariant (500 rows)", prop_layerNorm_f 500),
       ("Float causal attention: rows j>3 invisible at t=3 (500 draws)", prop_causal_f 500) ] do

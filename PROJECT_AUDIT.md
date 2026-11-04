@@ -265,3 +265,14 @@ Verifications : `lake build LeanDL` 87 jobs ; audit `checked 1987 declarations; 
 - **Item 1 (tenseur générique) : reste ouvert** — dernier gros chantier identifié.
 
 Verifications : `check.mjs` vert 22 pages ; build 87 jobs ; audit 1987 déclarations propres.
+
+
+## Phase 6b — Tenseur générique (RÉSOLU)
+
+- `lean/LeanDL/Core/Tensor.lean` (nouveau, couche Core) : `Tensor α m n := Fin (m*n) → α` — forme dans le type, stockage à plat ligne par ligne, le layout réel des librairies.
+- Pont prouvé avec la couche formelle : `row`/`col`/`unflat` (arithmétique `div`/`mod` des strides, `row_unflat`, `col_unflat`), `toMat`/`fromMat` inverseux (`toMat_fromMat`, `fromMat_toMat` — `Nat.div_add_mod`), `flatMulVec_eq` : la boucle à plat d'une couche dense EST le `Mat.mulVec` prouvé, entrée par entrée.
+- Pièges d'API rencontrés et règle : `Nat.div_lt_of_lt_mul`/`Nat.mod_lt` attendent `i.val < n * m` (multiplication dans l'ordre `n * m`), la unification désunifie les paramètres implicites de `row`/`col` — les passer en paramètres EXPLICITES ; `Nat.add_mul_mod_self` n'existe pas, c'est `Nat.add_mul_mod_self_right : (x + y * z) % z = x % z` ; `Nat.add_mul_div_left` réduit `(j + n*i)/n` (forme `n * i`, pas `i * n`).
+- Exécutable : property test `prop_tensor` dans `Demos/Props.lean` — 300 tenseurs Rat exacts, `flatMulVec == Mat.mulVec` sur chaque sortie + round-trip cellule par cellule, 7/7 PASS.
+- Docs FR/EN : section « Des formes vérifiées aux tenseurs à plat » dans la page Ch03 (la forme typée y est introduite).
+
+Verifications : build 88 jobs ; audit **2007 déclarations propres** (0 sorry, 0 axiome non standard) ; `lake exe props` 7/7 PASS ; `check.mjs` 22 pages. Phase 6 ENTIÈREMENT close.

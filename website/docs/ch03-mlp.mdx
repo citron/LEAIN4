@@ -46,6 +46,32 @@ The last theorem says a layer is nothing new: it is `nout` neurons of Chapter 1 
 `MLP α n m` is a family of types indexed by the input size `n` and the output size `m`. The constructor `cons` only accepts a layer `n → h` followed by a network `h → m`, so the sizes of consecutive layers *must* match. A network with mismatched layers is not a runtime error: it is a program that does not type-check.
 :::
 
+## From checked shapes to flat tensors
+
+Every network above is indexed by its sizes — `Mat α m n` knows `m` and `n`. Production
+code does not: it flattens everything into one buffer (`28*28*3` floats for an image,
+`B*T*d` for a batch) and the layout — row-major strides — is a comment. `Core/Tensor.lean`
+is the missing middle: a tensor whose **shape lives in the type** but which is **stored
+flat**, exactly like the real thing, with a proved dictionary between the two worlds.
+
+```lean file=Core/Tensor.lean#tensor
+```
+
+The index arithmetic is the classical `i / n` and `i % n` of row-major strides, and the
+two round trips are theorems: flattening a matrix and reading it back with `row`/`col`
+gives the same entry (`toMat_fromMat`, `fromMat_toMat` — the second one is Euclidean
+division with remainder, `Nat.div_add_mod`, doing its job).
+
+The payoff is the bridge to the layer we actually run:
+
+```lean file=Core/Tensor.lean#matvec
+```
+
+`flatMulVec` is the loop an untyped fully-connected layer runs over a flat buffer.
+`flatMulVec_eq` proves it **is** the formal `Mat.mulVec` of chapter 3 — entry for entry,
+no product added, no product dropped. The shape-checked network and the flattened
+deployment code are the same computation.
+
 ## XOR, solved
 
 XOR is `AND (OR x₁ x₂) (NAND x₁ x₂)`: the hidden layer computes OR and NAND, the output neuron is an AND. The theorem is checked on all four inputs by `decide`.

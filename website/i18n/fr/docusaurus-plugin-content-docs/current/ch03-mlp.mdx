@@ -46,6 +46,33 @@ Le dernier théorème dit qu'une couche n'a rien de nouveau : ce sont `nout` neu
 `MLP α n m` est une famille de types indexée par la taille d'entrée `n` et la taille de sortie `m`. Le constructeur `cons` n'accepte qu'une couche `n → h` suivie d'un réseau `h → m` : les tailles de couches consécutives *doivent* donc coïncider. Un réseau aux couches incompatibles n'est pas une erreur d'exécution : c'est un programme qui ne passe pas le typage.
 :::
 
+## Des formes vérifiées aux tenseurs à plat
+
+Tous les réseaux ci-dessus sont indexés par leurs tailles — `Mat α m n` connaît `m` et
+`n`. Le code de production, lui, ne connaît rien : il aplatit tout dans un seul tampon
+(`28*28*3` flottants pour une image, `B*T*d` pour un batch) et la disposition — les pas
+en ordre ligne par ligne — est un commentaire. `Core/Tensor.lean` est la pièce manquante :
+un tenseur dont la **forme vit dans le type** mais qui est **stocké à plat**, exactement
+comme le vrai, avec un dictionnaire prouvé entre les deux mondes.
+
+```lean file=Core/Tensor.lean#tensor
+```
+
+L'arithmétique des indices est le classique `i / n` et `i % n` des pas en ordre ligne par
+ligne, et les deux allers-retours sont des théorèmes : aplatir une matrice puis la relire
+avec `row`/`col` redonne la même entrée (`toMat_fromMat`, `fromMat_toMat` — le second
+n'est que la division euclidienne avec reste, `Nat.div_add_mod`).
+
+Tout l'intérêt est le pont vers la couche réellement exécutée :
+
+```lean file=Core/Tensor.lean#matvec
+```
+
+`flatMulVec` est la boucle qu'une couche entièrement connectée non typée fait sur le
+tampon à plat. `flatMulVec_eq` prouve que c'est **exactement** le `Mat.mulVec` formel du
+chapitre 3 — entrée par entrée, sans un produit ajouté ni perdu. Le réseau à formes
+vérifiées et le code aplatifié de déploiement sont le même calcul.
+
 ## Le XOR, résolu
 
 Le XOR vaut `ET (OU x₁ x₂) (NON-ET x₁ x₂)` : la couche cachée calcule OU et NON-ET, le neurone de sortie est un ET. Le théorème est vérifié sur les quatre entrées par `decide`.
