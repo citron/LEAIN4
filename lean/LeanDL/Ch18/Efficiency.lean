@@ -201,6 +201,44 @@ theorem balance_collapse {E : Nat} (hE : 0 < E) :
   exact ⟨vsum_oneAt0 a, vsum_oneAt0 a⟩
 
 -- ANCHOR_END: balance
+
+-- ANCHOR: routing
+/-- A full router matrix: `w i k` is expert `i`'s weight on token `k`, normalised per token.
+The fraction of tokens routed to expert `i` is `f i = (1/B) Σ_k w i k`. -/
+def frac {E B : Nat} (w : Fin E → Fin B → Rat) (i : Fin E) : Rat :=
+  (B : Rat)⁻¹ * vsum (fun k => w i k)
+
+/-- The fractions sum to 1: per-token normalisation + exchanging the two finite sums
+(`vsum_comm`) gives `Σᵢ fᵢ = (1/B) Σ_k 1 = 1`. -/
+theorem frac_sum {E B : Nat} (hB : 0 < B) (w : Fin E → Fin B → Rat)
+    (hw : ∀ k, vsum (fun i => w i k) = 1) : vsum (fun i => frac w i) = 1 := by
+  unfold frac
+  rw [vsum_smul]
+  rw [show (fun i => vsum (fun k => w i k)) = (fun i => vsum (w i)) from rfl]
+  rw [vsum_comm]
+  rw [show (fun k => vsum (fun i => w i k)) = (fun k => (1 : Rat)) from by
+        funext k; exact hw k]
+  rw [vsum_const]
+  push_cast
+  rw [show (B : Rat) * 1 = (B : Rat) from Rat.mul_one (B : Rat)]
+  rw [Rat.mul_comm]
+  exact Rat.mul_inv_cancel (a := (B : Rat)) (by norm_cast; omega)
+
+/-- **The load-balancing loss is at least 1 — for ANY router.** Real MoE training adds an
+auxiliary loss `E · Σᵢ fᵢ²` (fraction of tokens per expert, times the expert count). The
+`balance_ge` floor applies to `f` once `frac_sum` puts it in the theorem's hypotheses:
+no routing strategy, however degenerate or token-dependent, escapes the floor. -/
+theorem balancing_ge {E B : Nat} (hE : 0 < E) (hB : 0 < B) (w : Fin E → Fin B → Rat)
+    (hw : ∀ k, vsum (fun i => w i k) = 1) :
+    (1 : Rat) ≤ (E : Rat) * vsum (fun i => frac w i * frac w i) := by
+  have hf := frac_sum hB w hw
+  have h := balance_ge hE (fun i => frac w i) hf
+  have hE0 : 0 ≤ (E : Rat) := by norm_cast; omega
+  have hmul := Rat.mul_le_mul_of_nonneg_left h hE0
+  rw [show (E : Rat) * (E : Rat)⁻¹ = 1 from
+    Rat.mul_inv_cancel (a := (E : Rat)) (by norm_cast; omega)] at hmul
+  exact hmul
+-- ANCHOR_END: routing
 end MixtureOfExperts
 
 section Distillation

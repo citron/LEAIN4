@@ -45,6 +45,11 @@ The router gives expert $i$ a weight $p_i \ge 0$ with $\sum_i p_i = 1$. The load
 
 **Collapse pays $E$ times the floor** (`balance_collapse`): the collapsed router `oneAt0` — all mass on expert 0 — is a genuine distribution (`vsum_oneAt0`, by induction over `Fin (E + 1)`), and its collision loss is exactly $1 = E \cdot (1/E)$. A collapsed router is $E$ times more expensive on the balance loss *and* leaves $E-1$ experts idle: the floor is attained at uniform and the loss is unbounded above in the collapsed corner. No hypothesis is missing from `balance_ge`: it is the whole story.
 
+**The floor survives the full router matrix** (`frac_sum`, `balancing_ge`). Real load-balancing losses are not computed on a single weight vector: they are computed on the *fraction of tokens* $f_i$ routed to expert $i$ over a batch, and the auxiliary loss is $E\cdot\sum_i f_i^2$. The floor is a theorem about the whole routing matrix: if every token's weights are normalised, then $\sum_i f_i = 1$ — per-token normalisation, `vsum_comm` to exchange the two finite sums, and the double sum telescopes to $rac1B\sum_k 1 = 1$ — so `balance_ge` applies and the balancing loss is $\ge 1$ for **any** router, however degenerate or token-dependent.
+
+```lean file=Ch18/Efficiency.lean#routing
+```
+
 The demo makes the curve visible: $E = 8$ experts, floor $0.125$; uniform scores $0.125$, a skewed router $0.23$, a collapsed router $1.0$.
 
 <Figure src="moe_balance.svg" alt="Collision probability E times sum p squared versus router skew, starting at the floor 1 for the uniform router" caption="Skew buys specialization and pays in collisions: E * sum p^2 rises from the proved floor 1 as the router gets uneven." />
