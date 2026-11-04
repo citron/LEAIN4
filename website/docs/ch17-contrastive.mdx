@@ -52,6 +52,8 @@ Strip the batch to one query, one positive (score `hi`) and one negative (score 
 
 The proof also derives `log_mono` — logarithm monotone on the positives — from the tangent bound `log t ≤ t - 1` applied to the ratio `x / y` (`log_div`). No new axiom: a theorem of the four `LawfulLog` laws.
 
+<Figure src="infonce_floor.svg" alt="InfoNCE blind floor log(n+1) rising with the number of negatives, the matched-pair curve log 2 at gap zero and log(1+exp(-2)) at gap 2 below it" caption="The floor theorems predict, drawn: a blind embedding pays exactly log(n+1) - one bit for a matched pair, 3.14 bits for 32 negatives (infoNce_collapse). A matched pair with a real similarity gap pays log(1 + exp(lo - hi)) - matched_loss - and the gap of 2 curve sits visibly under the blindness line: contrastive learning is the fight to push the loss below its own floor." />
+
 ## Experiments
 
 `lake exe ch17` prints the numeric face of the four theorems. On `Float`:
@@ -62,6 +64,8 @@ The proof also derives `log_mono` — logarithm monotone on the positives — fr
 - the gradient `[-0.77, 0.05, 0.01, 0.62, 0.08]` sums to 0, with the positive's entry negative: pushed up, and the massiest negative pushed down the hardest.
 
 Then a real training run: five items on a circle, fixed queries at radius 1.5, embeddings on the unit sphere, cosine scores at temperature $\tau = 0.5$, plain SGD with a projection back to the sphere after every step (an unnormalised embedding runs away — the classic contrastive blow-up, caught in the open). The run *starts at the collapse floor*: every score is 1.5, the loss is $\log 5 = 1.61$ exactly. After 500 epochs the mean loss is **0.24**, and it stays at $0.23$–$0.25$ to epoch 2000; the mean cosine between each learned embedding and its target item is **1.00**. The embedding did not merely beat the floor — it recovered the items.
+
+<Figure src="softmax_sharp.svg" alt="Softmax mass on the positive as temperature varies: a step at tau = 0, nearly flat at tau = 2, the S-curve through tau = 1" caption="Temperature is the sharpness dial: scores 1 and 0, mass on the positive is exp(1/t)/(exp(1/t)+1). Cold (small tau): winner-take-all, gradients saturate. Hot (large tau): everything is mushy and the contrastive signal vanishes. Around tau = 1 the curve is steepest - which is why the temperature is the single most-tuned hyper-parameter of every contrastive run." />
 
 ## Exercises
 

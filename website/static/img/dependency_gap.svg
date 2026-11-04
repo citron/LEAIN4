@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 210" font-family="sans-serif" font-size="12"><rect width="480" height="210" fill="white"/>
+<text x="56" y="16" font-weight="bold">The dependency gap: x - x = 0, but X - X has double width</text>
+<line x1="40" y1="68" x2="440" y2="68" stroke="#ccc"/>
+<line x1="40" y1="118" x2="440" y2="118" stroke="#ccc"/>
+<line x1="40" y1="168" x2="440" y2="168" stroke="#ccc"/>
+<text x="34" y="76" text-anchor="end">X</text>
+<rect x="280" y="60" width="80" height="16" fill="#2e5aa8" fill-opacity="0.55" stroke="#2e5aa8"/>
+<text x="34" y="126" text-anchor="end">x - x</text>
+<circle cx="280" cy="118" r="5" fill="#2a9d5c"/><text x="292" y="122" fill="#2a9d5c">the exact point 0, for every x in X</text>
+<text x="34" y="176" text-anchor="end">X - X</text>
+<rect x="200" y="160" width="160" height="16" fill="#c4561a" fill-opacity="0.55" stroke="#c4561a"/>
+<text x="200" y="196" text-anchor="middle">-1</text><text x="360" y="196" text-anchor="middle">1</text>
+<text x="40" y="204" fill="#555" transform="translate(0,-4)"/>
+<text x="40" y="204" fill="#555">Interval arithmetic is a sound over-approximation: honest bounds, never exact for dependent inputs.</text>
+</svg>

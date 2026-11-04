@@ -70,6 +70,8 @@ The first identity ties them:
 
 **Cross-entropy = entropy + KL.** The entropy of the data does not depend on the model, so minimising cross-entropy is *exactly* minimising KL: fitting the model, not the data. This is why cross-entropy is the classification loss, not a decorative choice.
 
+<Figure src="entropy_coin.svg" alt="Binary entropy H(p) peaks at 1 bit for the fair coin and vanishes at the endpoints" caption="Entropy of a biased coin, the curve behind every information argument: maximum surprise (1 bit) at the fair coin, zero surprise at a deterministic source, and the curve is flat near the top - which is exactly why a slightly biased coin is almost as expensive to code as a fair one." />
+
 ## Gibbs inequality: KL ≥ 0
 
 The theorem that makes training mean something:
@@ -80,6 +82,8 @@ The theorem that makes training mean something:
 The proof is the textbook one, fully checked. The pointwise bound $\log q - \log p \le (q-p)/p$ is the tangent inequality $\log x \le x-1$ applied to $x = q/p$ and rewritten with `log_div`; summing against weights $p_i \ge 0$ preserves the inequality (`dot_mono`); the right side **telescopes** — $\sum_i p_i (q_i - p_i)/p_i = \sum_i q_i - \sum_i p_i = 1 - 1 = 0$ — using the exact cancellation $p \cdot p^{-1} = 1$ that holds over `Rat` and *fails* over `Float`; negating flips the sign. Four steps, each one line of Lean.
 
 **Consequences:** KL is $0$ exactly when $p = q$ (the tangent inequality is strict away from $1$); cross-entropy is bounded below by $H(p)$, so there is a floor no model can beat; and a model that puts near-zero probability on an event that *does* happen pays near-infinite loss — the "confidently wrong" row in the demo.
+
+<Figure src="kl_asymmetry.svg" alt="KL(p,q) and KL(q,p) as functions of q against a fixed p = 0.5: two different U-shaped curves, proving KL is not a distance" caption="KL is not a distance, visible: coding a source p = 0.5 with a code built for q costs KL(p, q), and the reverse order draws a different curve. Both hit zero exactly at q = p (Gibbs: KL ≥ 0, equality iff q = p), both blow up at the endpoints (the log of zero) - the two theorems of Section « Gibbs inequality » in one picture." />
 
 ## Generalization: bias, variance, and why ensembles work
 

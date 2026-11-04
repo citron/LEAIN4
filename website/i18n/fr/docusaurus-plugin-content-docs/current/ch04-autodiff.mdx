@@ -113,6 +113,8 @@ Avec cette machinerie, la règle delta du chapitre 3 devient un corollaire : la 
 ```lean file=Ch04/Network.lean#delta_rule
 ```
 
+<Figure src="chain_stack.svg" alt="Le gradient à travers une pile de couches sigmoïdes décroît linéairement en L : (1/4)^L au pire, (0.5)^L en général" caption="Pourquoi la profondeur est une multiplication : chaque couche sigmoïde est un facteur au plus 1/4, donc le gradient de bout en bout décroît en ligne droite sur l'axe logarithmique. C'est le théorème de disparition du gradient en une image - et la raison pour laquelle ReLU (pente locale 1) a pris le relais." />
+
 ## Des réseaux de profondeur quelconque
 
 Une couche dense et un perceptron multicouche entier ne sont que des fonctions qui construisent des expressions. Rien dans le code d'autodiff ne connaît les couches.

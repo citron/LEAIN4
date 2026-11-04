@@ -294,3 +294,22 @@ Verifications : build 88 jobs ; audit **2007 déclarations propres** (0 sorry, 0
 - Docs FR/EN : section « Certified intervals / Intervalles certifiés » dans Ch05, après l'encadré « What the hand-coded training is not » — le pont entre la démo Float sans garantie et le fait rationnel vérifiable.
 
 Verifications : build **89 jobs** ; audit **2084 déclarations propres** (0 sorry, 0 axiome non standard) ; `check.mjs` 22 pages ; build website FR/EN OK.
+
+## Phase I — Illustrations massives (RÉSOLU)
+
+Objectif : rendre le cours compréhensible par l’image. 13 nouvelles figures, avec parité FR/EN stricte.
+
+- **Courbes générées par Lean** (`lake exe figures`, `Demos/Figures.lean`, primitives `Core/Plot.lean`) :
+  `chain_stack` (vanishing gradients), `lr_stability` (falaise d’apprentissage SGD), `infonce_floor`
+  (plancher log N, effondrement), `entropy_coin` (entropie binaire), `kl_asymmetry` (KL non symétrique),
+  `softmax_sharp` (température), `float_drift` (dérive accumulée Float, visualisée à l’échelle des ulps
+  en unités 1e-12), `matched_gap` (loss appariée, plancher log 2 du modèle aveugle).
+- **Schémas statiques** : `tensor_layout` (la matrice EST son buffer plat row-major, pont `Core/Tensor`),
+  `interval_arith` (encadrements add/mul de `Core/Interval`), `dependency_gap` (X − X a double largeur,
+  x − x = 0), `four_corners` (règle des quatre coins de `mul_spec`).
+- **QA visuel** rendu dans un navigateur (les modèles de vision ne lisent pas les SVG) : a détecté et fait
+  corriger l’axe Y dégénéré de `float_drift` et deux légendes tronquées.
+- **Parité** vérifiée par script : chaque figure est référencée dans la page EN et la page FR.
+
+Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 axiome non standard) ;
+`check.mjs` 22 pages vertes ; `npm run build` website vert.

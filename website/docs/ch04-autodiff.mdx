@@ -113,6 +113,8 @@ With the machinery in place, the delta rule of Chapter 3 is a corollary: backpro
 ```lean file=Ch04/Network.lean#delta_rule
 ```
 
+<Figure src="chain_stack.svg" alt="Log gradient through a stack of sigmoid layers falls linearly in L: (1/4)^L worst case, (0.5)^L typical" caption="Why depth is a multiplication: each sigmoid layer is a factor at most 1/4, so the end-to-end gradient falls in a straight line on the log axis. This is the vanishing-gradient theorem in one picture - and the reason ReLU (local slope 1) took over." />
+
 ## Networks of any depth
 
 A dense layer and a whole multi-layer perceptron are just functions that build expressions. Nothing in the autodiff code knows about layers.

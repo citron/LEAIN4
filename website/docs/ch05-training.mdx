@@ -164,6 +164,8 @@ About one minute on a laptop CPU, with the full training set, three passes, plai
 The MNIST code is not proved correct: only the formula for its output-layer gradient is. To gain confidence, Chapter 4's recipe applies: compare with finite differences on a tiny instance.
 :::
 
+<Figure src="lr_stability.svg" alt="SGD absolute w after 600 steps on a quadratic: decays to zero for small rates, explodes past the cliff near eta = 1" caption="The optimizer's cliff, measured. On L(w) = w² with curvature 2, SGD is a contraction exactly while the rate sits under the cliff (eta < 1); past it, every theorem about descent stops applying and |w| explodes. The same picture underlies the step-size analysis of Chapter 5 - and every training run that diverges at epoch 3." />
+
 ## Certified intervals: bounding a Float run
 
 The demos run on `Float`, and `Float` promises nothing: rounding is not in the type. The honest bridge is a **rational interval** — bounds `lo` and `hi` in `Rat`, the exact scalar of the proofs — with a theorem per operation stating the true value lies inside:
@@ -179,6 +181,8 @@ Every operation carries its enclosure theorem, proved by `grind` from nothing bu
 The rule is an inclusion, not an equality: with dependent inputs (`x * x`) not every corner is reachable — interval arithmetic's classic over-estimation, witnessed in the file by the two examples on `sub` of a wide interval by itself. Inverse demands a positivity hypothesis (`invPos`, `divPos`): an interval containing 0 has no finite enclosure, and the typechecker forces you to say why that cannot happen.
 
 What a certified demo publishes is then a closed rational fact — `(mul (point (1/2)) (point (1/2))).lo = 1/4` — checked by `grind`, the same tactic that checks the proofs. A Float run gives the witness; the interval gives the guarantee.
+
+<Figure src="float_drift.svg" alt="Accumulated drift of the Float sum of ten thousand 0.1s against the exact rational answer, oscillating and growing with the exponent of the running sum" caption="The price of Float, measured: adding 0.1 one thousand times. The exact answer is the integer 1000 - a Rat certificate - but 0.1 is not a binary fraction, so every addition rounds. The drift oscillates with the exponent of the running sum and grows: exactly the gap Core/Interval.lean is built to bound." />
 
 ## Exercises
 

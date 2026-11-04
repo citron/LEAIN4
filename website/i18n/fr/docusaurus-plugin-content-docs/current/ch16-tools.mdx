@@ -70,6 +70,8 @@ La première identité les relie :
 
 **Entropie croisée = entropie + KL.** L'entropie des données ne dépend pas du modèle, donc minimiser l'entropie croisée revient *exactement* à minimiser la KL : ajuster le modèle, pas les données. Voilà pourquoi l'entropie croisée est la perte de classification, et non un choix décoratif.
 
+<Figure src="entropy_coin.svg" alt="L'entropie binaire H(p) culmine à 1 bit pour la pièce équitable et s'annule aux extrémités" caption="L'entropie d'une pièce biaisée, la courbe derrière tout argument d'information : surprise maximale (1 bit) à la pièce équitable, surprise nulle à la source déterministe, et la courbe est plate près du sommet - c'est exactement pourquoi une pièce légèrement biaisée coûte presque autant à coder qu'une pièce équitable." />
+
 ## Inégalité de Gibbs : KL ≥ 0
 
 Le théorème qui donne un sens à l'entraînement :
@@ -80,6 +82,8 @@ Le théorème qui donne un sens à l'entraînement :
 La preuve est celle du manuel, entièrement vérifiée. La borne ponctuelle $\log q - \log p \le (q-p)/p$ est l'inégalité tangente $\log x \le x-1$ appliquée à $x = q/p$ et réécrite avec `log_div` ; sommer contre des poids $p_i \ge 0$ préserve l'inégalité (`dot_mono`) ; le côté droit **télescope** — $\sum_i p_i (q_i - p_i)/p_i = \sum_i q_i - \sum_i p_i = 1 - 1 = 0$ — via l'annulation exacte $p \cdot p^{-1} = 1$ qui vaut sur `Rat` et *échoue* sur `Float` ; nier retourne le signe. Quatre étapes, chacune une ligne de Lean.
 
 **Conséquences :** la KL vaut $0$ exactement quand $p = q$ (l'inégalité tangente est stricte ailleurs qu'en $1$) ; l'entropie croisée est bornée en dessous par $H(p)$, il y a un plancher qu'aucun modèle ne bat ; et un modèle qui donne une probabilité quasi nulle à un événement qui *se produit* paie une perte quasi infinie — la ligne « sûre et fausse » de la démo.
+
+<Figure src="kl_asymmetry.svg" alt="KL(p,q) et KL(q,p) en fonction de q pour p = 0,5 fixe : deux courbes en U distinctes, preuve que KL n'est pas une distance" caption="KL n'est pas une distance, en image : coder une source p = 0,5 avec un code conçu pour q coûte KL(p, q), et l'ordre inverse dessine une autre courbe. Les deux s'annulent exactement en q = p (Gibbs : KL ≥ 0, égalité si et seulement si q = p), les deux explosent aux bords (le log de zéro) - les deux théorèmes de la section « Inégalité de Gibbs » en une image." />
 
 ## Généralisation : biais, variance, et pourquoi les ensembles marchent
 

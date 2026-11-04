@@ -164,6 +164,8 @@ Environ une minute sur le processeur d'un portable, avec tout le jeu d'entraîne
 Le code MNIST n'est pas démontré correct : seule la formule du gradient de sa couche de sortie l'est. Pour gagner en confiance, la recette du chapitre 4 s'applique : comparer avec des différences finies sur une toute petite instance.
 :::
 
+<Figure src="lr_stability.svg" alt="w absolu après 600 pas de SGD sur une quadratique : décroît vers zéro pour les petits taux, explose au-delà de la falaise vers eta = 1" caption="La falaise de l'optimiseur, mesurée. Sur L(w) = w² de courbure 2, SGD est une contraction exactement tant que le taux reste sous la falaise (eta < 1) ; au-delà, tout théorème de descente cesse de s'appliquer et |w| explose. C'est la même image que l'analyse du pas du chapitre 5 - et tout entraînement qui diverge à l'époque 3." />
+
 ## Intervalles certifiés : encadrer une exécution Float
 
 Les démos tournent sur `Float`, et `Float` ne promet rien : l'arrondi n'est pas dans le type. Le pont honnête est un **intervalle rationnel** — des bornes `lo` et `hi` en `Rat`, le scalaire exact des preuves — avec un théorème par opération affirmant que la vraie valeur reste à l'intérieur :
@@ -179,6 +181,8 @@ Chaque opération porte son théorème d'encadrement, prouvé par `grind` à par
 La règle est une inclusion, pas une égalité : avec des entrées liées (`x * x`), tous les coins ne sont pas atteignables — la surestimation classique de l'arithmétique d'intervalles, attestée dans le fichier par les deux exemples sur `sub` d'un intervalle large par lui-même. L'inversion exige une hypothèse de positivité (`invPos`, `divPos`) : un intervalle contenant 0 n'a pas d'encadrement fini, et le typechecker oblige à dire pourquoi cela ne peut pas arriver.
 
 Une démo certifiée publie alors un fait rationnel clos — `(mul (point (1/2)) (point (1/2))).lo = 1/4` — vérifié par `grind`, le même tactic que celui qui vérifie les preuves. L'exécution Float donne le témoin ; l'intervalle donne la garantie.
+
+<Figure src="float_drift.svg" alt="Dérive accumulée de la somme Float de dix mille 0,1 contre la réponse rationnelle exacte, oscillante et croissante avec l'exposant de la somme courante" caption="Le prix de Float, mesuré : ajouter 0,1 mille fois. La réponse exacte est l'entier 1000 - un certificat Rat - mais 0,1 n'est pas une fraction binaire, donc chaque addition arrondit. La dérive oscille avec l'exposant de la somme courante et croît : exactement le fossé que Core/Interval.lean est conçu pour encadrer." />
 
 ## Exercices
 

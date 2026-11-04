@@ -150,4 +150,68 @@ def main : IO Unit := do
       acc + p * p) 0.0
   save "moe_balance" <| lineSvg 480 260 0.0 4.0 0.8 6.0 "MoE collision probability E * sum p^2 (floor = 1)" "router skew alpha" "E * sum p^2"
     [("collision probability", blue, curve (grid 0.0 4.0 40) collide)]
+
+  -- Chapter 4: the chain rule through a deep stack. A sigmoid unit has |f'| <= 1/4,
+  -- so a stack of sigmoid layers multiplies the end-to-end gradient by at most (1/4)^L:
+  -- it vanishes exponentially. This is why ReLU (local slope 1) took over deep nets.
+  let stackL := grid 0.0 14.0 28
+  save "chain_stack" <| lineSvg 480 260 0.0 14.0 (-9.0) 1.0 "End-to-end gradient through a stack of sigmoid layers" "layers L" "log10 of the gradient"
+    [("worst case (1/4)^L", orange, curve stackL fun l => l * Float.log10 0.25),
+     ("typical (0.5)^L", blue, curve stackL fun l => l * Float.log10 0.5)]
+  -- Chapter 5: one-dimensional SGD on a smooth loss with curvature 2 around the
+  -- minimizer w = 0: iterates stay bounded while eta < 1, and explode past it.
+  let etas := grid 0.05 1.6 63
+  let gdEnd (eta : Float) : Float := Id.run do
+    let mut w := 1.0
+    for _ in [1:600] do w := w - eta * 2.0 * w
+    return if Float.abs w < 300.0 then Float.abs w else 300.0
+  save "lr_stability" <| lineSvg 480 260 0.0 1.6 0.0 64.0 "SGD |w| after 600 steps: the learning-rate cliff" "learning rate eta" "|w| (capped at 64)"
+    [("start w = 1", blue, curve etas gdEnd)]
+  -- Chapters 16-17: the InfoNCE floor. One positive, n negatives, blind embedding:
+  -- the loss is exactly log(n+1) (infoNce_collapse), and a matched pair costs
+  -- log(1 + exp(lo - hi)) (matched_loss), = log 2 when the model is blind.
+  let ns := grid 0.0 32.0 64
+  save "infonce_floor" <| lineSvg 480 260 0.0 32.0 0.0 4.0 "InfoNCE: the floor theorems predict" "negatives n" "loss"
+    [("blind: log(n+1)", orange, curve ns fun n => Float.log (n + 1.0)),
+     ("matched pair, gap 0: log 2", grey, curve ns fun _ => Float.log 2.0),
+     ("matched pair, gap 2", green, curve ns fun _ => Float.log (1.0 + Float.exp (-2.0)))]
+  -- Chapter 16: the entropy of a binary source peaks, flat, at the fair coin.
+  let ps := grid 0.001 0.999 99
+  save "entropy_coin" <| lineSvg 480 260 0.0 1.0 0.0 1.1 "Entropy of a biased coin" "p (probability of heads)" "entropy H(p)"
+    [("binary entropy H(p)", blue,
+      curve ps fun p => -(p * Float.log p / Float.log 2.0 + (1.0 - p) * Float.log (1.0 - p) / Float.log 2.0))]
+  -- Chapter 16: KL is not a distance (asymmetric): coding p = 0.5 with a code
+  -- built for q, in both orders (Core/Prob).
+  let qs := grid 0.02 0.98 96
+  let binKL (p q : Float) : Float := p * (Float.log p - Float.log q) / Float.log 2.0
+    + (1.0 - p) * (Float.log (1.0 - p) - Float.log (1.0 - q)) / Float.log 2.0
+  save "kl_asymmetry" <| lineSvg 480 260 0.0 1.0 0.0 1.1 "KL divergence is not a distance" "q (code built for p = 0.5)" "bits of waste"
+    [("KL(p, q)  from p = 0.5", blue, curve qs fun q => binKL 0.5 q),
+     ("KL(q, p)  the other order", orange, curve qs fun q => binKL q 0.5)]
+  -- Chapter 17: temperature sharpens the softmax. One positive at score 1, one
+  -- negative at 0: the mass on the positive is exp(1/t) / (exp(1/t) + 1).
+  let ts := grid 0.1 2.0 95
+  save "softmax_sharp" <| lineSvg 480 260 0.0 2.0 0.0 1.05 "Temperature sharpens the softmax (scores 1 and 0)" "temperature tau" "mass on the positive"
+    [("exp(1/t) / (exp(1/t) + 1)", blue,
+      curve ts fun t => let e := Float.exp (1.0 / t); e / (e + 1.0))]
+  -- Chapter 5: the price of Float. Adding 0.1 ten thousand times: the exact
+  -- answer is the integer 1000 (a Rat certificate), the Float loop is not -
+  -- 0.1 is not a binary fraction, and every addition rounds.
+  let sum10k : Array (Float × Float) := Id.run do
+    let mut acc := 0.0
+    let mut out := #[]
+    for k in [1:10001] do
+      acc := acc + 0.1
+      out := out.push (k.toFloat, acc - k.toFloat / 10.0)
+    return out
+  let dmax := (sum10k.foldl (fun m p => max m (Float.abs p.2)) 0.0) * 1.5e12
+  save "float_drift" <| lineSvg 480 260 0.0 10000.0 (0.0 - dmax) dmax
+    "Float: 10 000 additions of 0.1, drift vs the exact answer (units 1e-12)" "additions" "drift x 1e12"
+    [("accumulated rounding", orange, sum10k.map (fun q => (q.1, q.2 * 1e12)))]
+  -- Chapter 17: the closed form of the matched pair, loss = log(1 + exp(lo - hi)).
+  let gaps := grid (-6.0) 10.0 80
+  save "matched_gap" <| lineSvg 480 260 (-6.0) 10.0 (-0.2) 3.0 "Matched pair: loss = log(1 + exp(lo - hi))" "similarity gap  hi - lo" "InfoNCE loss"
+    [("matched_loss", blue, curve gaps fun g => Float.log (1.0 + Float.exp (-g))),
+     ("blind model: log 2", grey, curve gaps fun _ => Float.log 2.0)]
+  -- Chapter 5 (Core/Interval.lean): the number-line dictionary of the layer.
   IO.println "figures written to ../website/static/img/"
