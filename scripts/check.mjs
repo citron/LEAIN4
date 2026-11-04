@@ -5,6 +5,7 @@
 //  4. no `sorry` outside Exercises; no `axiom`, `admit`, `partial` or `native_decide` in the library
 //  5. every module of lean/LeanDL (except Exercises) is imported by lean/LeanDL.lean
 //  6. every generated SVG is well-formed
+//  7. every chapter page follows the pedagogical template (Lean anchors, Exercises)
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -112,6 +113,19 @@ for (const f of list(imgDir, '.svg')) {
   if (stack.length) errors.push(`${f}: unclosed <${stack.at(-1)}>`);
   if (!s.startsWith('<svg')) errors.push(`${f}: does not start with <svg`);
   if (/\b(NaN|nan|inf|-inf)\b/.test(s)) errors.push(`${f}: contains NaN or inf`);
+}
+
+// 7. pedagogical template: every chapter page must embed Lean code (>= 4 anchors)
+//    and end with an Exercises section (EN 'Exercises' / FR 'Exercices').
+for (const f of en.filter((x) => /^ch\d/.test(x))) {
+  const a = path.join(enDir, f);
+  const anchorsInPage = (read(a).match(/file=/g) ?? []).length;
+  if (anchorsInPage < 4) errors.push(`${f}: only ${anchorsInPage} embedded Lean anchors (template requires >= 4)`);
+  if (!/^## Exercises$/m.test(read(a))) errors.push(`${f}: missing '## Exercises' section`);
+}
+for (const f of fr.filter((x) => /^ch\d/.test(x))) {
+  const b = path.join(frDir, f);
+  if (!/^## Exercices$/m.test(read(b))) errors.push(`fr/${f}: missing '## Exercices' section`);
 }
 
 if (errors.length) {

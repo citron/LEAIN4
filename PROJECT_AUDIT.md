@@ -256,3 +256,12 @@ Vérifications : `lake build` 87 jobs ; audit `checked 1933 declarations; using 
 - **`log_mono` dérivé** (log croissant sur les positifs) depuis la borne tangente `log t ≤ t-1` appliquée au rapport `x/y` via `log_div` — aucun nouvel axiome. Helpers `div_le_one_of_le`, `div_pos'` en `Core`-style dans `RatLaws` de Ch17.
 
 Verifications : `lake build LeanDL` 87 jobs ; audit `checked 1987 declarations; using sorry: []; non-standard axioms: []` ; `node scripts/check.mjs` 22 pages ; `npm run build` embarque `matched_mass`/`matched_loss` FR et EN.
+
+
+## Phase 6a — Infrastructure partielle (RÉSOLU)
+
+- **Item 2 (passe arrière sur tableaux, correction prouvée) : clos de fait.** `Ch04/Correct.lean` contient déjà `back_spec` (invariant du balayage : taille préservée, la coordonnée `j` gagne `s * (e.deriv j).eval x`), `backprop_correct` (`backprop` = gradient formel évalué) et `forward_eq_dot_backprop` (mode direct = `dot dx (grad e)`). Le "chantier le plus lourd" du Roadmap était donc déjà payé — le Roadmap ne le disait pas.
+- **Item 3 (gabarit pédagogique) : clos.** `scripts/check.mjs` règle 7 : chaque page de chapitre EN embarque ≥ 4 ancres Lean ; chaque page EN a `## Exercises`, chaque page FR a `## Exercices`. Test négatif vérifié (section supprimée => check rouge, restaurée => vert).
+- **Item 1 (tenseur générique) : reste ouvert** — dernier gros chantier identifié.
+
+Verifications : `check.mjs` vert 22 pages ; build 87 jobs ; audit 1987 déclarations propres.
