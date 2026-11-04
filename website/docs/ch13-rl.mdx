@@ -55,6 +55,13 @@ Two exact facts, proved for any commutative ring:
 - `bellman_fixed`: the fixed point is $r/(1-\gamma)$.
 - `tdUpdate_error`: one update $Q\leftarrow Q+\eta(\text{target}-Q)$ multiplies the distance to the target by $1-\eta$. For $0<\eta\le1$ it moves towards the target without overshooting.
 
+Compound a TD update $k$ times against a fixed target and the error is multiplied by $(1-\eta)^k$ — exactly:
+
+```lean file=Ch13/Rl.lean#td_iter
+```
+
+`tdIter_error` is the compounding of `tdUpdate_error` by induction: with $0\le\eta\le 1$ the estimate converges **geometrically** to the target. This is the exact arithmetic of Q-learning's inner loop. (The full stochastic convergence theorem — moving targets, exploration, Robbins–Monro step sizes — needs a noise model and lives outside this course's algebraic scope.)
+
 ## Policy-based: REINFORCE
 
 Instead of values we can improve the policy directly, with a neural network that outputs the probability of going right. The **policy-gradient theorem** says

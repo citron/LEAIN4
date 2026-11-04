@@ -55,6 +55,13 @@ Deux faits exacts, prouvés pour tout anneau commutatif :
 - `bellman_fixed` : le point fixe est $r/(1-\gamma)$.
 - `tdUpdate_error` : une mise à jour $Q\leftarrow Q+\eta(\text{cible}-Q)$ multiplie la distance à la cible par $1-\eta$. Pour $0<\eta\le1$, elle se rapproche de la cible sans la dépasser.
 
+Composée $k$ fois contre une cible fixe, la mise à jour TD multiplie l’erreur par $(1-\eta)^k$ — exactement :
+
+```lean file=Ch13/Rl.lean#td_iter
+```
+
+`tdIter_error` est la composition de `tdUpdate_error` par récurrence : pour $0\le\eta\le 1$, l’estimation converge **géométriquement** vers la cible. C’est l’arithmétique exacte de la boucle interne du Q-learning. (Le théorème complet de convergence stochastique — cibles mouvantes, exploration, pas de Robbins–Monro — demande un modèle de bruit et vit hors du périmètre algébrique du cours.)
+
 ## Par la politique : REINFORCE
 
 Au lieu des valeurs, on peut améliorer directement la politique, avec un réseau de neurones qui donne la probabilité d'aller à droite. Le **théorème du gradient de politique** dit
