@@ -6,7 +6,7 @@ namespace LeanDL.Ch17
 
 open Lean.Grind LeanDL.Ch16
 
-variable [LawfulLog] [HasExp Rat] [LawfulExp Rat]
+variable [LawfulLog] [HasExp Rat] [LawfulExp Rat] [MonotoneExp (α := Rat)]
 
 -- ANCHOR: ex1
 /-- Exercise 1: **adding one more negative raises the collapsed floor by exactly

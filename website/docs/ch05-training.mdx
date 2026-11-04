@@ -164,6 +164,22 @@ About one minute on a laptop CPU, with the full training set, three passes, plai
 The MNIST code is not proved correct: only the formula for its output-layer gradient is. To gain confidence, Chapter 4's recipe applies: compare with finite differences on a tiny instance.
 :::
 
+## Certified intervals: bounding a Float run
+
+The demos run on `Float`, and `Float` promises nothing: rounding is not in the type. The honest bridge is a **rational interval** — bounds `lo` and `hi` in `Rat`, the exact scalar of the proofs — with a theorem per operation stating the true value lies inside:
+
+```lean file=Core/Interval.lean#interval
+```
+
+Every operation carries its enclosure theorem, proved by `grind` from nothing but the two inequalities: `add_spec`, `neg_spec`, `sub_spec`. Multiplication is the hard one — multiplying an inequality by a negative number flips it — so the enclosure is the **four-corner rule**:
+
+```lean file=Core/Interval.lean#mul
+```
+
+The rule is an inclusion, not an equality: with dependent inputs (`x * x`) not every corner is reachable — interval arithmetic's classic over-estimation, witnessed in the file by the two examples on `sub` of a wide interval by itself. Inverse demands a positivity hypothesis (`invPos`, `divPos`): an interval containing 0 has no finite enclosure, and the typechecker forces you to say why that cannot happen.
+
+What a certified demo publishes is then a closed rational fact — `(mul (point (1/2)) (point (1/2))).lo = 1/4` — checked by `grind`, the same tactic that checks the proofs. A Float run gives the witness; the interval gives the guarantee.
+
 ## Exercises
 
 1. Prove `softmax` entries are non-negative and sum to one over `Rat`, with the usual `exp` laws.

@@ -164,6 +164,22 @@ Environ une minute sur le processeur d'un portable, avec tout le jeu d'entraîne
 Le code MNIST n'est pas démontré correct : seule la formule du gradient de sa couche de sortie l'est. Pour gagner en confiance, la recette du chapitre 4 s'applique : comparer avec des différences finies sur une toute petite instance.
 :::
 
+## Intervalles certifiés : encadrer une exécution Float
+
+Les démos tournent sur `Float`, et `Float` ne promet rien : l'arrondi n'est pas dans le type. Le pont honnête est un **intervalle rationnel** — des bornes `lo` et `hi` en `Rat`, le scalaire exact des preuves — avec un théorème par opération affirmant que la vraie valeur reste à l'intérieur :
+
+```lean file=Core/Interval.lean#interval
+```
+
+Chaque opération porte son théorème d'encadrement, prouvé par `grind` à partir des seules inégalités : `add_spec`, `neg_spec`, `sub_spec`. La multiplication est la difficile — multiplier une inégalité par un nombre négatif l'inverse — d'où l'encadrement par la **règle des quatre coins** :
+
+```lean file=Core/Interval.lean#mul
+```
+
+La règle est une inclusion, pas une égalité : avec des entrées liées (`x * x`), tous les coins ne sont pas atteignables — la surestimation classique de l'arithmétique d'intervalles, attestée dans le fichier par les deux exemples sur `sub` d'un intervalle large par lui-même. L'inversion exige une hypothèse de positivité (`invPos`, `divPos`) : un intervalle contenant 0 n'a pas d'encadrement fini, et le typechecker oblige à dire pourquoi cela ne peut pas arriver.
+
+Une démo certifiée publie alors un fait rationnel clos — `(mul (point (1/2)) (point (1/2))).lo = 1/4` — vérifié par `grind`, le même tactic que celui qui vérifie les preuves. L'exécution Float donne le témoin ; l'intervalle donne la garantie.
+
 ## Exercices
 
 1. Démontrez que les entrées de `softmax` sont positives et de somme 1 sur `Rat`, avec les lois usuelles de `exp`.

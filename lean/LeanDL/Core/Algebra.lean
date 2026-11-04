@@ -169,9 +169,23 @@ class HasExp (α : Type) where
 instance : HasExp Float := ⟨Float.exp⟩
 -- ANCHOR_END: hasexp
 
-/-- Laws that `exp` must satisfy; `Float` does not satisfy them exactly, exact models do. -/
+/-- Laws that `exp` must satisfy; `Float` does not satisfy them exactly, exact models do.
+
+`exp_add` and `exp_zero` are pure algebra: any group homomorphism
+`(α, +) → (α*, ·)` satisfies them — including wild, DECREASING ones. Monotonicity
+is analytic and does not follow from these laws; it lives in the separate class
+`MonotoneExp` below, so the algebraic layer stays exactly algebraic. -/
 class LawfulExp (α : Type) [Lean.Grind.CommRing α] [HasExp α] : Prop where
   exp_add : ∀ x y : α, HasExp.exp (x + y) = HasExp.exp x * HasExp.exp y
   exp_zero : HasExp.exp (0 : α) = 1
+
+/-- **The analytic frontier, declared once.** The real exponential is increasing;
+the algebraic laws of `LawfulExp` cannot prove it (wild homomorphisms of
+`(Q, +)` into `(Q*, ·)` are countermodels). Chapters that need an increasing
+`exp` — Ch12's forward process, Ch17's matched pair — ask for THIS class, by
+name. It is a hypothesis in the signatures, not a global axiom: the audit keeps
+zero non-standard axioms, and every use of analysis points here. -/
+class MonotoneExp {α : Type} [LE α] [HasExp α] : Prop where
+  exp_mono : ∀ a b : α, a ≤ b → HasExp.exp a ≤ HasExp.exp b
 
 end LeanDL

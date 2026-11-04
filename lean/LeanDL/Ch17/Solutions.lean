@@ -6,7 +6,7 @@ namespace LeanDL.Ch17
 
 open Lean.Grind LeanDL.Ch16
 
-variable [LawfulLog] [HasExp Rat] [LawfulExp Rat]
+variable [LawfulLog] [HasExp Rat] [LawfulExp Rat] [MonotoneExp (α := Rat)]
 
 -- ANCHOR: sol1
 /-- Solution 1: rewrite both losses with `infoNce_collapse` — the goal becomes pure `log`

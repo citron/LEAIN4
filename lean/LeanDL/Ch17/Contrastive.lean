@@ -128,7 +128,7 @@ end RatLaws
 -- ANCHOR: infonce
 section InfoNCE
 
-variable [LawfulLog] [HasExp Rat] [LawfulExp Rat]
+variable [LawfulLog] [HasExp Rat] [LawfulExp Rat] [MonotoneExp (α := Rat)]
 
 /-- The partition function `Z = Σᵢ exp (z i)`, as a dot against the constant 1. -/
 def vsum {n : Nat} (z : Vec Rat n) : Rat :=
@@ -414,14 +414,15 @@ theorem matched_equal (hi : Rat) :
 /-- **The matched loss decreases as the gap grows — CONDITIONALLY.** Monotonicity of
 `exp` is an *analytic* property of the real exponential; it does NOT follow from
 `exp_add`/`exp_zero` alone (any group homomorphism `(Rat, +) -> (Rat, *)` satisfies
-those). So it is an explicit, named hypothesis — the honest frontier of this
-algebraic layer. The real exponential satisfies it; a wild homomorphism does not. -/
+those). It lives as the NAMED class `MonotoneExp` — the honest frontier of this
+algebraic layer, declared once in `Core/Algebra.lean`. The real exponential
+satisfies it; a wild homomorphism does not. -/
 theorem matched_mono
-    (hmono : ∀ a b : Rat, a <= b -> HasExp.exp a <= HasExp.exp b)
     (hi₁ lo₁ hi₂ lo₂ : Rat) (h : lo₂ - hi₂ <= lo₁ - hi₁) :
     infoNce 1 (by grind) (matched hi₂ lo₂) <= infoNce 1 (by grind) (matched hi₁ lo₁) := by
   rw [matched_loss, matched_loss]
-  have e₂ : HasExp.exp (lo₂ - hi₂) <= HasExp.exp (lo₁ - hi₁) := hmono _ _ h
+  have e₂ : HasExp.exp (lo₂ - hi₂) <= HasExp.exp (lo₁ - hi₁) :=
+    MonotoneExp.exp_mono _ _ h
   have hpos₂ : 0 < 1 + HasExp.exp (lo₂ - hi₂) := by
     have := exp_pos' (lo₂ - hi₂)
     grind

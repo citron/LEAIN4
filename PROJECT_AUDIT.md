@@ -276,3 +276,21 @@ Verifications : `check.mjs` vert 22 pages ; build 87 jobs ; audit 1987 déclarat
 - Docs FR/EN : section « Des formes vérifiées aux tenseurs à plat » dans la page Ch03 (la forme typée y est introduite).
 
 Verifications : build 88 jobs ; audit **2007 déclarations propres** (0 sorry, 0 axiome non standard) ; `lake exe props` 7/7 PASS ; `check.mjs` 22 pages. Phase 6 ENTIÈREMENT close.
+
+
+## Phase 7 — Frontières Float sans Mathlib (RÉSOLU)
+
+**(a) Monotonie de `exp` : la frontière analytique nommée.**
+- `Core/Algebra.lean` : `class MonotoneExp {α} [LE α] [HasExp α] : Prop` avec `exp_mono : a ≤ b → exp a ≤ exp b`. La doc explique pourquoi ce n'EST PAS une loi algébrique : tout morphisme de groupes `(Q,+) → (Q\{0},·)` satisfait `exp_add`/`exp_zero`, et des morphismes sauvages rendent `exp` décroissante. La monotonie est la propriété ANALYTIQUE de l'exponentielle réelle, déclarée une fois pour toutes dans la classe.
+- Ch17 : `matched_mono` prend l'hypothèse de monotonie via `[MonotoneExp (α := Rat)]` (l'implicite `α` exige l'annotation), Solutions/Exercises alignés, docs FR/EN réécrites honnêtement.
+- Piège évité : ne PAS mettre la monotonie dans `LawfulExp` — l'environnement sans Mathlib n'expose pas `LinearOrder` utilisable comme contrainte ; `[LE α]` suffit pour `a ≤ b`.
+
+**(b) `Core/Interval.lean` : arithmétique d'intervalles certifiée sur `Rat`.**
+- `structure Interval {lo hi : Rat}` (bornes EXACTES), `Mem`, inclusion `⊆`.
+- Opérations + théorèmes d'encadrement tout `grind` : `add_spec`, `neg_spec`, `sub_spec` ; `mul_spec` par la **règle des quatre coins** (`box_max`, `box_min`, construits avec les lemmes de monotonie signés `Rat.mul_le_mul_of_nonneg_*` et les helpers nonpos dérivés par négation) ; `inv_le_inv_core` (multiplier par `(x·y)⁻¹ ≥ 0`), `invPos_spec`, `divPos_spec`, `widen_spec` (marge d'arrondi en `Rat` exact).
+- Certificats fermés vérifiés par `grind`. Pièges d'API : `decide` ne réduit PAS `Rat.mul` au kernel (constructeurs intelligents avec normalisation gcd) — `grind` le fait via sa normalisation de corps ; `grind` ne déplie pas les projections de structure — les certificats passent par `show` (formes littérales) ; trop de coins en dénominateurs sous `show` provoque un timeout `isDefEq` (200 000 heartbeats) — rester sur des entiers/petits rationnels.
+- Le piège de DÉPENDANCE est documenté par l'exemple : `x - x = 0` pour tout `x`, mais `I - I` a DOUBLE largeur — l'encadrement est son, jamais exact.
+- `native_decide` reste interdit par `check.mjs` (règle 4) : tout est `grind`.
+- Docs FR/EN : section « Certified intervals / Intervalles certifiés » dans Ch05, après l'encadré « What the hand-coded training is not » — le pont entre la démo Float sans garantie et le fait rationnel vérifiable.
+
+Verifications : build **89 jobs** ; audit **2084 déclarations propres** (0 sorry, 0 axiome non standard) ; `check.mjs` 22 pages ; build website FR/EN OK.
