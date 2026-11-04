@@ -35,6 +35,22 @@ Quatre choses que le bloc ci-dessus prouve :
 
 **Le gradient est $p - \text{onehot}$** (`infonce_grad`) : InfoNCE *est* la perte cross-entropy du chapitre 5 avec un label one-hot à l'indice 0, donc son gradient est hérité de `ceLoss_grad` en une ligne : le gradient du logit du candidat $i$ est sa masse courante $p_i$, moins $1$ pour le positif. Chaque candidat est poussé avec exactement la masse de probabilité qu'il doit céder : un négatif qui a capturé $60\,\%$ de la masse est repoussé le plus fort ; un négatif déjà à $0{,}01\,\%$ est à peine touché. Cette identité explique toute la dynamique de l'entraînement contrastif — et pourquoi les négatifs durs (masse $=$ grande) dominent le signal.
 
+## Le couple apparié, en forme fermée
+
+```lean file=Ch17/Contrastive.lean#matched
+```
+
+Réduisez le batch à une requête, un positif (score `hi`) et une négative (score `lo`) : InfoNCE cesse d'être un agrégat et se replie en une seule fonction élémentaire de l'**écart de similarité** `hi - lo`. Le bloc ci-dessus prouve ce repli, exactement :
+
+**La masse du positif est une sigmoïde** (`matched_mass`) : `1 / (1 + exp(lo - hi))`. L'étape clé est `matched_key` — `(1 + exp(lo-hi)) · exp(hi) = exp(hi) + exp(lo)`, une application de `exp_add`. La masse vaut `1` quand le positif domine, exactement `1/2` quand le modèle est aveugle (`hi = lo`), et tend vers `0` quand le couple est scoré à l'envers. Toute courbe d'« accuracy » des papiers contrastifs est cette fonction.
+
+**La perte est une softplus** (`matched_loss`) : `log (1 + exp(lo - hi))`. La perte ne dépend *que de l'écart* — les scores individuels ne comptent pas, seule leur différence compte. C'est pour cela que la température et l'échelle des scores se battent dans chaque entraînement réel : c'est le même bouton.
+
+**L'aveuglement coûte exactement `log 2`** (`matched_equal`) : avec `hi = lo` la perte vaut `log 2` et la masse `1/2`, pas approximativement. Pour `n` négatives, le même énoncé est `infoNce_collapse` ci-dessus ; ici, son ombre à deux candidats.
+
+**La perte décroît quand l'écart croît** (`matched_mono`) — et ce théorème est honnête sur son hypothèse : la monotonie de `exp` est une propriété *analytique* de l'exponentielle réelle. Elle ne découle **pas** de `exp_add` et `exp_zero` à eux seuls — tout morphisme de groupes `(Q,+) → (Q\{0},·)` satisfait ces lois, et des morphismes sauvages rendent `exp` décroissante. Le théorème prend donc `hmono : a ≤ b → exp a ≤ exp b` comme hypothèse nommée. L'exponentielle réelle la satisfait ; la couche algébrique seule ne peut pas la prouver. Savoir *quelle* étape exige l'analyse fait partie de la formalisation.
+
+La preuve dérive aussi `log_mono` — le logarithme est croissant sur les positifs — de la borne tangente `log t ≤ t - 1` appliquée au rapport `x / y` (`log_div`). Aucun nouvel axiome : un théorème des quatre lois de `LawfulLog`.
 ## Expériences
 
 `lake exe ch17` imprime la face numérique des quatre théorèmes. En `Float` :

@@ -244,3 +244,15 @@ Exercises, aucun axiome non standard. Docs FR/EN Ch09 complétées (ancre
 - **Exercices Ch18 4-5** : `exercise_pow_add` (loi de puissance multiplicative — le socle algébrique des lois d'échelle) et `exercise_distill_gap` (l'écart de distillation est *exactement* le KL), corrigés prouvés (`sol4`, `sol5`), docs FR/EN appariées (liste, ancres, indices, corrigés).
 
 Vérifications : `lake build` 87 jobs ; audit `checked 1933 declarations; using sorry: []; non-standard axioms: []` ; `lake exe props` 6/6 PASS ; `node scripts/check.mjs` 22 pages FR/EN.
+
+
+## Phase 5.5 — Ch17 : le couple apparié en forme fermée (RÉSOLU)
+
+- **`matched hi lo`** (1 positif, 1 négative) : InfoNCE se replie en fonction élémentaire de l'écart de similarité.
+- **`matched_mass`** : masse softmax du positif = `1/(1+exp(lo-hi))` exactement (sigmoïde de l'écart) — courbe d'accuracy de tout papier contrastif.
+- **`matched_loss`** : perte = `log(1+exp(lo-hi))` (softplus de l'écart négatif) — la température et l'échelle des scores sont le même bouton.
+- **`matched_equal`** : `hi = lo` (modèle aveugle) donne exactement `log 2` et masse `1/2`.
+- **`matched_mono`** : la perte décroît quand l'écart croît — sous hypothèse `hmono` NOMMÉE (monotonie de `exp` : propriété analytique de l'exponentielle réelle, non dérivable des seules lois `exp_add`/`exp_zero` — tout morphisme `(Q,+)→(Q\{0},·)` satisfait ces lois ; les morphismes sauvages rendent `exp` décroissante). Frontière honnête de la couche algébrique.
+- **`log_mono` dérivé** (log croissant sur les positifs) depuis la borne tangente `log t ≤ t-1` appliquée au rapport `x/y` via `log_div` — aucun nouvel axiome. Helpers `div_le_one_of_le`, `div_pos'` en `Core`-style dans `RatLaws` de Ch17.
+
+Verifications : `lake build LeanDL` 87 jobs ; audit `checked 1987 declarations; using sorry: []; non-standard axioms: []` ; `node scripts/check.mjs` 22 pages ; `npm run build` embarque `matched_mass`/`matched_loss` FR et EN.

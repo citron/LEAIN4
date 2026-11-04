@@ -110,6 +110,19 @@ theorem exp_pos' [HasExp Rat] [LawfulExp Rat] (x : Rat) : 0 < HasExp.exp x := by
     rw [heq, Rat.zero_mul] at h1
     exact absurd h1 (by grind))
 
+/-- `x/y <= 1` when `0 < y` and `x <= y`. -/
+theorem div_le_one_of_le {x y : Rat} (hy : 0 < y) (h : x <= y) : x / y <= 1 := by
+  rw [Rat.div_def]
+  have hinv : 0 <= y⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hy)
+  have h2 := Rat.mul_le_mul_of_nonneg_right h hinv
+  have hyi : y * y⁻¹ = 1 := Rat.mul_inv_cancel _ (by grind)
+  grind
+
+/-- Positive rationals are closed under division. -/
+theorem div_pos' {x y : Rat} (hx : 0 < x) (hy : 0 < y) : 0 < x / y := by
+  rw [Rat.div_def]
+  exact Rat.mul_pos hx (Rat.inv_pos.mpr hy)
+
 end RatLaws
 
 -- ANCHOR: infonce
@@ -312,6 +325,111 @@ theorem infonce_grad {α : Type} [Lean.Grind.CommRing α] [Ch04.HasAct α]
     ((Ch05.ceLoss (⟨0, hm⟩ : Fin m)).deriv k).eval z =
       Ch05.softmax z k - (if (⟨0, hm⟩ : Fin m) = k then 1 else 0) :=
   Ch05.ceLoss_grad z ⟨0, hm⟩ k
+
+-- ANCHOR: matched
+/-- **The matched pair**: one query, one positive (score `hi`), one negative (score
+`lo`). `Samples n` has `n + 1` candidates, so `matched hi lo : Samples 1` is the
+2-candidate problem — the image-text matching toy of CLIP's paper, exactly. -/
+def matched (hi lo : Rat) : Samples 1 :=
+  { q := 1, pos := hi, neg := fun _ => lo }
+
+/-- **The key algebra**: `(1 + exp(lo - hi)) * exp hi = exp hi + exp lo`. -/
+theorem matched_key (hi lo : Rat) :
+    (1 + HasExp.exp (lo - hi)) * HasExp.exp hi = HasExp.exp hi + HasExp.exp lo := by
+  have h : HasExp.exp (lo - hi) * HasExp.exp hi = HasExp.exp lo := by
+    have h2 : lo - hi + hi = lo := by grind
+    rw [← LawfulExp.exp_add, h2]
+  rw [Rat.add_mul, Rat.one_mul, h]
+
+theorem matched_score0 (hi lo : Rat) : score (matched hi lo) (0 : Fin 2) = hi := by
+  simp [score, matched]
+
+theorem matched_score1 (hi lo : Rat) : score (matched hi lo) (1 : Fin 2) = lo := by
+  simp [score, matched]
+
+theorem matched_score_succ (hi lo : Rat) :
+    score (matched hi lo) (Fin.succ (0 : Fin 1)) = lo := by
+  simp [score, matched]
+
+/-- **The positive's softmax mass, closed form**: `1 / (1 + exp(lo - hi))` — the
+sigmoid of the similarity gap. This is the exact curve every contrastive training
+run plots: mass `1` when the positive dominates, `1/2` when the model collapses
+(`hi = lo`), mass tending to `0` when it gets the pair backwards. -/
+theorem matched_mass (hi lo : Rat) :
+    softmax (score (matched hi lo)) (0 : Fin 2) = (1 + HasExp.exp (lo - hi))⁻¹ := by
+  have hpos : 0 < HasExp.exp hi + HasExp.exp lo := by
+    have a := exp_pos' hi
+    have b := exp_pos' lo
+    grind
+  have hinv : HasExp.exp hi * (HasExp.exp hi + HasExp.exp lo)⁻¹ =
+      (1 + HasExp.exp (lo - hi))⁻¹ := by
+    refine (Rat.inv_eq_of_mul_eq_one ?_).symm
+    calc (1 + HasExp.exp (lo - hi)) * (HasExp.exp hi * (HasExp.exp hi + HasExp.exp lo)⁻¹)
+        = ((1 + HasExp.exp (lo - hi)) * HasExp.exp hi) *
+            (HasExp.exp hi + HasExp.exp lo)⁻¹ := by grind [Rat.mul_assoc]
+      _ = (HasExp.exp hi + HasExp.exp lo) * (HasExp.exp hi + HasExp.exp lo)⁻¹ := by
+            rw [matched_key]
+      _ = 1 := Rat.mul_inv_cancel _ (Rat.ne_of_gt hpos)
+  have hZ : vsum (score (matched hi lo)) = HasExp.exp hi + HasExp.exp lo := by
+    unfold vsum
+    rw [Vec.dot, matched_score0, Vec.dot, Rat.one_mul, Rat.one_mul]
+    show HasExp.exp hi + (HasExp.exp (score (matched hi lo) (Fin.succ (0 : Fin 1))) +
+        Vec.dot (fun i : Fin 0 => (1 : Rat))
+          (fun i => HasExp.exp (score (matched hi lo) i.succ.succ))) = _
+    rw [matched_score_succ]
+    unfold Vec.dot
+    grind
+  unfold softmax
+  rw [matched_score0, hZ, hinv]
+
+/-- **The matched loss, closed form**: `log (1 + exp(lo - hi))` — the softplus of
+the *negated* similarity gap. The loss is a pure function of the gap: shrink the
+gap and the loss grows, exponentially in the difference. -/
+theorem matched_loss (hi lo : Rat) :
+    infoNce 1 (by grind) (matched hi lo) = LawfulLog.log (1 + HasExp.exp (lo - hi)) := by
+  have hgt : 0 < 1 + HasExp.exp (lo - hi) := by
+    have := exp_pos' (lo - hi)
+    grind
+  have hinv1 : (1 : Rat)⁻¹ = 1 := by
+    rw [Rat.inv_eq_of_mul_eq_one]
+    · grind
+  have hsm : (Vec.smul (1 : Rat)⁻¹ (score (matched hi lo)) : Vec Rat 2) =
+      score (matched hi lo) := by
+    funext i
+    show (1 : Rat)⁻¹ * score (matched hi lo) i = score (matched hi lo) i
+    rw [hinv1, Rat.one_mul]
+  show -LawfulLog.log (softmax (Vec.smul (1 : Rat)⁻¹ (score (matched hi lo))) (0 : Fin 2)) = _
+  rw [hsm, matched_mass]
+  rw [LawfulLog.log_inv (1 + HasExp.exp (lo - hi)) (Rat.ne_of_gt hgt)]
+  exact Rat.neg_neg _
+
+/-- The query cannot separate positive from negative (`hi = lo`): the loss is exactly
+`log 2`, and the positive's mass is exactly `1/2`. -/
+theorem matched_equal (hi : Rat) :
+    infoNce 1 (by grind) (matched hi hi) = LawfulLog.log 2 := by
+  rw [matched_loss]
+  have h : hi - hi = 0 := by grind
+  rw [h, LawfulExp.exp_zero, show (1 : Rat) + 1 = 2 from by grind]
+
+/-- **The matched loss decreases as the gap grows — CONDITIONALLY.** Monotonicity of
+`exp` is an *analytic* property of the real exponential; it does NOT follow from
+`exp_add`/`exp_zero` alone (any group homomorphism `(Rat, +) -> (Rat, *)` satisfies
+those). So it is an explicit, named hypothesis — the honest frontier of this
+algebraic layer. The real exponential satisfies it; a wild homomorphism does not. -/
+theorem matched_mono
+    (hmono : ∀ a b : Rat, a <= b -> HasExp.exp a <= HasExp.exp b)
+    (hi₁ lo₁ hi₂ lo₂ : Rat) (h : lo₂ - hi₂ <= lo₁ - hi₁) :
+    infoNce 1 (by grind) (matched hi₂ lo₂) <= infoNce 1 (by grind) (matched hi₁ lo₁) := by
+  rw [matched_loss, matched_loss]
+  have e₂ : HasExp.exp (lo₂ - hi₂) <= HasExp.exp (lo₁ - hi₁) := hmono _ _ h
+  have hpos₂ : 0 < 1 + HasExp.exp (lo₂ - hi₂) := by
+    have := exp_pos' (lo₂ - hi₂)
+    grind
+  have hpos₁ : 0 < 1 + HasExp.exp (lo₁ - hi₁) := by
+    have := exp_pos' (lo₁ - hi₁)
+    grind
+  exact log_mono hpos₂ hpos₁ (by grind)
+-- ANCHOR_END: matched
 
 -- ANCHOR_END: infonce
 end InfoNCE

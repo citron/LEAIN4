@@ -35,6 +35,23 @@ Four things the block above proves:
 
 **The gradient is $p - \text{onehot}$** (`infonce_grad`): InfoNCE *is* Chapter 5's cross-entropy loss with a one-hot label on index 0, so its gradient is inherited from `ceLoss_grad` in one line: the gradient on the logit of candidate $i$ is its current mass $p_i$, minus $1$ for the positive. Each candidate is pushed with exactly the probability mass it should give up: a negative that grabbed $60\,\%$ of the mass is pushed away the hardest; a negative already at $0.01\,\%$ is barely touched. This one identity explains the whole dynamics of contrastive training — and why hard negatives (mass $=$ big) dominate the signal.
 
+## The matched pair, in closed form
+
+```lean file=Ch17/Contrastive.lean#matched
+```
+
+Strip the batch to one query, one positive (score `hi`) and one negative (score `lo`) and InfoNCE stops being an aggregate: it collapses to a single elementary function of the **similarity gap** `hi - lo`. The block above proves the collapse, exactly:
+
+**The positive's mass is a sigmoid** (`matched_mass`): `1 / (1 + exp(lo - hi))`. The key step is `matched_key` — `(1 + exp(lo-hi)) · exp(hi) = exp(hi) + exp(lo)`, one application of `exp_add`. So the mass is `1` when the positive dominates, exactly `1/2` when the model is blind (`hi = lo`), and tends to `0` when the pair is scored backwards. Every contrastive paper's "accuracy" plot is this curve.
+
+**The loss is a softplus** (`matched_loss`): `log (1 + exp(lo - hi))`. The loss is a *pure function of the gap* — the individual scores do not matter, only their difference. This is why temperature and score scale fight each other in every real run: they are the same dial.
+
+**Blindness costs exactly `log 2`** (`matched_equal`): with `hi = lo` the loss is `log 2` and the mass is `1/2`, not approximately. For `n` negatives the same statement is `infoNce_collapse` above; this is its two-candidate shadow.
+
+**The loss decreases as the gap grows** (`matched_mono`) — and this one is honest about its hypothesis: monotonicity of `exp` is an *analytic* property of the real exponential. It does **not** follow from `exp_add` and `exp_zero` alone — any group homomorphism `(Q,+) → (Q\{0},·)` satisfies those laws, and wild ones make `exp` decreasing. So the theorem takes `hmono : a ≤ b → exp a ≤ exp b` as an explicit assumption. The real exponential satisfies it; the algebraic layer alone cannot prove it. Knowing *which* step needs analysis is part of the formalisation.
+
+The proof also derives `log_mono` — logarithm monotone on the positives — from the tangent bound `log t ≤ t - 1` applied to the ratio `x / y` (`log_div`). No new axiom: a theorem of the four `LawfulLog` laws.
+
 ## Experiments
 
 `lake exe ch17` prints the numeric face of the four theorems. On `Float`:
