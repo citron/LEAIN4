@@ -188,6 +188,75 @@ Une démo certifiée publie alors un fait rationnel clos — `(mul (point (1/2))
 
 <Figure src="float_drift.svg" alt="Dérive accumulée de la somme Float de dix mille 0,1 contre la réponse rationnelle exacte, oscillante et croissante avec l'exposant de la somme courante" caption="Le prix de Float, mesuré : ajouter 0,1 mille fois. La réponse exacte est l'entier 1000 - un certificat Rat - mais 0,1 n'est pas une fraction binaire, donc chaque addition arrondit. La dérive oscille avec l'exposant de la somme courante et croît : exactement le fossé que Core/Interval.lean est conçu pour encadrer." />
 
+## La trousse du praticien
+
+Entre les theoremes sur les optimiseurs et un entrainement qui ne pete pas, il y
+a quatre dispositifs que tout praticien utilise chaque jour. Chacun porte un
+fait exact qui justifie tout son edifice — prouve sur `Rat`, dans un seul
+fichier : `LeanDL/Ch05/Kit.lean`.
+
+**Dropout.** Zero des unites au hasard pendant l'entrainement, tout conserve au
+test — et les expectations du reseau ne bougent pas, *parce que* chaque unite
+est reechelonnee par `1/p` :
+
+```lean file=Ch05/Kit.lean#dropout
+```
+
+`dropout_expect` affirme que l'unite reechelonnee a exactement l'expectation
+`x`. C'est pourquoi le dropout est sans effet en inference : les expectations
+en entrainement et en test coincident deja. Sans le `1/p`, toute passe
+d'inference est biaisee du taux de dropout.
+
+**Ecrêtage du gradient (gradient clipping).** Couper les gradients a la boite
+`[-c, c]` — le remede standard aux gradients explosifs des RNN et Transformers.
+Le fait qui porte tout : l'ecrêtage ne change jamais le signe d'un gradient, et
+ne sort jamais de la boite :
+
+```lean file=Ch05/Kit.lean#clip
+```
+
+`clip_align` (`0 <= x * clip c x`) explique pourquoi le pas ecrete descend
+toujours : l'ecrêtage raccourcit le pas, il ne l'inverse pas.
+
+**Decroissance des poids, decouplee vs L2.** AdamW reduit le poids de facon
+multiplicative, en dehors du normaliseur des moments ; le L2 classique ajoute
+`wd * w` au *gradient*, donc la reduction voyage *dans* les moments d'Adam et
+se fait reechelonner par le normaliseur corrige. En SGD simple, les deux regles
+sont la meme mise a jour :
+
+```lean file=Ch05/Kit.lean#decay
+```
+
+`decay_sgd_eq` est l'enonce exact de pourquoi la decouplage est invisible en
+SGD — et pourquoi Adam est tout l'interet d'AdamW. Le theoreme compagnon
+`adam_first_step_unbiased` montre que la correction de biais divise
+*exactement* le demarrage `(1 - beta)` : au pas 1, la reduction d'AdamW est la
+seule decroissance qui agit sur le poids.
+
+**Initialisation.** Tirer les poids de variance `1/n` (Xavier) ou `2/n` (He
+pour ReLU) a un fan-in `n`, et la variance des pre-activations reste O(1) a
+travers les couches. Une ligne d'algebre porte la regle :
+
+```lean file=Ch05/Kit.lean#fanin
+```
+
+`var_smul` (`Var (c*X) = c^2 * Var X`) est la regle du fan-in : a fan-in `n`,
+un poids d'ecart-type `1/sqrt n` (variance `1/n`) multiplie la variance
+d'entree par `n * 1/n = 1` — ni explosion ni evanescence, a l'initialisation.
+
+**Calendriers (schedules).** La decroissance exponentielle `eta_t = eta_0 *
+gamma^t` depense un budget total de pas *fini*, uniformement en le nombre de
+pas :
+
+```lean file=Ch05/Kit.lean#schedule
+```
+
+La somme geometrique est exacte (`geom_sum`), donc `lr_decay_total` borne
+`Sum_{t<n} eta_0 gamma^t` par `eta_0 / (1 - gamma)` pour tout `n`. Le
+calendrier `1/t` de la partie 2 depense un budget sans borne. C'est la
+difference exacte entre « decroitre » et « decroitre vite » — et pourquoi un
+entrainement a decroissance rapide cesse d'explorer en fin de course.
+
 ## Exercices
 
 1. Démontrez que les entrées de `softmax` sont positives et de somme 1 sur `Rat`, avec les lois usuelles de `exp`.
@@ -232,3 +301,40 @@ Dépliez `ema` : `ema β g 0 = 0`, donc la valeur après un pas est `β * 0 + (1
 ```
 
 </details>
+
+```lean file=Ch05/Exercises.lean#ex3
+```
+
+```lean file=Ch05/Exercises.lean#ex4
+```
+
+<details>
+<summary>Indice 3</summary>
+
+Cas sur `x < -c`, puis sur `c < x` ; `unfold clip` + `split <;> grind` dans chaque branche.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch05/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Indice 4</summary>
+
+Sens direct : cas sur les deux gardes, chaque branche réécrit `h` en une inégalité que `grind` ferme. Sens inverse : `unfold clip`, `split <;> grind`.
+
+</details>
+
+<details>
+<summary>Corrigé 4</summary>
+
+```lean file=Ch05/Solutions.lean#sol4
+```
+
+</details>
+

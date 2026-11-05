@@ -15,6 +15,7 @@ import LeanDL.Ch04.Network
 import LeanDL.Ch04.Solutions
 import LeanDL.Ch05.Loss
 import LeanDL.Ch05.Mnist
+import LeanDL.Ch05.Kit
 import LeanDL.Ch05.Norm
 import LeanDL.Ch05.Optim
 import LeanDL.Ch05.Solutions

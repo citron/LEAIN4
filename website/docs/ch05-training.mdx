@@ -188,6 +188,70 @@ What a certified demo publishes is then a closed rational fact — `(mul (point 
 
 <Figure src="float_drift.svg" alt="Accumulated drift of the Float sum of ten thousand 0.1s against the exact rational answer, oscillating and growing with the exponent of the running sum" caption="The price of Float, measured: adding 0.1 one thousand times. The exact answer is the integer 1000 - a Rat certificate - but 0.1 is not a binary fraction, so every addition rounds. The drift oscillates with the exponent of the running sum and grows: exactly the gap Core/Interval.lean is built to bound." />
 
+## The practitioner's kit
+
+Between the optimiser theorems and a training run that does not explode sit four
+devices every practitioner reaches for daily. Each has one exact fact that
+carries its whole justification — proved on `Rat`, in one file:
+`LeanDL/Ch05/Kit.lean`.
+
+**Dropout.** Randomly zero units during training, keep everything at test time —
+and the net's expectations do not move, *because* each unit is rescaled by
+`1/p`:
+
+```lean file=Ch05/Kit.lean#dropout
+```
+
+`dropout_expect` says the rescaled unit has expectation exactly `x`. That is why
+dropout is a no-op at inference: train-time and test-time expectations already
+agree. No `1/p`, and every inference pass is biased by the dropout rate.
+
+**Gradient clipping.** Cut gradients to the box `[-c, c]` — the standard cure for
+exploding gradients in RNNs and Transformers. The load-bearing fact: clipping
+never flips a gradient's sign, and never leaves the box:
+
+```lean file=Ch05/Kit.lean#clip
+```
+
+`clip_align` (`0 <= x * clip c x`) is why the clipped step still moves downhill:
+clipping shortens the step, it does not reverse it.
+
+**Weight decay, decoupled vs L2.** AdamW shrinks the weight multiplicatively,
+outside the moment normaliser; classical L2 adds `wd * w` to the gradient, so it
+rides *inside* Adam's moments and gets rescaled by the bias-corrected
+normaliser. In plain SGD the two rules are the same update:
+
+```lean file=Ch05/Kit.lean#decay
+```
+
+`decay_sgd_eq` is the exact statement of why decoupling is invisible for SGD —
+and why Adam is the whole point of AdamW. The companion `adam_first_step_unbiased`
+shows the bias correction divides the `(1 - beta)` warmup out *exactly*, so at
+step 1 AdamW's shrink is the only decay acting on the weight.
+
+**Initialisation.** Draw weights with variance `1/n` (Xavier) or `2/n` (He for
+ReLU) at fan-in `n`, and the pre-activation variance stays O(1) across layers.
+One algebraic line carries it:
+
+```lean file=Ch05/Kit.lean#fanin
+```
+
+`var_smul` (`Var (c*X) = c^2 * Var X`) is the fan-in rule: at fan-in `n`, a
+weight of standard deviation `1/sqrt n` (so variance `1/n`) multiplies the input
+variance by `n * 1/n = 1` — no explosion, no vanishing, at init.
+
+**Schedules.** Exponential decay `eta_t = eta_0 * gamma^t` spends a *finite*
+total step budget, uniformly in the number of steps:
+
+```lean file=Ch05/Kit.lean#schedule
+```
+
+The geometric sum is exact (`geom_sum`), so `lr_decay_total` bounds
+`Sum_{t<n} eta_0 gamma^t` by `eta_0 / (1 - gamma)` for every `n`. The `1/t`
+schedule of part 2 spends an unbounded budget. This is the exact difference
+between "decay" and "decay fast" — and why late-training behaviour under a
+fast decay stops exploring.
+
 ## Exercises
 
 1. Prove `softmax` entries are non-negative and sum to one over `Rat`, with the usual `exp` laws.
@@ -232,3 +296,40 @@ Unfold `ema`: `ema β g 0 = 0`, so the value after one step is `β * 0 + (1 - β
 ```
 
 </details>
+
+```lean file=Ch05/Exercises.lean#ex3
+```
+
+```lean file=Ch05/Exercises.lean#ex4
+```
+
+<details>
+<summary>Hint 3</summary>
+
+Case on `x < -c`, then on `c < x`; `unfold clip` + `split <;> grind` in each branch.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch05/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Hint 4</summary>
+
+Forward: case on the two guards, each branch rewrites `h` to an inequality `grind` closes. Backward: `unfold clip`, `split <;> grind`.
+
+</details>
+
+<details>
+<summary>Solution 4</summary>
+
+```lean file=Ch05/Solutions.lean#sol4
+```
+
+</details>
+

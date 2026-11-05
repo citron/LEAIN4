@@ -1,3 +1,4 @@
+import LeanDL.Ch05.Kit
 import LeanDL.Ch05.Optim
 
 /-! Exercises for Chapter 5. Replace each `sorry`; the solutions are in `Solutions.lean`. -/
@@ -20,5 +21,21 @@ theorem exercise_sgd_two_steps (η a w : α) :
 theorem exercise_ema_first (β g : α) : ema β g 1 = (1 - β) * g := by
   sorry
 -- ANCHOR_END: ex2
+
+
+-- ANCHOR: ex3
+/-- Exercise 3: clipping is idempotent — clipping an already clipped
+gradient changes nothing. -/
+theorem exercise_clip_idem (c x : Rat) (hc : 0 <= c) :
+    clip c (clip c x) = clip c x := by
+  sorry
+-- ANCHOR_END: ex3
+
+-- ANCHOR: ex4
+/-- Exercise 4: clipping is the identity exactly on its box. -/
+theorem exercise_clip_fixed (c x : Rat) (hc : 0 <= c) :
+    clip c x = x <-> -c <= x /\ x <= c := by
+  sorry
+-- ANCHOR_END: ex4
 
 end LeanDL.Ch05
