@@ -3,6 +3,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkLeanAnchor from './plugins/remark-lean-anchor.mjs';
+import searchLocal from '@easyops-cn/docusaurus-search-local';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -17,6 +18,13 @@ const config = {
   onBrokenLinks: 'throw',
   markdown: {mermaid: true, hooks: {onBrokenMarkdownLinks: 'throw'}},
   themes: ['@docusaurus/theme-mermaid'],
+  plugins: [[searchLocal, {
+    hashed: true,
+    language: ['en', 'fr'],
+    docsRouteBasePath: '/',
+    indexBlog: false,
+    highlightSearchTermsOnTargetPage: true,
+  }]],
 
   i18n: {
     defaultLocale: 'en',

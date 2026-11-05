@@ -45,3 +45,34 @@ node ../scripts/check.mjs
 | 15 JEPA | done | done | done |
 | 16 Mathematical tools: entropy, KL, Gibbs | done | done | done |
 | 17 Contrastive learning: InfoNCE, exactly | done | done | done |
+| 18 Efficiency: quantization, MoE, distillation, scaling | done | done | done |
+
+## Licence / License
+
+EUPL v1.2 — `LICENSE`. Copyright (c) 2026 William Gacquer (AMILTO SARL).
+L'UEPL est authentique dans toutes les langues officielles de l'UE ; le texte français
+faisant foi est publié sur [EUR-Lex](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:52017X0117(02)).
+
+## Guarantees / Garanties
+
+Every Lean snippet shown on the site is pulled from a **compiled** file through
+`-- ANCHOR:` markers, so nothing on the site can be out of date with the code.
+`node scripts/check.mjs` enforces: EN/FR page parity, every chapter page ≥ 4 Lean
+anchors + an `## Exercises` / `## Exercices` section, and `sorry` confined to
+`Exercises.lean`. The CI runs `lake build`, the axiom audit
+(`scripts/audit_axioms.lean`: no `sorry`, no non-standard axioms), the property
+tests (`lake exe props`), the MNIST accuracy gate and the site check.
+
+Chaque extrait Lean affiché sur le site est extrait d'un fichier **compilé** via les
+marqueurs `-- ANCHOR:` ; rien ne peut être désynchronisé du code. `check.mjs` impose la
+parité FR/EN, ≥ 4 ancres Lean et une section d'exercices par chapitre, et cantonne les
+`sorry` aux exercices. La CI lance `lake build`, l'audit des axiomes (aucun `sorry`,
+aucun axiome non standard), les tests de propriétés, le seuil de précision MNIST et le
+contrôle du site.
+
+## Licence (suite) / local viewing
+
+```bash
+cd website && npm run build && npx docusaurus serve --port 3000 --no-open
+# open http://localhost:3000/LEAIN4/   (baseUrl is /LEAIN4/, root 404s)
+```
