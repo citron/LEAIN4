@@ -62,6 +62,8 @@ This is plain supervised learning: regression of the *change* of the state from 
 
 <Figure src="dream_drift.svg" alt="Compounding drift over k imagined steps: a Lipschitz 1.2 model's bound explodes while a 0.5 model's bound stays under 0.2" caption="The compounding bound of compounding_error, drawn: per-step error eps piles up geometrically - with Lipschitz 1.2 the bound explodes past 6 after 10 imagined steps, with 0.5 it saturates at 2*eps. Short rollouts are safe, long dreams need contraction: that is the theorem the horizon of a world model must respect." />
 
+<Figure src="planning_horizon.svg" alt="Two growth curves: model-based error L^k (L = 1.25) crossing model-free 0.25k near k = 20" caption="The planning horizon, drawn: model-based error compounds geometrically (0.1 x 1.25^k) while model-free error only accumulates linearly (k*eps). After the crossing near k = 17 model-free wins: plan with the model for short horizons, switch to model-free beyond - the theorem of this chapter in one picture." />
+
 ## Why imagined rollouts drift
 
 A one-step model is accurate, but imagination feeds the model its **own predictions**. A small error at step 1 becomes part of the input at step 2, and so on. How fast the error grows depends on how much the model amplifies differences, its **Lipschitz constant** $L$:

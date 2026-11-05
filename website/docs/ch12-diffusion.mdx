@@ -35,6 +35,8 @@ flowchart LR
 
 *Top row: the forward process destroys the data. Bottom row: the trained network undoes it, step by step, to generate new data.*
 
+<Figure src="snr_decay.svg" alt="alpha_bar_t falling as 0.92^t and the signal-to-noise ratio alpha_bar/(1-alpha_bar) collapsing faster" caption="What the forward schedule really destroys: the signal-to-noise ratio alpha_bar_t / (1 - alpha_bar_t). alpha_bar decays geometrically (0.92^t) and the SNR collapses even faster - by t = 20, x_t is pure noise. This is the exact decay the monotonicity theorem of this chapter makes precise." />
+
 ## The forward process and its closed form
 
 One noising step is

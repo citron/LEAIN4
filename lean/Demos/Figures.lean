@@ -396,4 +396,57 @@ def main : IO Unit := do
     "beta-VAE model: distortion 1/(1+beta) vs rate beta/(1+beta)" "beta" "value"
     [("distortion 1/(1+beta)", blue, curve (grid 0.1 10.0 50) fun b => 1.0 / (1.0 + b)),
      ("rate beta/(1+beta)", orange, curve (grid 0.1 10.0 50) fun b => b / (1.0 + b))]
+  -- Ch13: value iteration contracts toward the fixed point
+  save "vi_contractions" <| lineSvg 480 250 0.0 12.0 0.0 1.05
+    "Value iteration: the error to V* shrinks as gamma^k per sweep" "sweeps k" "error / initial"
+    [("gamma = 0.9", blue, curve (grid 0.0 12.0 25) fun k => Float.pow 0.9 k),
+     ("gamma = 0.5", orange, curve (grid 0.0 12.0 25) fun k => Float.pow 0.5 k)]
+  -- Ch02: the perceptron mistake bound
+  save "perceptron_bound" <| lineSvg 480 250 0.14 1.0 0.0 60.0
+    "Perceptron bound 1/gamma^2: a thin margin costs samples" "margin gamma" "bound 1/gamma^2"
+    [("1 / gamma^2", blue, curve (grid 0.14 1.0 40) fun g => 1.0 / (g * g)),
+     ("cap 50", orange, curve (grid 0.14 1.0 40) fun _ => 50.0)]
+  -- Ch05: heavy ball momentum damps the zigzag
+  save "momentum_path" <| lineSvg 480 250 0.0 30.0 (0.0 - 1.0) 1.0
+    "On a steep valley: plain SGD zigzags, momentum mu = 0.9 damps it" "steps k" "position"
+    [("SGD mu = 0", blue, curve (grid 0.0 30.0 61) fun k =>
+        Float.sin (1.5 * k) * Float.pow 0.98 k),
+     ("momentum mu = 0.9", orange, curve (grid 0.0 30.0 61) fun k =>
+        Float.sin (1.5 * k) * Float.pow 0.85 k)]
+  -- Ch11: the optimal discriminator is the posterior
+  save "disc_posterior" <| lineSvg 480 250 (0.0 - 3.0) 3.0 0.0 1.0
+    "Optimal D*(x) = p / (p + q) for two Gaussians p = N(-1,1), q = N(1,1)" "x" "D*(x)"
+    [("D*(x)", blue, curve (grid (0.0 - 3.0) 3.0 61) fun x =>
+        let pp := Float.exp (-(x + 1.0) * (x + 1.0) / 2.0)
+        let qq := Float.exp (-(x - 1.0) * (x - 1.0) / 2.0)
+        pp / (pp + qq))]
+  -- Ch12: the signal-to-noise ratio of the forward process
+  save "snr_decay" <| lineSvg 480 250 1.0 20.0 0.0 12.0
+    "Forward diffusion: SNR = alpha_bar / (1 - alpha_bar) collapses" "step t" "value"
+    [("alpha_bar_t", blue, curve (grid 1.0 20.0 20) fun t => Float.pow 0.92 t),
+     ("SNR", orange, curve (grid 1.0 20.0 20) fun t =>
+        let a := Float.pow 0.92 t
+        a / (1.0 - a))]
+  -- Ch14: model-based error compounds, model-free accumulates
+  save "planning_horizon" <| lineSvg 480 250 1.0 20.0 0.0 12.0
+    "Plan error: model-based 0.1 L^k (L = 1.25) vs model-free 0.25 k" "horizon k" "error"
+    [("model-based 0.1 x 1.25^k", blue, curve (grid 1.0 20.0 20) fun k => 0.1 * Float.pow 1.25 k),
+     ("model-free 0.25 k", orange, curve (grid 1.0 20.0 20) fun k => 0.25 * k)]
+  -- Ch15: the variance regularizer is a hinge on the batch spread
+  save "var_hinge" <| lineSvg 480 240 0.0 2.0 0.0 1.1
+    "Variance penalty max(0, delta - spread): zero once the batch is spread" "spread of embeddings" "penalty (delta = 1)"
+    [("max(0, 1 - spread)", blue, curve (grid 0.0 2.0 41) fun x =>
+        if x < 1.0 then 1.0 - x else 0.0)]
+  -- Ch16: test risk is U-shaped in capacity
+  save "capacity_u" <| lineSvg 480 250 1.0 40.0 0.0 1.2
+    "Test risk = bias^2 + variance: the U bottoms where the two balance" "capacity n" "risk"
+    [("bias^2 = 1/n", blue, curve (grid 1.0 40.0 40) fun n => 1.0 / n),
+     ("variance = n / 400", orange, curve (grid 1.0 40.0 40) fun n => n / 400.0),
+     ("sum", grey, curve (grid 1.0 40.0 40) fun n => 1.0 / n + n / 400.0)]
+  -- Ch17: InfoNCE as a function of the positive similarity gap
+  save "nce_temp" <| lineSvg 480 250 0.0 6.0 0.0 1.5
+    "InfoNCE loss -log(e^s / (e^s + 3)) vs positive gap s: 1.39 blind, 0 aligned" "similarity gap s" "loss"
+    [("loss (3 negatives)", blue, curve (grid 0.0 6.0 40) fun s =>
+        -(Float.log (Float.exp s / (Float.exp s + 3.0))))]
+
   IO.println "figures written to ../website/static/img/"

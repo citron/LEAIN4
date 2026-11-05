@@ -20,6 +20,8 @@ Le chapitre 15 pénalise l'effondrement dans JEPA par un terme de variance, sans
 
 <Figure src="infonce_mass.svg" alt="Masse de probabilite sur le positif selon le nombre de negatifs n : la courbe aveugle 1/(n+1) et la courbe a ecart 2 e^2/(e^2+n) bien au-dessus" caption="Ce qu'achete un ecart de similarite : un plongement aveugle partage la masse softmax a parts egales, 1/(n+1) - a 32 negatifs, 3 %. Le couple apparie prouve avec ecart 2 maintient e^2/(e^2+n) pres de 19 % au meme n. L'ecart entre les deux courbes est la valeur de l'apprentissage contrastif, et il grandit avec n : plus de negatifs punit l'aveuglement." />
 
+<Figure src="nce_temp.svg" alt="InfoNCE -log(e^s/(e^s+3)) selon l'ecart positif s : de 1,39 vers presque zero" caption="Le paysage InfoNCE trace : avec trois negatifs, la perte vaut -log(e^s/(e^s+3)) - elle est a log 4 = 1,39 quand le positif est indiscernable (s = 0) et tend vers 0 quand le positif prend de l'avance. Le plancher demontre au chapitre est exactement la valeur en s = 0." />
+
 ## La perte
 
 ```lean file=Ch17/Contrastive.lean#infonce

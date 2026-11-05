@@ -79,6 +79,8 @@ OR: mistakes per epoch = [3, 1, 2, 2, 1, 0]
 XOR: mistakes per epoch = [4, 4, 4, 4, 4, ...]
 ```
 
+<Figure src="perceptron_bound.svg" alt="The mistake bound R^2/gamma^2 against the margin: a hyperbolic blow-up as gamma shrinks" caption="Novikoff's bound, drawn: with R = 1, a separator at margin gamma costs at most 1/gamma^2 mistakes. A fat margin (gamma = 1) learns in one update; a razor-thin margin (gamma = 0.1) needs a hundred. The perceptron never learns faster than the geometry of the data allows." />
+
 ## Theorem 2 — Novikoff's convergence theorem
 
 If the data *is* linearly separable with a margin, the perceptron stops. Precisely: assume a vector $w^*$ with $y_t\,(w^*\cdot x_t) \ge \gamma > 0$ for all examples and $\|x_t\|^2 \le R^2$. Then any run of $k$ mistake-driven updates starting from $w=0$ satisfies

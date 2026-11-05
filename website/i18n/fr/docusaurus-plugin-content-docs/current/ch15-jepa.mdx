@@ -77,6 +77,8 @@ Si l'encodeur cible n'est pas entraîné par la perte mais est une **moyenne mob
 
 <Figure src="spread_collapse.svg" alt="Penalite de dispersion 2*d^2 selon la distance d des plongements, annulee exactement au point effondre d = 0" caption="La penalite de dispersion est une parabole : un lot de 2 plongements a distance d a une dispersion de 2 d^2 (l'identite des paires au carre demontree au chapitre), et le lot effondre - tous les plongements egaux - vaut exactement zero (spread_const). La penalite ne decourage pas l'effondrement a la marge : elle est minimale exactement la, donc la ponderer retire reellement l'effondrement des optima." />
 
+<Figure src="var_hinge.svg" alt="La penalisation charniere max(0, delta - dispersion) : de delta a zero a la dispersion delta, puis plate" caption="La regularisation de variance est une charniere : le batch n'est penalise que tant que sa dispersion reste sous delta, et la penalisation est exactement nulle des que les plongements sont assez disperses - pourquoi elle arrete l'effondrement au seuil de la proposition du chapitre sans jamais combattre une representation saine." />
+
 ## Remède 2 : garder explicitement les plongements dispersés
 
 Les méthodes de type VICReg ajoutent un régularisateur qui pénalise des plongements trop semblables : un terme de **variance** (chaque coordonnée doit garder une variance d'au moins $\gamma$) et un terme de **covariance** (les coordonnées ne doivent pas être redondantes). Nous prouvons la propriété qui fait fonctionner le terme de variance, sous la forme la plus simple (plongements scalaires, une « dispersion » nulle exactement quand tous les plongements coïncident) :

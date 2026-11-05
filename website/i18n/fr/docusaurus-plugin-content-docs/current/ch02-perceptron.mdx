@@ -79,6 +79,8 @@ OR: mistakes per epoch = [3, 1, 2, 2, 1, 0]
 XOR: mistakes per epoch = [4, 4, 4, 4, 4, ...]
 ```
 
+<Figure src="perceptron_bound.svg" alt="La borne d'erreurs R^2/gamma^2 selon la marge : explosion hyperbolique quand gamma fond" caption="La borne de Novikoff, tracee : avec R = 1, un separateur a la marge gamma coute au plus 1/gamma^2 erreurs. Une marge epaisse (gamma = 1) apprend en une mise a jour ; une marge fine comme rasoir (gamma = 0,1) en demande cent. Le perceptron n'apprend jamais plus vite que la geometrie des donnees ne le permet." />
+
 ## Théorème 2 — le théorème de convergence de Novikoff
 
 Si les données *sont* linéairement séparables avec une marge, le perceptron s'arrête. Précisément : supposons un vecteur $w^*$ tel que $y_t\,(w^*\cdot x_t) \ge \gamma > 0$ pour tous les exemples et $\|x_t\|^2 \le R^2$. Alors toute suite de $k$ mises à jour déclenchées par des erreurs, à partir de $w=0$, vérifie

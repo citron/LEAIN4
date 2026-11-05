@@ -74,6 +74,8 @@ La normalisation de couche commence par *centrer* les activations. Voici la part
 
 La normalisation de couche complète (division par l'écart-type, avec échelle et décalage appris) viendra avec le Transformer au chapitre 9.
 
+<Figure src="momentum_path.svg" alt="Deux oscillations amorties dans une vallee etroite : SGD mu = 0 oscille fort, momentum mu = 0,9 s'installe plus vite" caption="La boule lourde, tracee : dans une vallee etroite, SGD pur rebondit d'un bord a l'autre presque a pleine amplitude (decroissance lente 0.98^k), tandis que momentum mu = 0,9 annule les rebonds transverses et decroit en 0.85^k - l'amortissement que predit l'analyse de Polyak du chapitre." />
+
 ## Optimiseurs
 
 La descente de gradient simple met à jour $w \leftarrow w - \eta\,\nabla L(w)$. Deux raffinements dominent la pratique : le **momentum** (moyenner les gradients dans le temps) et **Adam** (qui remet aussi à l'échelle chaque coordonnée selon la taille de ses gradients récents). Les trois sont de petites fonctions pures sur des tableaux :

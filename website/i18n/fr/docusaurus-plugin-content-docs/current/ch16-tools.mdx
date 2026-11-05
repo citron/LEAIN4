@@ -87,6 +87,8 @@ La preuve est celle du manuel, entièrement vérifiée. La borne ponctuelle $\lo
 
 <Figure src="bias_var.svg" alt="Courbes de risque selon la taille n de l'ensemble : la variance 1/n tombe, le risque d'ensemble 0,09 + 1/n la suit et s'arrete au plancher plat biais^2 = 0,09" caption="La decomposition des ensembles, dessinee : le terme de variance 1/n meurt aussi vite qu'on moyenne, le risque d'ensemble 0,09 + 1/n le suit vers le bas - et s'arrete au plancher plat du biais qu'on ne moyenne jamais. Plus de modeles achete de la variance, jamais du biais : exactement le contenu de ensemble_risk_decomp, une droite et son asymptote." />
 
+<Figure src="capacity_u.svg" alt="Biais^2 = 1/n qui tombe, variance = n/400 qui monte, leur somme en U selon la capacite" caption="La courbe en U de la generalisation tracee a partir de la decomposition exacte du chapitre : biais^2 = 1/n tombe avec la capacite, variance = n/400 monte avec elle, et le risque de test est leur somme - un U dont le fond est l'equilibre des deux. Un ensemble divise le terme de variance par n (le theoreme), aplatissant le bras droit." />
+
 ## Généralisation : biais, variance, et pourquoi les ensembles marchent
 
 Pourquoi un modèle qui colle parfaitement aux données d'entraînement échoue-t-il parfois sur des données nouvelles ? La réponse a une forme exacte — et ici c'est un théorème, pas un graphique. Tire une hypothèse d'une famille (le hasard de l'entraînement : ordre des données, graines, minibatchs), note chaque hypothèse sur chaque entrée contre la cible, fais la moyenne. L'identité :

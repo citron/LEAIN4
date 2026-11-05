@@ -62,6 +62,8 @@ C'est de l'apprentissage supervisé ordinaire : régression du *changement* d'é
 
 <Figure src="dream_drift.svg" alt="Dérive composee sur k pas imaginaires : la borne d'un modele Lipschitz 1,2 explose, celle d'un modele 0,5 reste sous 0,2" caption="La borne de composition de compounding_error, dessinee : l'erreur par pas s'empile geometriquement - avec Lipschitz 1,2 la borne explose au-dela de 6 apres 10 pas imagines, avec 0,5 elle sature a 2*eps. Les trajectoires courtes sont sures, les reves longs exigent une contraction : c'est le theoreme que l'horizon d'un modele du monde doit respecter." />
 
+<Figure src="planning_horizon.svg" alt="Deux croissances : erreur du modele 0.1 x 1.25^k croissant, sans-modele 0.25k lineaire, croisement vers k = 17" caption="L'horizon de planification, trace : l'erreur du modele se compose geometriquement (0.1 x 1.25^k) la ou l'erreur sans modele ne s'accumule que lineairement (k*eps). Les deux courbes se croisent vers k = 17 : planifier avec le modele a court horizon, passer au sans-modele au-dela - le theoreme du chapitre en une image." />
+
 ## Pourquoi les trajectoires imaginées dérivent
 
 Un modèle à un pas est précis, mais l'imagination donne au modèle **ses propres prédictions** en entrée. Une petite erreur au pas 1 devient une partie de l'entrée au pas 2, et ainsi de suite. La vitesse de croissance de l'erreur dépend de combien le modèle amplifie les différences, sa **constante de Lipschitz** $L$ :

@@ -74,6 +74,8 @@ Layer normalisation starts by *centring* the activations. Here is the part that 
 
 The full layer norm (dividing by the standard deviation, with learnable scale and shift) comes with the Transformer in Chapter 9.
 
+<Figure src="momentum_path.svg" alt="Two damped oscillations in a steep valley: SGD mu = 0 oscillates widely, momentum mu = 0.9 settles faster" caption="The heavy ball, drawn: on a narrow valley, plain SGD bounces across the valley at almost full amplitude (slow decay 0.98^k), while momentum mu = 0.9 cancels the transverse bounces and decays at 0.85^k - the damping the Polyak analysis of this chapter predicts." />
+
 ## Optimizers
 
 Plain gradient descent updates $w \leftarrow w - \eta\,\nabla L(w)$. Two refinements dominate practice: **momentum** (average the gradients over time) and **Adam** (also rescale each coordinate by the size of its recent gradients). All three are small pure functions on arrays:
