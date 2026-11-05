@@ -1,3 +1,5 @@
+<Figure src="quant_grid.svg" alt="Sawtooth of the rounding error x - roundq(x) on a grid of step 1, oscillating between the drawn bounds -1/2 and +1/2" caption="roundq_err_le, drawn: round-to-nearest on a grid of step s leaves a sawtooth error that never escapes [-s/2, +s/2] - the bound is attained exactly at the grid midpoints. Every weight in a quantized model pays at most s/2, which is why the step size (not the bit count alone) is what the error bound speaks about." />
+
 ---
 sidebar_position: 19
 title: "Chapter 18 — Efficiency: quantization, MoE, distillation, scaling"
@@ -53,6 +55,8 @@ The router gives expert $i$ a weight $p_i \ge 0$ with $\sum_i p_i = 1$. The load
 The demo makes the curve visible: $E = 8$ experts, floor $0.125$; uniform scores $0.125$, a skewed router $0.23$, a collapsed router $1.0$.
 
 <Figure src="moe_balance.svg" alt="Collision probability E times sum p squared versus router skew, starting at the floor 1 for the uniform router" caption="Skew buys specialization and pays in collisions: E * sum p^2 rises from the proved floor 1 as the router gets uneven." />
+
+<Figure src="scaling_shape.svg" alt="Training loss curve L(N) = Linf + c^N (L0 - Linf) falling geometrically from 4 toward the flat floor Linf = 1.5" caption="The train_decay theorem in one line: with c = 0.9 the loss falls geometrically toward the irreducible floor Linf - each decade of scale buys a fixed multiplicative dent in (L - Linf), never a reach of the floor. The shape the scaling laws measure is exactly this geometric approach, and the floor is what extra data cannot fix." />
 
 ## Distillation: the floor is the teacher's entropy
 

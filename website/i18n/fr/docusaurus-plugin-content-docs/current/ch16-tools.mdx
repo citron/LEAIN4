@@ -85,6 +85,8 @@ La preuve est celle du manuel, entièrement vérifiée. La borne ponctuelle $\lo
 
 <Figure src="kl_asymmetry.svg" alt="KL(p,q) et KL(q,p) en fonction de q pour p = 0,5 fixe : deux courbes en U distinctes, preuve que KL n'est pas une distance" caption="KL n'est pas une distance, en image : coder une source p = 0,5 avec un code conçu pour q coûte KL(p, q), et l'ordre inverse dessine une autre courbe. Les deux s'annulent exactement en q = p (Gibbs : KL ≥ 0, égalité si et seulement si q = p), les deux explosent aux bords (le log de zéro) - les deux théorèmes de la section « Inégalité de Gibbs » en une image." />
 
+<Figure src="bias_var.svg" alt="Courbes de risque selon la taille n de l'ensemble : la variance 1/n tombe, le risque d'ensemble 0,09 + 1/n la suit et s'arrete au plancher plat biais^2 = 0,09" caption="La decomposition des ensembles, dessinee : le terme de variance 1/n meurt aussi vite qu'on moyenne, le risque d'ensemble 0,09 + 1/n le suit vers le bas - et s'arrete au plancher plat du biais qu'on ne moyenne jamais. Plus de modeles achete de la variance, jamais du biais : exactement le contenu de ensemble_risk_decomp, une droite et son asymptote." />
+
 ## Généralisation : biais, variance, et pourquoi les ensembles marchent
 
 Pourquoi un modèle qui colle parfaitement aux données d'entraînement échoue-t-il parfois sur des données nouvelles ? La réponse a une forme exacte — et ici c'est un théorème, pas un graphique. Tire une hypothèse d'une famille (le hasard de l'entraînement : ordre des données, graines, minibatchs), note chaque hypothèse sur chaque entrée contre la cible, fais la moyenne. L'identité :

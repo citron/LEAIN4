@@ -60,6 +60,8 @@ The world model never sees this formula. It only sees **transitions** $(x,v,u)\t
 
 This is plain supervised learning: regression of the *change* of the state from the state and action. As in Chapters 11 to 13, the loss is an `Expr`, so its gradient comes from the verified `backprop`.
 
+<Figure src="dream_drift.svg" alt="Compounding drift over k imagined steps: a Lipschitz 1.2 model's bound explodes while a 0.5 model's bound stays under 0.2" caption="The compounding bound of compounding_error, drawn: per-step error eps piles up geometrically - with Lipschitz 1.2 the bound explodes past 6 after 10 imagined steps, with 0.5 it saturates at 2*eps. Short rollouts are safe, long dreams need contraction: that is the theorem the horizon of a world model must respect." />
+
 ## Why imagined rollouts drift
 
 A one-step model is accurate, but imagination feeds the model its **own predictions**. A small error at step 1 becomes part of the input at step 2, and so on. How fast the error grows depends on how much the model amplifies differences, its **Lipschitz constant** $L$:

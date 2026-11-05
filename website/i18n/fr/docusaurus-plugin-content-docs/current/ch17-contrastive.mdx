@@ -18,6 +18,8 @@ title: "Chapitre 17 — Apprentissage contrastif : InfoNCE, exactement"
 
 Le chapitre 15 pénalise l'effondrement dans JEPA par un terme de variance, sans jamais prouver ce que la perte d'un modèle effondré *doit* valoir — parce que l'apprentissage contrastif n'était pas au programme. Ce chapitre comble ce trou : la perte elle-même, définie sur `Rat` exact, avec les quatre faits que tous les praticiens citent comme du folklore, élevés au rang de théorèmes.
 
+<Figure src="infonce_mass.svg" alt="Masse de probabilite sur le positif selon le nombre de negatifs n : la courbe aveugle 1/(n+1) et la courbe a ecart 2 e^2/(e^2+n) bien au-dessus" caption="Ce qu'achete un ecart de similarite : un plongement aveugle partage la masse softmax a parts egales, 1/(n+1) - a 32 negatifs, 3 %. Le couple apparie prouve avec ecart 2 maintient e^2/(e^2+n) pres de 19 % au meme n. L'ecart entre les deux courbes est la valeur de l'apprentissage contrastif, et il grandit avec n : plus de negatifs punit l'aveuglement." />
+
 ## La perte
 
 ```lean file=Ch17/Contrastive.lean#infonce

@@ -317,3 +317,8 @@ Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 a
 ## Phase I2 — Illustrations salve 2 (RÉSOLU)
 
 9 figures supplémentaires (Ch02, Ch03, Ch04, Ch06, Ch07, Ch08, Ch09, Ch10, Ch13), toutes générées par Lean via `lake exe figures` et insérées FR/EN par `<Figure>`. QA visuel par rendu navigateur : `xor_points` passé en lieux géométriques (lineSvg relie les points, un nuage de 2 points devient une ligne), titre `elbo_parts` raccourci (troncature à droite). Vérifications : build 89 jobs, audit 2084 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 43 SVG.
+
+
+## Phase I3 — Illustrations salve 3 (RÉSOLU)
+
+9 figures supplémentaires (Ch01, Ch05, Ch11, Ch14, Ch15, Ch16, Ch17, Ch18), toutes générées par Lean via `lake exe figures` et insérées FR/EN par `<Figure>`. QA visuel par rendu navigateur : six titres tronqués à droite ont été raccourcis (mode_collapse, weight_decay, dream_drift, spread_collapse, infonce_mass, quant_grid, sigmoid_deriv). Vérifications : build 89 jobs, audit 2084 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 52 SVG.

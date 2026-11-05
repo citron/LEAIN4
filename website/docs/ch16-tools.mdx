@@ -85,6 +85,8 @@ The proof is the textbook one, fully checked. The pointwise bound $\log q - \log
 
 <Figure src="kl_asymmetry.svg" alt="KL(p,q) and KL(q,p) as functions of q against a fixed p = 0.5: two different U-shaped curves, proving KL is not a distance" caption="KL is not a distance, visible: coding a source p = 0.5 with a code built for q costs KL(p, q), and the reverse order draws a different curve. Both hit zero exactly at q = p (Gibbs: KL ≥ 0, equality iff q = p), both blow up at the endpoints (the log of zero) - the two theorems of Section « Gibbs inequality » in one picture." />
 
+<Figure src="bias_var.svg" alt="Risk curves against ensemble size n: variance 1/n falls, ensemble risk 0.09 + 1/n falls to the flat bias^2 = 0.09 floor" caption="The ensemble decomposition drawn: the variance term 1/n dies as fast as you average, the ensemble risk 0.09 + 1/n follows it down - and stops at the flat bias^2 floor you can never average away. More models buy variance, never bias: exactly the content of ensemble_risk_decomp, a straight line and its asymptote." />
+
 ## Generalization: bias, variance, and why ensembles work
 
 Why does a model that fits the training set perfectly sometimes fail on new data? The answer has an exact form — and here it is a theorem, not a plot. Draw a hypothesis from a family (the randomness of training: data order, seeds, minibatches), score each at every input against the target, average. The identity:

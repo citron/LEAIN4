@@ -102,6 +102,8 @@ Avant l'activation, un neurone sans biais est une application linéaire. La preu
 ```lean file=Ch01/Neuron.lean#linear
 ```
 
+<Figure src="sigmoid_deriv.svg" alt="Sigmoide montant de 0 a 1, et sa derivee une cloche de pic 1/4 en zero" caption="La derivee de la sigmoide est une cloche de pic 1/4 : sigma' = sigma(1 - sigma), maximale en 0 ou sigma = 1/2. Cette seule courbe est l'evanescence des gradients du Ch4 en germe - une pile de couches sigmoides multiplie des facteurs au plus egaux a 1/4, c'est exactement pourquoi la ReLU a pris la releve." />
+
 ## Une propriété de la sigmoïde
 
 Nous n'utilisons jamais l'analyse réelle. Nous supposons seulement que `exp` vérifie $e^{x+y}=e^x e^y$ et $e^0=1$ (la classe `LawfulExp`), et `grind` fait l'algèbre de corps :

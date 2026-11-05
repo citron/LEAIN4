@@ -18,6 +18,8 @@ title: "Chapter 17 — Contrastive learning: InfoNCE, exactly"
 
 Chapter 15 penalises collapse in JEPA with a variance term but never proves what the *loss* of a collapsed model must be — because contrastive learning was not in the course. That gap is this chapter: the loss itself, defined over exact `Rat`, with the four facts every practitioner quotes as theorems, not folklore.
 
+<Figure src="infonce_mass.svg" alt="Probability mass on the positive against the number of negatives n: the blind 1/(n+1) curve and the gap-2 curve e^2/(e^2+n) staying far above it" caption="What a similarity gap buys: a blind embedding shares the softmax mass equally, 1/(n+1) - at 32 negatives, 3 %. The proven matched pair with gap 2 keeps e^2/(e^2+n) near 19 % at the same n. The gap between the two curves is the value of contrastive learning, and it widens with n: more negatives punish blindness." />
+
 ## The loss
 
 ```lean file=Ch17/Contrastive.lean#infonce

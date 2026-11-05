@@ -1,3 +1,5 @@
+<Figure src="quant_grid.svg" alt="Dent de scie de l'erreur d'arrondi x - roundq(x) sur une grille de pas 1, oscillant entre les bornes tracees -1/2 et +1/2" caption="roundq_err_le, dessine : l'arrondi a la maille la plus proche sur une grille de pas s laisse une erreur en dent de scie qui ne sort jamais de [-s/2, +s/2] - la borne est atteinte exactement aux milieux de maille. Chaque poids d'un modele quantifie paie au plus s/2, c'est pourquoi la taille du pas (pas seulement le nombre de bits) est ce que la borne d'erreur enonce." />
+
 ---
 sidebar_position: 19
 title: "Chapitre 18 — Efficacité : quantification, MoE, distillation, scaling"
@@ -54,6 +56,8 @@ Le routeur donne à l'expert $i$ un poids $p_i \ge 0$ avec $\sum_i p_i = 1$. La 
 La démo rend la courbe visible : $E = 8$ experts, plancher $0.125$ ; l'uniforme vaut $0.125$, un routeur biaisé $0.23$, un effondré $1.0$.
 
 <Figure src="moe_balance.svg" alt="Probabilité de collision E fois somme p au carré selon le biais du routeur, partant du plancher 1 pour le routeur uniforme" caption="Le biais achète la spécialisation et se paie en collisions : E * somme p² s’élève au-dessus du plancher démontré 1 quand le routeur devient inégal." />
+
+<Figure src="scaling_shape.svg" alt="Courbe de perte d'entrainement L(N) = Linf + c^N (L0 - Linf) tombant geometriquement de 4 vers le plancher plat Linf = 1,5" caption="Theoreme train_decay en une ligne : avec c = 0,9 la perte tombe geometriquement vers le plancher irreductible Linf - chaque decade d'echelle achete un creux multiplicatif fixe dans (L - Linf), jamais l'atteinte du plancher. La forme que les lois d'echelle mesurent est exactement cette approche geometrique, et le plancher est ce que plus de donnees ne repare pas." />
 
 ## Distillation : le plancher est l'entropie du professeur
 

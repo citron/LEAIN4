@@ -56,6 +56,8 @@ La somme sur les classes est une somme sur `List.finRange m`. La preuve demande 
 Calculer $e^{z}$ déborde pour $z$ grand. Les implémentations soustraient d'abord $\max_i z_i$ (le code MNIST ci-dessous le fait). Cela ne change pas le softmax, ce qui l'autorise. Nous ne démontrons pas formellement cette identité ici, car elle demande une loi reliant `exp`, `inv` et les produits ; c'est un bon exercice dans un corps.
 :::
 
+<Figure src="weight_decay.svg" alt="Deux traces SGD sur (w-1)^2 : sans decroissance w converge vers 1, avec lam = 1 elle se stabilise a 0,5" caption="La decroissance des poids sur la perte la plus simple : avec lam = 0 le SGD marche vers le minimiseur w = 1 ; avec lam = 1 le point fixe amorti est w = 1/(1 + lam) = 0,5. La decroissance change un peu de biais contre de la variance - l'optimum vise est voluntairement une version retrecie du vrai." />
+
 ## Régularisation L2 (décroissance des poids)
 
 Ajouter $c\sum_i w_i^2$ à la perte pénalise les grands poids. Son gradient vaut $2c\,w_k$ : chaque pas de gradient fait donc aussi rétrécir les poids, d'où le nom de *décroissance des poids*.

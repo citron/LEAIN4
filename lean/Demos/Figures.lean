@@ -273,4 +273,72 @@ def main : IO Unit := do
     "MLP: first-layer gradient shrinks with depth (log10)" "depth L" "log10 |dL/dW0|"
     [("typical  0.5^L", blue, curve xsS fun l => Float.log (Float.pow 0.5 l) / Float.log 10.0),
      ("worst    0.25^L", orange, curve xsS fun l => Float.log (Float.pow 0.25 l) / Float.log 10.0)]
+  -- Salve 3
+  -- Ch01: the sigmoid derivative is a bell with peak 1/4
+  let xs1 := grid (0.0 - 5.0) 5.0 160
+  save "sigmoid_deriv" <| lineSvg 480 250 (0.0 - 5.0) 5.0 (0.0 - 0.1) 1.1
+    "Sigmoid and derivative: sigma' = sigma(1 - sigma), peak 1/4" "input u" "value"
+    [("sigma(u)", blue, curve xs1 sigmoid),
+     ("sigma'(u) = sigma(1-sigma)", orange, curve xs1 fun u =>
+        let g := sigmoid u
+        g * (1.0 - g))]
+  -- Ch05: L2 weight decay shrinks the fixed point
+  let decay (lr lam : Float) : Array (Float × Float) := Id.run do
+    let mut out := #[(0.0, 0.0)]
+    let mut w := 0.0
+    for t in List.range 80 do
+      w := w - lr * (2.0 * (w - 1.0) + 2.0 * lam * w)
+      out := out.push (t.toFloat + 1.0, w)
+    return out
+  save "weight_decay" <| lineSvg 480 250 1.0 80.0 (0.0 - 0.2) 1.2
+    "SGD on (w-1)^2: decay lam = 1 settles at 0.5, not 1" "steps" "weight w"
+    [("lam = 0  ->  w -> 1", blue, decay 0.1 0.0),
+     ("lam = 1  ->  w -> 0.5", orange, decay 0.1 1.0)]
+  -- Ch11: covering both modes beats collapsing on one (mode_collapse_reward)
+  let xs11 := grid 0.1 4.0 60
+  save "mode_collapse" <| lineSvg 480 250 0.1 4.0 0.0 1.2
+    "Generator reward a*b/(a+b): covering modes beats collapsing" "generator mass a (b = 1)" "reward"
+    [("collapse: a/(a+1)", orange, curve xs11 fun a => a / (a + 1.0)),
+     ("covers both: a/(a+0.5)", blue, curve xs11 fun a => a / (a + 0.5))]
+  -- Ch14: imagined rollouts drift by the compounding bound
+  let xs14 := grid 0.0 10.0 20
+  save "dream_drift" <| lineSvg 480 250 0.0 10.0 0.0 6.5
+    "World model: per-step error compounds geometrically over k steps" "imagined steps k" "total drift"
+    [("Lipschitz L = 1.2 (drift explodes)", orange, curve xs14 fun k => 0.1 * (Float.pow 1.2 k - 1.0) / 0.2),
+     ("Lipschitz L = 0.5 (drift bounded)", blue, curve xs14 fun k => 0.2 * (1.0 - Float.pow 0.5 k))]
+  -- Ch15: the spread penalty is exactly zero at collapse
+  let xs15 := grid 0.0 3.0 60
+  save "spread_collapse" <| lineSvg 480 250 0.0 3.0 0.0 18.0
+    "JEPA spread of a 2-point batch is 2 d^2 - zero at collapse" "embedding distance d" "spread penalty"
+    [("spread = 2 d^2", blue, curve xs15 fun d => 2.0 * d * d),
+     ("collapsed batch (d = 0)", orange, curve xs15 fun _ => 0.0)]
+  -- Ch16: ensembles kill variance, never bias
+  let xs16 := grid 1.0 20.0 38
+  save "bias_var" <| lineSvg 480 250 1.0 20.0 0.0 1.4
+    "Ensemble risk = bias^2 + variance/n (bias^2 = 0.09, variance = 1)" "models n" "risk"
+    [("variance 1/n", blue, curve xs16 fun n => 1.0 / n),
+     ("ensemble risk 0.09 + 1/n", orange, curve xs16 fun n => 0.09 + 1.0 / n),
+     ("bias^2 floor (unremovable)", grey, curve xs16 fun _ => 0.09)]
+  -- Ch17: the mass on the positive decays as 1/(n+1) when blind
+  let xs17 := grid 1.0 32.0 31
+  save "infonce_mass" <| lineSvg 480 250 1.0 32.0 0.0 1.05
+    "InfoNCE mass on the positive: blind 1/(n+1) vs gap 2" "negatives n" "probability"
+    [("blind: 1/(n+1)", orange, curve xs17 fun n => 1.0 / (n + 1.0)),
+     ("matched gap 2", blue, curve xs17 fun n =>
+        7.389056 / (7.389056 + n))]
+  -- Ch18: round quantization never errs by more than s/2 (roundq_err_le)
+  let xs18 := grid (0.0 - 3.0) 3.0 200
+  save "quant_grid" <| lineSvg 480 250 (0.0 - 3.0) 3.0 (0.0 - 0.8) 0.8
+    "Round-to-nearest, grid s = 1: sawtooth error in [-1/2, 1/2]" "value x (grid s = 1)" "x - roundq x"
+    [("rounding error", blue, curve xs18 fun x =>
+        x - (Float.floor (x + 0.5))),
+     ("bound +s/2", orange, curve xs18 fun _ => 0.5),
+     ("bound -s/2", green, curve xs18 fun _ => 0.0 - 0.5)]
+  -- Ch18: the training-loss decay theorem, drawn
+  let xs19 := grid 1.0 40.0 39
+  save "scaling_shape" <| lineSvg 480 250 1.0 40.0 1.0 4.5
+    "train_decay: L(N) = Linf + c^N (L0 - Linf) falls geometrically to the floor Linf" "data/parameters N" "loss L(N)"
+    [("L0 = 4, Linf = 1.5, c = 0.9", blue, curve xs19 fun n =>
+        1.5 + Float.pow 0.9 n * 2.5),
+     ("irreducible floor Linf", orange, curve xs19 fun _ => 1.5)]
   IO.println "figures written to ../website/static/img/"

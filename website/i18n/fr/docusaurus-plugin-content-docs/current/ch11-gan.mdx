@@ -69,6 +69,8 @@ Remarquez ce que le théorème **ne dit pas** : il ne dit pas que $d^\star$ est 
 Les preuves d'optimalité deviennent souvent faciles quand on *devine le minimiseur* et qu'on prouve une identité de la forme « perte = minimum + un carré ». L'identité est un calcul d'anneau que `grind` termine ; la positivité du carré fait le reste.
 :::
 
+<Figure src="mode_collapse.svg" alt="Deux courbes de recompense selon la masse a du generateur : couvrir les deux modes a/(a+0,5) est strictement au-dessus de l'effondrement a/(a+1)" caption="Theoreme de l'effondrement de modes, dessine : pour toute masse a, la courbe de couverture a/(a+0,5) est strictement au-dessus de la courbe d'effondrement a/(a+1) - repartir le generateur sur les deux modes paye toujours plus que de se concentrer sur un, exactement l'inegalite que mode_collapse_reward prouve pour tout a, b positifs." />
+
 ## L’effondrement de modes, prouvé
 
 Les données vivent sur deux modes égaux, de masse $a$ chacun ; le générateur répartit sa masse $b$ dessus. L’analyse des moindres carrés ci-dessus (`lsLoss_value`) dit que le discriminateur optimal paie le générateur $a\,m\,(a+m)^{-1}$ sur un mode portant la masse générée $m$. Deux options :

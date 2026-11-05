@@ -56,6 +56,8 @@ The sum over classes is a sum over `List.finRange m`. The proof needs one small 
 Computing $e^{z}$ overflows for large $z$. Implementations subtract $\max_i z_i$ first (the MNIST code below does). This does not change the softmax, which is why it is allowed. We do not prove that identity formally here, because it needs a law relating `exp`, `inv` and products; it is a good exercise in a field.
 :::
 
+<Figure src="weight_decay.svg" alt="Two SGD traces on (w-1)^2: without decay w converges to 1, with decay lam = 1 it settles at 0.5" caption="Weight decay at work on the simplest loss: with lam = 0 plain SGD walks to the minimizer w = 1; with lam = 1 the damped fixed point is w = 1/(1 + lam) = 0.5. Decay trades a little bias for variance - the optimum it converges to is intentionally a shrunken version of the true one." />
+
 ## L2 regularisation (weight decay)
 
 Adding $c\sum_i w_i^2$ to the loss penalises large weights. Its gradient is $2c\,w_k$, so each gradient step also shrinks the weights, which is why it is called *weight decay*.
