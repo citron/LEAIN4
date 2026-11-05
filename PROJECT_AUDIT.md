@@ -327,3 +327,8 @@ Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 a
 ## Phase I4 — Illustrations salve 4 (RÉSOLU)
 
 8 figures supplémentaires (Ch01, Ch03, Ch04, Ch06, Ch07, Ch08, Ch09, Ch10), générées par Lean et insérées FR/EN. Fix infrastructure : `Core/Plot.lean` échappe le XML (`esc` sur `&`, `<`, `>` dans titres, axes, légendes) — découvert par QA navigateur : `cell_hold.svg` était invalide (le `<` nu de « `f < 1` » tronquait le titre à la ligne 16). Légende `mlp_stairs` raccourcie après troncature. Toutes les figures regénées. Vérifications : build 89 jobs, audit 2085 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 60 SVG.
+
+
+## Phase I5 — Illustrations salve 5 (RÉSOLU)
+
+9 figures supplémentaires (Ch02, Ch05, Ch11, Ch12, Ch13, Ch14, Ch15, Ch16, Ch17) : toutes les pages de chapitre ont désormais au moins 3 figures, Ch18 en a 4. QA navigateur/vision : 5 figures corrigées après troncature de titre ou courbe hors cadre (`perceptron_bound` rééquilibré en x ∈ [0.14, 1] pour que 1/γ² tienne sous 60, `snr_decay` en y ∈ [0, 12] pour que le pic SNR ≈ 11.5 tienne, `nce_temp` en y ∈ [0, 1.5], `planning_horizon` rebalisé en 0.1·1.25ᵏ vs 0.25k pour rendre le croisement visible vers k = 17, légendes et captions FR/EN alignées dessus). Vérifications : build 89 jobs, audit 2085 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 69 SVG.
