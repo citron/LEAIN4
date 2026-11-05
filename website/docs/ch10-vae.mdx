@@ -52,6 +52,8 @@ After training, generating is simple: draw $z\sim\mathcal N(0,1)$ and decode.
 
 (The closed form of the KL term is a standard Gaussian integral; we take it as the definition and prove properties of it. The *shape* of the loss — a lower bound on the data log-likelihood — does not need integrals: it is a finite-sum identity, and it is proved exactly over `Rat` in `Ch10/Elbo.lean`, below.)
 
+<Figure src="elbo_parts.svg" alt="Two curves against x: the reconstruction -log p(x) dips in the two data modes, the KL term rises quadratically away from the q mean" caption="The two halves the ELBO theorem stitches together: -log p(x) wants the code near a data mode (the twin dips), KL(q||p) wants it near the prior mean (the rising bowl). The exact identity proved in Lean (evidence_bound) says the loss is their sum - every VAE training curve is these two terms negotiating, per mini-batch." />
+
 ## The ELBO, proved
 
 The VAE objective is not a heuristic: it is a **lower bound on the log-likelihood**, and the KL term is the price of the encoder's approximation. For a *finite* latent space, with a joint $P$ (weights $p(z_i,x)>0$, unnormalised), a likelihood factor $e_i$, evidence $m=\sum_i p(z_i,x)\,e_i = p(x)$, and any encoder $q$:

@@ -60,6 +60,8 @@ The line that matters is $c_t = f_t\odot c_{t-1} + i_t\odot g_t$: the memory is 
 ```lean file=Ch08/Lstm.lean#forward
 ```
 
+<Figure src="lstm_gates.svg" alt="The four building blocks of the LSTM cell: f and i are sigmoids in (0,1), the candidate tanh in (-1,1), f times the candidate is the gated update" caption="Every LSTM gate is one of these four curves. f = sigmoid decides the keep-ratio (0 keeps the memory, 1 rewrites it - the highway the gradient theorem uses), i = sigmoid the write-ratio, the tanh keeps the candidate bounded, and f * c~ is the multiply-add the whole update is made of." />
+
 ## The gradient has a highway
 
 Isolate the cell path: $c_{t+1} = f_t\,c_t + u_t$, where the forget gate $f_t$ and the update $u_t = i_t g_t$ are regarded as given. Unrolled as an `Expr` in $c_0$:

@@ -115,6 +115,8 @@ Avec cette machinerie, la règle delta du chapitre 3 devient un corollaire : la 
 
 <Figure src="chain_stack.svg" alt="Le gradient à travers une pile de couches sigmoïdes décroît linéairement en L : (1/4)^L au pire, (0.5)^L en général" caption="Pourquoi la profondeur est une multiplication : chaque couche sigmoïde est un facteur au plus 1/4, donc le gradient de bout en bout décroît en ligne droite sur l'axe logarithmique. C'est le théorème de disparition du gradient en une image - et la raison pour laquelle ReLU (pente locale 1) a pris le relais." />
 
+<Figure src="relu_dead.svg" alt="Deux courbes : la ReLU vivante y = max(0,x) qui monte depuis l'origine, et la ReLU morte plate a zero sur tout l'axe" caption="La ReLU morte, dessinee : une unite dont les poids ont pousse l'entree toujours en negatif sort exactement 0 partout - le gradient de la ReLU vaut 0 sur toute cette demi-droite, donc aucun gradient de perte ne circule et l'unite ne se remet jamais (relu_grad, Ch04). L'initialisation n'est pas cosmetique : elle decide combien d'unites restent vivantes." />
+
 ## Des réseaux de profondeur quelconque
 
 Une couche dense et un perceptron multicouche entier ne sont que des fonctions qui construisent des expressions. Rien dans le code d'autodiff ne connaît les couches.

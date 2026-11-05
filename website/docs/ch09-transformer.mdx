@@ -50,6 +50,8 @@ $$
 
 A Transformer block adds this to its input (a **residual connection**) and then applies a small MLP, again with a residual connection. Real models stack many blocks, use several attention "heads" in parallel, and normalise activations with layer norm.
 
+<Figure src="attention_causal.svg" alt="A 6x6 causal attention matrix with uniform scores: row t spreads 1/(t+1) over its own past and zero over the future" caption="The causal mask, drawn: scores uniform, so each row shares its mass equally over the positions it is allowed to see. Row 0 sees only itself (mass 1), row 5 averages over six. Everything above the diagonal is exactly zero - that is the no-leak property the chapter proves (causal_no_leak), visible as the white triangle." />
+
 ## Five facts, proved
 
 ### 1. The weights are a distribution, and the softmax is shift-invariant

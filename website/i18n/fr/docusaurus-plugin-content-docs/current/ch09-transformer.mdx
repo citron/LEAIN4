@@ -50,6 +50,8 @@ $$
 
 Un bloc Transformer ajoute ceci à son entrée (une **connexion résiduelle**) puis applique un petit MLP, de nouveau avec une connexion résiduelle. Les vrais modèles empilent de nombreux blocs, utilisent plusieurs « têtes » d'attention en parallèle et normalisent les activations par normalisation de couche.
 
+<Figure src="attention_causal.svg" alt="Matrice d'attention causale 6x6 a scores uniformes : la ligne t repartit 1/(t+1) sur son propre passe et zero sur le futur" caption="Le masque causal, dessine : scores uniformes, donc chaque ligne repartit sa masse a parts egales sur les positions qu'elle a le droit de voir. La ligne 0 ne voit qu'elle-meme (masse 1), la ligne 5 moyenne sur six. Tout ce qui est au-dessus de la diagonale vaut exactement zero - c'est la propriete sans fuite demontree au chapitre (causal_no_leak), visible en triangle blanc." />
+
 ## Cinq faits, démontrés
 
 ### 1. Les poids forment une distribution, et le softmax est invariant par translation

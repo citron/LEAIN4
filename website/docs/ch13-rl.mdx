@@ -39,6 +39,8 @@ flowchart LR
 
 *The reinforcement-learning loop: the agent acts, the environment answers with a new state and a reward.*
 
+<Figure src="td_bootstrap.svg" alt="TD(0) values 0.5^i along a ten-step chain approaching the true value 1: the bootstrapped estimates start pessimistic and climb geometrically" caption="TD's bargain drawn: the agent has not reached the reward yet, so V(s_i) = 0.5^i underestimates the true 1 - every state's value is the next state's value halved (the Bellman equation). The formal fix (tdIter_error) shows the error shrinking geometrically with each iteration; the picture is the same fact, one dot per state." />
+
 ## Value-based: Q-learning
 
 The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterwards. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.

@@ -59,6 +59,8 @@ The index `x ⟨i + j, _⟩` needs a proof that `i + j < m + k`. We supply it wi
 
 So the backward pass of a convolution is again a convolution-like operation: you do not need a new idea to train it.
 
+<Figure src="conv_window.svg" alt="An 8x8 grayscale input with a bright square: the 3x3 convolution window slides over it, each position a dot product" caption="The convolution in one picture: the network reads the image through a 3x3 window that slides everywhere, each position computing the same dot product (the weight sharing Conv3x3 encodes). The bright square lights up the window exactly where it covers it - that is what a learned filter detects." />
+
 ## A CNN for MNIST
 
 Now two dimensions. Our network: a $3\times 3$ convolution with 4 channels ($26\times 26$ outputs), ReLU, $2\times 2$ **max-pooling** (keep the largest of every $2\times2$ block, giving $13\times 13$), a dense layer to 10 logits, softmax cross-entropy.

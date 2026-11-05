@@ -95,6 +95,8 @@ flowchart LR
 
 Compare with Chapter 2: the same neurons and the same step activation, but two layers instead of one.
 
+<Figure src="depth_signal.svg" alt="log10 of the first-layer gradient against depth L: the typical 0.5^L line and the worst 0.25^L line both fall straight down" caption="Why depth is a double-edged sword: the gradient of the first layer is a product of L factors, so on the log scale it falls as a straight line (chain_stack, Ch04). The same product that composes features also eats the signal - the theme every later chapter answers (skip connections, LSTMs, residual blocks)." />
+
 ## Theorem — every Boolean function is a one-hidden-layer network
 
 XOR is not a one-off. For any Boolean function `f` of `n` inputs:

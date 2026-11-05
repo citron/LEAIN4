@@ -60,6 +60,8 @@ La ligne qui compte est $c_t = f_t\odot c_{t-1} + i_t\odot g_t$ : la mémoire es
 ```lean file=Ch08/Lstm.lean#forward
 ```
 
+<Figure src="lstm_gates.svg" alt="Les quatre briques de la cellule LSTM : f et i sont des sigmoides dans (0,1), le candidat tanh dans (-1,1), f fois le candidat est la mise a jour gatee" caption="Chaque porte du LSTM est une de ces quatre courbes. f = sigmoid decide du taux de conservation (0 garde la memoire, 1 la reecrit - l'autoroute qu'utilise the theoreme du gradient), i = sigmoid du taux d'ecriture, le tanh borne le candidat, et f * c~ est le multiplie-additionnel qui constitue toute la mise a jour." />
+
 ## Le gradient dispose d'une autoroute
 
 Isolons le chemin de la cellule : $c_{t+1} = f_t\,c_t + u_t$, où la porte d'oubli $f_t$ et la mise à jour $u_t = i_t g_t$ sont considérées comme données. Déroulé comme une `Expr` en $c_0$ :

@@ -214,4 +214,63 @@ def main : IO Unit := do
     [("matched_loss", blue, curve gaps fun g => Float.log (1.0 + Float.exp (-g))),
      ("blind model: log 2", grey, curve gaps fun _ => Float.log 2.0)]
   -- Chapter 5 (Core/Interval.lean): the number-line dictionary of the layer.
+  -- Salve 2: one more figure for each chapter that has only one
+  -- Ch02: XOR is not linearly separable
+  let xsX := grid (0.0 - 0.3) 1.3 40
+  save "xor_points" <| lineSvg 480 260 (0.0 - 0.3) 1.3 (0.0 - 0.3) 1.3
+    "XOR: +1 on the diagonal, -1 on the anti-diagonal - no line separates them" "x1" "x2"
+    [("+1 class (0,0) (1,1)", blue, curve xsX fun x => x),
+     ("-1 class (0,1) (1,0)", orange, curve xsX fun x => 1.0 - x)]
+  -- Ch04: the dead ReLU
+  let xsA := grid (0.0 - 4.0) 4.0 80
+  save "relu_dead" <| lineSvg 480 240 (0.0 - 4.0) 4.0 (0.0 - 1.0) 2.0
+    "ReLU alive vs ReLU dead: y = max(0, x) and y = 0" "input x" "output"
+    [("alive y = max(0, x)", blue, curve xsA fun x => max 0.0 x),
+     ("dead unit: stuck at 0", orange, curve xsA fun _ => 0.0)]
+  -- Ch06: the convolution window reads a patch of the input
+  let img6 := (Array.range 8).map (fun i =>
+    (Array.range 8).map (fun j =>
+      if i >= 2 && i <= 5 && j >= 2 && j <= 5 then 1.0 - (i.toFloat * 8.0 + j.toFloat) / 200.0 else (i.toFloat + j.toFloat) / 30.0))
+  save "conv_window" <| heatSvg 30 "Conv3x3: the window is a 3x3 dot product over a sliding patch" "row i" "col j" img6
+  -- Ch07: gradient through the unrolled chain
+  let xsD := grid 1.0 14.0 13
+  save "rnn_chain" <| lineSvg 480 240 1.0 14.0 (0.0 - 12.0) 1.0
+    "RNN: gradient magnitude through T unrolled steps (log10)" "time steps T" "log10 |grad|"
+    [("typical  0.5^T", blue, curve xsD fun t => Float.log (Float.pow 0.5 t) / Float.log 10.0),
+     ("worst    0.25^T", orange, curve xsD fun t => Float.log (Float.pow 0.25 t) / Float.log 10.0)]
+  -- Ch08: what the LSTM gates compute
+  let xsG := grid (0.0 - 6.0) 6.0 120
+  save "lstm_gates" <| lineSvg 480 240 (0.0 - 6.0) 6.0 (0.0 - 1.5) 1.5
+    "LSTM parts: f = sigmoid, i = sigmoid, c~ = tanh, f * c~" "gate input" "value"
+    [("f = sigmoid", blue, curve xsG sigmoid),
+     ("i = sigmoid", green, curve xsG sigmoid),
+     ("c~ = tanh", orange, curve xsG fun x => Float.tanh x),
+     ("f * c~  (with c~ = 1)", purple, curve xsG sigmoid)]
+  -- Ch09: causal self-attention, uniform scores
+  let attn9 := (Array.range 6).map (fun i =>
+    (Array.range 6).map (fun j =>
+      if j > i then 0.0 else 1.0 / (i.toFloat + 1.0)))
+  save "attention_causal" <| heatSvg 44 "Causal self-attention (uniform scores): each row spreads over its own past" "query t" "key j" attn9
+  -- Ch10: -log p(x) and the KL, the two halves of the ELBO
+  let p10 (x : Float) : Float :=
+    0.5 * normalPdf (0.0 - 1.0) 1.0 x + 0.5 * normalPdf 4.0 1.0 x
+  let xsE := grid (0.0 - 5.0) 8.0 130
+  let nll10 := xsE.map fun x => (x, 0.0 - Float.log (max 1e-9 (p10 x)))
+  let kl10 := xsE.map fun x => (x, 0.5 * (x - 1.0) * (x - 1.0) - 0.5 - Float.log (max 1e-9 (p10 x)) - 0.5 * Float.log (2.0 * 3.141592653589793))
+  save "elbo_parts" <| lineSvg 480 260 (0.0 - 5.0) 8.0 (0.0 - 1.0) 6.0
+    "Ch10: -log p(x) and KL(q||p) - the ELBO is their sum" "x" "value"
+    [("-log p(x)", blue, nll10),
+     ("KL (q = N(1,1) to p)", green, kl10)]
+  -- Ch13: TD(0) bootstrap error decays geometrically
+  let xsT := grid 1.0 12.0 11
+  save "td_bootstrap" <| lineSvg 480 240 1.0 12.0 0.0 1.1
+    "TD(0) on a chain: V(s_i) = 0.5^i approaches the true value 1" "state i (steps to end)" "value"
+    [("TD(0) V(s_i)", blue, curve xsT fun i => Float.pow 0.5 i),
+     ("true value (10 steps away)", orange, curve xsT fun _ => 1.0)]
+  -- Ch03: gradient signal through depth
+  let xsS := grid 1.0 14.0 13
+  save "depth_signal" <| lineSvg 480 240 1.0 14.0 (0.0 - 12.0) 1.0
+    "MLP: first-layer gradient shrinks with depth (log10)" "depth L" "log10 |dL/dW0|"
+    [("typical  0.5^L", blue, curve xsS fun l => Float.log (Float.pow 0.5 l) / Float.log 10.0),
+     ("worst    0.25^L", orange, curve xsS fun l => Float.log (Float.pow 0.25 l) / Float.log 10.0)]
   IO.println "figures written to ../website/static/img/"

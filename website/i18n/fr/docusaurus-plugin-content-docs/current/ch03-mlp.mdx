@@ -96,6 +96,8 @@ flowchart LR
 
 Comparez avec le chapitre 2 : mêmes neurones et même activation échelon, mais deux couches au lieu d'une.
 
+<Figure src="depth_signal.svg" alt="log10 du gradient de la premiere couche en fonction de la profondeur L : les droites typique 0.5^L et pire cas 0.25^L plongent toutes les deux" caption="Pourquoi la profondeur est a double tranchant : le gradient de la premiere couche est un produit de L facteurs, donc sur l'echelle logarithmique il chute en ligne droite (chain_stack, Ch04). Le meme produit qui compose les features mange aussi le signal - le theme que chaque chapitre suivant adresse (connexions residuelles, LSTM, blocs residuels)." />
+
 ## Théorème — toute fonction booléenne est un réseau à une couche cachée
 
 Le XOR n'est pas un cas isolé. Pour toute fonction booléenne `f` de `n` entrées :

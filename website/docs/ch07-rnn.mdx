@@ -55,6 +55,8 @@ $$ \frac{\partial h_T}{\partial h_0} \;=\; \prod_{s=1}^{T} \bigl(1-h_s^2\bigr)\,
 
 BPTT multiplies $T$ factors. Whether the product shrinks, stays or grows is the whole story of training RNNs.
 
+<Figure src="rnn_chain.svg" alt="log10 of the gradient through T unrolled time steps: 0.5^T typical and 0.25^T worst fall as straight lines" caption="Unrolling an RNN turns backprop into the Ch03 depth product, with time in place of layers: log10 falls linearly, -0.3 per step typical, -0.6 worst. Ten steps back is already a thousandth of the signal - the formal vanishing the LSTM highway (Ch08) is built to escape." />
+
 ## Vanishing gradients
 
 Each factor $1 - h_s^2$ lies between $0$ and $1$ (because $|\tanh|\le 1$). So if $|w| < 1$ the product is at most $|w|^T$: it **decays exponentially with the length of the sequence**. The theorem below states this for squares, which avoids absolute values; it is proved over `Rat`, with exact arithmetic.

@@ -52,6 +52,8 @@ Après l'entraînement, générer est simple : tirer $z\sim\mathcal N(0,1)$ et d
 
 (La forme close du terme KL est une intégrale gaussienne classique ; nous la prenons comme définition et démontrons ses propriétés. La *structure* de la perte — une borne inférieure de la log-vraisemblance des données — ne demande pas d'intégrales : c'est une identité en sommes finies, prouvée exactement sur `Rat` dans `Ch10/Elbo.lean`, ci-dessous.)
 
+<Figure src="elbo_parts.svg" alt="Deux courbes en fonction de x : la reconstruction -log p(x) plonge dans les deux modes des donnees, le terme KL monte quadratiquement loin de la moyenne de q" caption="Les deux moities que the theoreme de l'ELBO recoud : -log p(x) veut le code pres d'un mode des donnees (les deux plongeons), KL(q||p) le veut pres de la moyenne du prior (la coupe montante). L'identite exacte prouvee en Lean (evidence_bound) dit que la perte est leur somme - toute courbe d'entrainement d'un VAE est ces deux termes qui negocient, mini-batch apres mini-batch." />
+
 ## L'ELBO, prouvé
 
 L'objectif du VAE n'est pas une heuristique : c'est une **borne inférieure de la log-vraisemblance**, et le terme KL est le prix de l'approximation de l'encodeur. Pour un espace latent *fini*, avec une loi jointe $P$ (poids $p(z_i,x)>0$, non normalisée), un facteur de vraisemblance $e_i$, l'évidence $m=\sum_i p(z_i,x)\,e_i = p(x)$, et tout encodeur $q$ :

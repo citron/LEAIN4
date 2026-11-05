@@ -115,6 +115,8 @@ With the machinery in place, the delta rule of Chapter 3 is a corollary: backpro
 
 <Figure src="chain_stack.svg" alt="Log gradient through a stack of sigmoid layers falls linearly in L: (1/4)^L worst case, (0.5)^L typical" caption="Why depth is a multiplication: each sigmoid layer is a factor at most 1/4, so the end-to-end gradient falls in a straight line on the log axis. This is the vanishing-gradient theorem in one picture - and the reason ReLU (local slope 1) took over." />
 
+<Figure src="relu_dead.svg" alt="Two curves: the alive ReLU y = max(0,x) rising from the origin, and the dead ReLU flat at zero across the whole axis" caption="The dead ReLU, drawn: a unit whose weights pushed its input always negative outputs exactly 0 everywhere - the ReLU gradient is 0 on that whole half-line, so no loss gradient flows and the unit never recovers (relu_grad, Ch04). Initialization is not cosmetic: it decides how many units stay alive." />
+
 ## Networks of any depth
 
 A dense layer and a whole multi-layer perceptron are just functions that build expressions. Nothing in the autodiff code knows about layers.

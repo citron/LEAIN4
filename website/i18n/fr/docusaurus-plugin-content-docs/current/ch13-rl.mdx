@@ -39,6 +39,8 @@ flowchart LR
 
 *La boucle de l’apprentissage par renforcement : l’agent agit, l’environnement répond par un nouvel état et une récompense.*
 
+<Figure src="td_bootstrap.svg" alt="Valeurs TD(0) 0.5^i le long d'une chaine de dix pas vers la vraie valeur 1 : les estimations amorcees partent pessimistes et grimpent geometriquement" caption="Le marche de TD, dessine : l'agent n'a pas encore atteint la recompense, donc V(s_i) = 0.5^i sous-estime le vrai 1 - la valeur de chaque etat vaut la moitie de celle du suivant (l'equation de Bellman). La correction formelle (tdIter_error) montre l'erreur retrecir geometriquement a chaque iteration ; l'image est le meme fait, un point par etat." />
+
 ## Par les valeurs : Q-learning
 
 La **valeur d'action** $Q(s,a)$ est le retour espéré après avoir pris $a$ en $s$ puis agi au mieux. Elle satisfait l'**équation de Bellman** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Le Q-learning en fait une mise à jour vers une **cible** $r+\gamma\max_{a'}Q(s',a')$.
