@@ -110,6 +110,33 @@ What it buys, exactly:
 
 The demo's last block runs the identity numerically: three noisy models around a line, and `risk − (bias² + variance)` prints `0.000000` — the exact identity surviving rounding.
 
+## Learning theory: the three atoms
+
+The bias-variance identity explains *how* a family generalizes. Three exact facts explain what *no* learner escapes. They live in `Core/Theory.lean`, proved with the same finite-weight algebra as everything above.
+
+**Atom 1 — the union bound.** With nonnegative weights, a weighted sum dominates any single term:
+
+```lean file=Core/Theory.lean#unionbound
+```
+
+Every "with probability ≥ 1 − M·δ, every hypothesis in the class is ε-good" statement is this inequality iterated over the class: the bad event is contained in the union of the per-hypothesis bad events, and the measure of a union is at most the sum of the measures. The class size M enters the bound *linearly* — which is why bounding the size (or the capacity) of a model class is bounding its risk.
+
+**Atom 2 — train = test for a fixed hypothesis.** Under the fair-coin law, expectation is the plain average:
+
+```lean file=Core/Theory.lean#symmetry
+```
+
+The number computed for "the training point" and for "the test point" is *the same number* — as long as the hypothesis was chosen independently of the point. The generalization gap is created entirely by fitting: the moment the hypothesis depends on the sample, the symmetry is broken, and measuring the break is what a held-out set does.
+
+**Atom 3 — No Free Lunch.** Under labels drawn uniformly, every prediction — deterministic *or randomized* — has expected 0-1 error exactly 1/2:
+
+```lean file=Core/Theory.lean#nfl
+```
+
+Averaged over all labelings of the data, no learner beats chance. Every advantage a learner shows on real data is *borrowed* from an assumption that the data is not adversarial: smoothness, low dimension, shared structure. The theorem is the formal statement of "there is no assumption-free learning" — inductive bias is not a design choice, it is the price of admission.
+
+The high-probability translations (Hoeffding, Chernoff) quantify the deviation of an empirical average from its expectation with exponential terms `exp(-2nε²)`; those are analytic facts about `exp` on the reals. On `Rat` we keep the atoms exact and say plainly where the exponential step is taken — we do not hide it.
+
 ## Experiment
 
 `lake exe ch16` evaluates the same formulas on `Float` for four distributions — the data $p$ and three models — and prints the identity $\mathrm{CE} = H + \mathrm{KL}$ as numbers:
@@ -150,6 +177,8 @@ Proved, over `Rat` with an abstract logarithm: $E$, variance, $H$, CE, KL satisf
 3. Prove a constant has variance $0$.
 4. Prove $H = 0$ on a one-point distribution.
 5. Prove an **ensemble of one** has zero variance term: with a single hypothesis of weight $1$, $\sum_k p_k (f_k(x) - \bar f(x))^2 = 0$.
+6. Prove the fair coin has mean label `1/2`: `coin.expect (fun i => (i.val : Rat)) = 1/2`.
+7. Prove **randomized No Free Lunch**: mixing the two predictions by any law `q : Dist 2` still gives expected 0-1 error `1/2` under the coin.
 
 **Exercises in Lean.** The file `lean/LeanDL/Ch16/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
 
@@ -166,6 +195,12 @@ Proved, over `Rat` with an abstract logarithm: $E$, variance, $H$, CE, KL satisf
 ```
 
 ```lean file=Ch16/Exercises.lean#ex5
+```
+
+```lean file=Ch16/Exercises.lean#ex6
+```
+
+```lean file=Ch16/Exercises.lean#ex7
 ```
 
 <details>
@@ -239,6 +274,36 @@ On `Fin 1`, `Vec.dot` is one multiplication: `p.w 0 * (·)`. `p.sum1` forces `p.
 <summary>Solution 5</summary>
 
 ```lean file=Ch16/Solutions.lean#sol5
+```
+
+</details>
+
+<details>
+<summary>Hint 6</summary>
+
+`Theory.coin_expect_avg` turns the expectation into `((0 : Rat) + 1) / 2`; `grind` finishes.
+
+</details>
+
+<details>
+<summary>Solution 6</summary>
+
+```lean file=Ch16/Solutions.lean#sol6
+```
+
+</details>
+
+<details>
+<summary>Hint 7</summary>
+
+`Theory.nfl_coin` says the inner expectation is `1/2` for *every* `y`. Rewrite the function `(fun y => coin.expect (err y))` to the constant `(fun _ => 1/2)` with `funext`, then apply `expect_const`.
+
+</details>
+
+<details>
+<summary>Solution 7</summary>
+
+```lean file=Ch16/Solutions.lean#sol7
 ```
 
 </details>

@@ -332,3 +332,15 @@ Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 a
 ## Phase I5 — Illustrations salve 5 (RÉSOLU)
 
 9 figures supplémentaires (Ch02, Ch05, Ch11, Ch12, Ch13, Ch14, Ch15, Ch16, Ch17) : toutes les pages de chapitre ont désormais au moins 3 figures, Ch18 en a 4. QA navigateur/vision : 5 figures corrigées après troncature de titre ou courbe hors cadre (`perceptron_bound` rééquilibré en x ∈ [0.14, 1] pour que 1/γ² tienne sous 60, `snr_decay` en y ∈ [0, 12] pour que le pic SNR ≈ 11.5 tienne, `nce_temp` en y ∈ [0, 1.5], `planning_horizon` rebalisé en 0.1·1.25ᵏ vs 0.25k pour rendre le croisement visible vers k = 17, légendes et captions FR/EN alignées dessus). Vérifications : build 89 jobs, audit 2085 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 69 SVG.
+
+
+
+## Phase U — Cours ultime : vitrine, kit, théorie (RÉSOLU)
+
+**Vitrine** : `LICENSE` = texte officiel EUPL-1.2 (SPDX, anglais) + en-tête de copyright — l'UEPL n'a pas de version 2 officielle, v1.2 est la dernière ; lien EUR-Lex pour le texte français authentique. README complété (table Ch18, section licence, garanties CI). Recherche locale FR/EN sur le site (`@easyops-cn/docusaurus-search-local`, index `search-index.json` EN + FR).
+
+**Kit d'entraînement (Ch05, `Kit.lean`)** : attente exacte du dropout (`drop_exp`), clipping par morceaux signé et borné (`clip`, `clip_align`, `clip_bounded`), AdamW vs L2 couplé (`decay_sgd_eq`), premier pas Adam sans biais (`adam_first_step_unbiased`), variance d'une mise à l'échelle (`var_smul` — le lemme derrière Xavier/He), somme géométrique finie et budget LR (`geom_sum`, `lr_decay_total`). Exercices 3-4 + solutions prouvées, docs FR/EN.
+
+**Théorie de l'apprentissage (`Core/Theory.lean`)** : trois atomes exacts sur `Rat` — (1) atome de l'union bornée : à poids positifs l'espérance domine chaque terme pondéré (`dot_nonneg`, `dot_ge_head`), c'est exactement l'inégalité itérée de toute borne de généralisation à classe finie ; (2) symétrie train=test : sous la pièce équitable l'espérance est la moyenne (`coin`, `coin_expect_avg`) — le nombre est identique des deux côtés tant que l'hypothèse est indépendante du point, l'écart est créé par l'ajustement ; (3) No Free Lunch : sous étiquettes uniformes toute prédiction — déterministe (`nfl_coin`) ou randomisée (`nfl_coin_mix`) — a une erreur 0-1 espérée exactement 1/2. Les traductions Hoeffding/Chernoff sont signalées comme pas analytique sur `exp`, jamais masquées. Docs FR/EN dans Ch16 (« Théorie de l'apprentissage : les trois atomes »), exercices 6-7 + solutions prouvées.
+
+Vérifications : build 91 jobs, audit 2184 déclarations propres (0 `sorry` hors Exercices, 0 axiome non standard), `check.mjs` 22 pages FR/EN, ancres résolues.

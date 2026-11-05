@@ -1,4 +1,5 @@
 import LeanDL.Ch16.Tools
+import LeanDL.Core.Theory
 
 /-! Exercises for Chapter 16. Replace each `sorry`; the solutions are in `Solutions.lean`. -/
 
@@ -53,5 +54,27 @@ theorem exercise_variance_single {n : Nat} (p : Dist 1) (f : Fin 1 → Vec Rat n
     Vec.dot p.w (fun k => (f k i - p.wavg f i) * (f k i - p.wavg f i)) = 0 := by
   sorry
 -- ANCHOR_END: ex5
+
+-- ANCHOR: ex6
+/-- Exercise 6: the fair coin has **mean label** `1/2`:
+`LeanDL.Theory.coin.expect (fun i => (i.val : Rat)) = 1 / 2`.
+(Hint: `Theory.coin_expect_avg` reduces the goal to an average of two
+numbers; then `grind`.) -/
+theorem exercise_coin_mean :
+    LeanDL.Theory.coin.expect (fun i => (i.val : Rat)) = 1 / 2 := by
+  sorry
+-- ANCHOR_END: ex6
+
+-- ANCHOR: ex7
+/-- Exercise 7: **randomized No Free Lunch.** Mixing the two predictions
+`0` and `1` by any law `q : Dist 2` still gives expected 0-1 error
+`1/2` under the coin:
+`q.expect (fun y => coin.expect (Theory.err y)) = 1 / 2`.
+(Hint: `Theory.nfl_coin` says the inner expectation is `1/2` for *every*
+`y`; rewrite the function to the constant `1/2` and use `expect_const`.) -/
+theorem exercise_nfl_random (q : Dist 2) :
+    q.expect (fun y => LeanDL.Theory.coin.expect (LeanDL.Theory.err y)) = 1 / 2 := by
+  sorry
+-- ANCHOR_END: ex7
 
 end LeanDL.Ch16

@@ -1,4 +1,5 @@
 import LeanDL.Ch16.Tools
+import LeanDL.Core.Theory
 
 /-! Solutions for the Chapter 16 exercises. -/
 
@@ -79,5 +80,23 @@ theorem exercise_variance_single_solution {n : Nat} (p : Dist 1) (f : Fin 1 → 
   simp only [Vec.dot, hp0, hmean, Rat.sub_self, Rat.mul_zero]
   grind
 -- ANCHOR_END: sol5
+
+-- ANCHOR: sol6
+theorem exercise_coin_mean_solution :
+    LeanDL.Theory.coin.expect (fun i => (i.val : Rat)) = 1 / 2 := by
+  rw [LeanDL.Theory.coin_expect_avg]
+  show ((0 : Rat) + 1) / 2 = 1 / 2
+  grind
+-- ANCHOR_END: sol6
+
+-- ANCHOR: sol7
+theorem exercise_nfl_random_solution (q : Dist 2) :
+    q.expect (fun y => LeanDL.Theory.coin.expect (LeanDL.Theory.err y)) = 1 / 2 := by
+  have h : (fun y => LeanDL.Theory.coin.expect (LeanDL.Theory.err y))
+      = (fun _ => (1 / 2 : Rat)) := by
+    funext y
+    exact LeanDL.Theory.nfl_coin y
+  rw [h, q.expect_const]
+-- ANCHOR_END: sol7
 
 end LeanDL.Ch16

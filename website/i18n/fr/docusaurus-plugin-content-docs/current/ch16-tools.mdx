@@ -110,6 +110,33 @@ Ce que ça achète, exactement :
 
 Le dernier bloc de la démo calcule l'identité numériquement : trois modèles bruités autour d'une droite, et `risque − (biais² + variance)` affiche `0.000000` — l'identité exacte survit à l'arrondi.
 
+## Théorie de l'apprentissage : les trois atomes
+
+L'identité biais-variance explique *comment* une famille généralise. Trois faits exacts expliquent ce qu'*aucun* apprenant ne contourne. Ils vivent dans `Core/Theory.lean`, prouvés avec la même algèbre de poids finis que tout ce qui précède.
+
+**Atome 1 — l'union bornée.** À poids positifs, une somme pondérée domine chacun de ses termes :
+
+```lean file=Core/Theory.lean#unionbound
+```
+
+Toute affirmation « avec probabilité ≥ 1 − M·δ, toute hypothèse de la classe est ε-bonne » est cette inégalité itérée sur la classe : l'événement mauvais est inclus dans la réunion des événements mauvais par hypothèse, et la mesure d'une réunion est au plus la somme des mesures. La taille M de la classe entre *linéairement* dans la borne — c'est pourquoi borner la taille (ou la capacité) d'une classe de modèles, c'est borner son risque.
+
+**Atome 2 — train = test pour une hypothèse fixée.** Sous la loi de la pièce équitable, l'espérance est la simple moyenne :
+
+```lean file=Core/Theory.lean#symmetry
+```
+
+Le nombre calculé pour « le point d'entraînement » et pour « le point de test » est *le même nombre* — tant que l'hypothèse est choisie indépendamment du point. L'écart de généralisation est créé entièrement par l'ajustement : dès que l'hypothèse dépend de l'échantillon, la symétrie est brisée, et mesurer cette rupture est le rôle d'un jeu de test conservé.
+
+**Atome 3 — No Free Lunch.** Sous des étiquettes tirées uniformément, toute prédiction — déterministe *ou randomisée* — a une erreur 0-1 espérée exactement égale à 1/2 :
+
+```lean file=Core/Theory.lean#nfl
+```
+
+En moyenne sur tous les étiquetages des données, aucun apprenant ne bat le hasard. Chaque avantage montré sur des données réelles est *emprunté* à une hypothèse qui dit que les données ne sont pas adverses : régularité, faible dimension, structure partagée. Le théorème est l'énoncé formel de « il n'y a pas d'apprentissage sans hypothèse » — le biais inductif n'est pas un choix de conception, c'est le droit d'entrée.
+
+Les traductions en probabilité élevée (Hoeffding, Chernoff) quantifient l'écart d'une moyenne empirique à son espérance par des exponentielles `exp(-2nε²)` ; ce sont des faits analytiques sur `exp` dans les réels. Sur `Rat` nous gardons les atomes exacts et nous disons sans détour où le pas exponentiel est pris — nous ne le cachons pas.
+
 ## Expérience
 
 `lake exe ch16` évalue les mêmes formules en `Float` pour quatre distributions — les données $p$ et trois modèles — et imprime l'identité $\mathrm{CE} = H + \mathrm{KL}$ en chiffres :
@@ -150,6 +177,8 @@ Prouvé, sur `Rat` avec un logarithme abstrait : $E$, la variance, $H$, CE et KL
 3. Prouvez qu'une constante a une variance $0$.
 4. Prouvez $H = 0$ sur une distribution à un point.
 5. Prouvez qu'un **ensemble d'un seul** a un terme de variance nul : avec une unique hypothèse de poids $1$, $\sum_k p_k (f_k(x) - \bar f(x))^2 = 0$.
+6. Prouver que la pièce équitable a pour étiquette moyenne `1/2` : `coin.expect (fun i => (i.val : Rat)) = 1/2`.
+7. Prouver le **No Free Lunch randomisé** : mélanger les deux prédictions par une loi quelconque `q : Dist 2` donne encore une erreur 0-1 espérée de `1/2` sous la pièce.
 
 **Exercices en Lean.** Le fichier `lean/LeanDL/Ch16/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d'abord.
 
@@ -166,6 +195,12 @@ Prouvé, sur `Rat` avec un logarithme abstrait : $E$, la variance, $H$, CE et KL
 ```
 
 ```lean file=Ch16/Exercises.lean#ex5
+```
+
+```lean file=Ch16/Exercises.lean#ex6
+```
+
+```lean file=Ch16/Exercises.lean#ex7
 ```
 
 <details>
@@ -239,6 +274,36 @@ Sur `Fin 1`, `Vec.dot` est une seule multiplication : `p.w 0 * (·)`. `p.sum1` f
 <summary>Corrigé 5</summary>
 
 ```lean file=Ch16/Solutions.lean#sol5
+```
+
+</details>
+
+<details>
+<summary>Indice 6</summary>
+
+`Theory.coin_expect_avg` transforme l'espérance en `((0 : Rat) + 1) / 2` ; `grind` conclut.
+
+</details>
+
+<details>
+<summary>Corrigé 6</summary>
+
+```lean file=Ch16/Solutions.lean#sol6
+```
+
+</details>
+
+<details>
+<summary>Indice 7</summary>
+
+`Theory.nfl_coin` dit que l'espérance intérieure vaut `1/2` pour *tout* `y`. Réécrire la fonction `(fun y => coin.expect (err y))` en la constante `(fun _ => 1/2)` via `funext`, puis appliquer `expect_const`.
+
+</details>
+
+<details>
+<summary>Corrigé 7</summary>
+
+```lean file=Ch16/Solutions.lean#sol7
 ```
 
 </details>

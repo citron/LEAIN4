@@ -66,5 +66,6 @@ import LeanDL.Core.Rng
 import LeanDL.Core.Sum
 import LeanDL.Core.Prob
 import LeanDL.Core.Tensor
+import LeanDL.Core.Theory
 import LeanDL.Core.Interval
 import LeanDL.Core.Vec
