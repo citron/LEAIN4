@@ -313,3 +313,7 @@ Objectif : rendre le cours compréhensible par l’image. 13 nouvelles figures, 
 
 Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 axiome non standard) ;
 `check.mjs` 22 pages vertes ; `npm run build` website vert.
+
+## Phase I2 — Illustrations salve 2 (RÉSOLU)
+
+9 figures supplémentaires (Ch02, Ch03, Ch04, Ch06, Ch07, Ch08, Ch09, Ch10, Ch13), toutes générées par Lean via `lake exe figures` et insérées FR/EN par `<Figure>`. QA visuel par rendu navigateur : `xor_points` passé en lieux géométriques (lineSvg relie les points, un nuage de 2 points devient une ligne), titre `elbo_parts` raccourci (troncature à droite). Vérifications : build 89 jobs, audit 2084 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 43 SVG.
