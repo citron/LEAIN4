@@ -322,3 +322,8 @@ Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 a
 ## Phase I3 — Illustrations salve 3 (RÉSOLU)
 
 9 figures supplémentaires (Ch01, Ch05, Ch11, Ch14, Ch15, Ch16, Ch17, Ch18), toutes générées par Lean via `lake exe figures` et insérées FR/EN par `<Figure>`. QA visuel par rendu navigateur : six titres tronqués à droite ont été raccourcis (mode_collapse, weight_decay, dream_drift, spread_collapse, infonce_mass, quant_grid, sigmoid_deriv). Vérifications : build 89 jobs, audit 2084 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 52 SVG.
+
+
+## Phase I4 — Illustrations salve 4 (RÉSOLU)
+
+8 figures supplémentaires (Ch01, Ch03, Ch04, Ch06, Ch07, Ch08, Ch09, Ch10), générées par Lean et insérées FR/EN. Fix infrastructure : `Core/Plot.lean` échappe le XML (`esc` sur `&`, `<`, `>` dans titres, axes, légendes) — découvert par QA navigateur : `cell_hold.svg` était invalide (le `<` nu de « `f < 1` » tronquait le titre à la ligne 16). Légende `mlp_stairs` raccourcie après troncature. Toutes les figures regénées. Vérifications : build 89 jobs, audit 2085 déclarations propres (0 sorry, 0 axiome non standard), `check.mjs` 22 pages. Site : 60 SVG.
