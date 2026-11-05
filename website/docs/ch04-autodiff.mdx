@@ -48,6 +48,8 @@ flowchart LR
 `Expr` is an `inductive` type: a value is built by one of the constructors. A function defined by pattern matching on every constructor, calling itself only on sub-expressions (like `eval`), is *structurally recursive*: Lean checks that it terminates, and proofs about it go by `induction`.
 :::
 
+<Figure src="fd_drift.svg" alt="Log2 error of the central difference of sin against the step exponent k: a U-shaped curve in Float" caption="Why the exact derivative, not finite differences in Float: the central difference of sin at x = 1, step h = 2^-k - the truncation error O(h^2) shrinks the error (log2 scale) while Float cancellation grows it, drawing a U with a floor near 2^-52: the machine epsilon. No choice of h escapes the wall; the symbolic derivative of this chapter has no such floor." />
+
 ## What is "the derivative"?
 
 We define the **formal partial derivative** $\partial_j e$ of an expression with respect to the variable $j$, as another expression: the sum rule, the product rule, and the chain rule for each non-linearity ($\exp' = \exp$, $\sigma' = \sigma(1-\sigma)$, $\tanh' = 1-\tanh^2$, $\log' = 1/x$, $(1/x)' = -1/x^2$, $\sqrt{x}' = 1/(2\sqrt{x})$, and $\mathrm{relu}' = \mathrm{step}$). These primitives are all we need for the rest of the course: softmax, normalization, attention.

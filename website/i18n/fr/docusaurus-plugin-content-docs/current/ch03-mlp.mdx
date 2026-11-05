@@ -73,6 +73,8 @@ tampon à plat. `flatMulVec_eq` prouve que c'est **exactement** le `Mat.mulVec` 
 chapitre 3 — entrée par entrée, sans un produit ajouté ni perdu. Le réseau à formes
 vérifiées et le code aplatifié de déploiement sont le même calcul.
 
+<Figure src="mlp_stairs.svg" alt="La sinusoidale et un reseau ReLU par morceaux qui la plie en segments droits" caption="Ce qu'achetent unites ReLU cachees : chaque unite coude un segment droit, et quelques-unes plient n'importe quelle courbe en segments d'escalier qui convergent vers elle (bleu sin, orange une ajustement a 4 unites - la decomposition exacte que la preuve d'approximation universelle construit). Le MLP est le demi-plan du Ch1 rendu lineaire par morceaux par des noeuds d'ajustement appris." />
+
 ## Le XOR, résolu
 
 Le XOR vaut `ET (OU x₁ x₂) (NON-ET x₁ x₂)` : la couche cachée calcule OU et NON-ET, le neurone de sortie est un ET. Le théorème est vérifié sur les quatre entrées par `decide`.

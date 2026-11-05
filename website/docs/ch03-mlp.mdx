@@ -72,6 +72,8 @@ The payoff is the bridge to the layer we actually run:
 no product added, no product dropped. The shape-checked network and the flattened
 deployment code are the same computation.
 
+<Figure src="mlp_stairs.svg" alt="The sine curve and a piecewise-linear ReLU network bending it into straight segments" caption="What hidden ReLU units buy: each unit kinks one straight segment, and a handful of them bend any curve into staircase segments that converge on it (blue sin, orange a 4-unit fit - the exact decomposition the universal approximation proof builds). The MLP is the half-plane of Chapter 1 made piecewise-linear by bending at learned knots." />
+
 ## XOR, solved
 
 XOR is `AND (OR x₁ x₂) (NAND x₁ x₂)`: the hidden layer computes OR and NAND, the output neuron is an AND. The theorem is checked on all four inputs by `decide`.

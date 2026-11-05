@@ -27,6 +27,8 @@ Une couche dense sur une image de $28\times 28$ a $784$ poids *par neurone*, et 
 
 <Figure src="conv.svg" alt="Un noyau de longueur 3 glissant sur une entrée de longueur 7" caption="Chaque sortie est le produit scalaire du noyau avec une fenêtre de l'entrée." />
 
+<Figure src="rf_growth.svg" alt="Taille du champ receptif selon la profondeur : des couches 3x3 empilees croissent en 2L+1, un 5x5 large reste plat" caption="Les convolutions empilees font croitre le champ receptif lineairement : L couches de 3x3 voient 2L + 1 pixels, la ou un seul 5x5 reste coince a 5 (l'identite de composition demontree au chapitre en est exactement la raison). La profondeur achete du contexte, avec bien moins de parametres qu'un noyau large - le marche qui rend les CNN profonds profonds." />
+
 ## Convolution en dimension un, avec les formes dans le type
 
 Commençons en dimension un, où les preuves sont courtes. Un noyau de longueur $k+1$ glisse sur une entrée de longueur $m+k$ et produit exactement $m$ sorties. En Lean, cette arithmétique fait partie du type : un noyau qui ne rentre pas ne passe tout simplement pas le typage.

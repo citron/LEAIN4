@@ -56,6 +56,8 @@ Le produit scalaire est défini par récurrence sur la longueur :
 
 Elles sont écrites pour n'importe quel type de scalaires : l'échelon utilise `≤`, la sigmoïde et tanh utilisent une exponentielle `HasExp.exp`. Avec `α := Float`, `HasExp.exp` est `Float.exp`.
 
+<Figure src="neuron_halfplane.svg" alt="Une droite frontiere w.x = b dans le plan, avec la region de declenchement au-dessus" caption="Un neurone seul est un demi-plan : l'equation w.x = b trace une droite frontiere (bleue) et le neurone s'active exactement d'un cote (orange). ET, OU et les portes logiques du chapitre ne sont que des positions de cette droite ; le XOR echoue car aucune droite unique ne le realise - la geometrie du Ch2 en une image." />
+
 ## Le neurone
 
 ```mermaid

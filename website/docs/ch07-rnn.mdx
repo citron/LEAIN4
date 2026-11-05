@@ -80,6 +80,8 @@ Without a saturating activation there is nothing to cap the factors. For the lin
 
 With $w=2$ the gradient is multiplied by a million in 20 steps; with $|w|<1$ it dies. Training a long RNN is therefore walking a tightrope, and no value of $w$ is comfortable. (Practitioners clip gradients against the explosion; the vanishing is the harder problem, and motivates the LSTM of the next chapter.)
 
+<Figure src="lag_copy.svg" alt="Two pulses on a time axis, the input pulse and the target pulse delayed by three steps" caption="The memory task the RNN runs: y_t = x_(t-3) - an input pulse at t = 3 must re-emerge at t = 6. The state update has to carry the pulse exactly three steps: not too little (it vanishes), not too much (it smears into later outputs). That knife-edge is where the vanishing-gradient analysis of this chapter bites." />
+
 ## An RNN with $n$ units, in Lean
 
 For real vectors we use arrays. (The tree-shaped `Expr` of Chapter 4 would copy the whole history every time a unit reads the previous state, which is exponential in $T$.) The forward pass keeps all the hidden states:

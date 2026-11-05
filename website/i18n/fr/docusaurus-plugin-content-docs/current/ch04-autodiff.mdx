@@ -48,6 +48,8 @@ flowchart LR
 `Expr` est un type `inductive` : une valeur est construite par l'un des constructeurs. Une fonction définie par filtrage sur chaque constructeur, qui ne s'appelle que sur des sous-expressions (comme `eval`), est *structurellement récursive* : Lean vérifie qu'elle termine, et les preuves à son sujet se font par `induction`.
 :::
 
+<Figure src="fd_drift.svg" alt="Erreur log2 de la difference centrale de sin selon l'exposant k : courbe en U en Float" caption="Pourquoi la derivee exacte, pas les differences finies en Float : la difference centrale de sin en x = 1, pas h = 2^-k - l'erreur de troncature O(h^2) fait tomber l'erreur (echelle log2) pendant la cancellation Float la fait remonter, dessinant un U au plancher vers 2^-52 : l'epsilon machine. Aucun choix de h n'echappe au mur ; la derivee symbolique du chapitre n'a pas ce plancher." />
+
 ## Qu'est-ce que « la dérivée » ?
 
 Nous définissons la **dérivée partielle formelle** $\partial_j e$ d'une expression par rapport à la variable $j$, comme une autre expression : règle de la somme, règle du produit, et règle de dérivation en chaîne pour chaque non-linéarité ($\exp' = \exp$, $\sigma' = \sigma(1-\sigma)$, $\tanh' = 1-\tanh^2$, $\log' = 1/x$, $(1/x)' = -1/x^2$, $\sqrt{x}' = 1/(2\sqrt{x})$, et $\mathrm{relu}' = \mathrm{step}$). Ces primitives suffisent pour la suite du cours : softmax, normalisation, attention.

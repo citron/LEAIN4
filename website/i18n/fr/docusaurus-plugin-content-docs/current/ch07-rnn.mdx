@@ -80,6 +80,8 @@ Sans activation saturante, rien ne borne les facteurs. Pour la récurrence liné
 
 Avec $w=2$, le gradient est multiplié par un million en 20 pas ; avec $|w|<1$ il s'éteint. Entraîner un long RNN, c'est marcher sur un fil, et aucune valeur de $w$ n'est confortable. (Les praticiens écrêtent les gradients contre l'explosion ; l'évanouissement est le problème difficile, et motive le LSTM du chapitre suivant.)
 
+<Figure src="lag_copy.svg" alt="Deux impulsions sur un axe temporel, l'entree et la cible retardees de trois pas" caption="La tache de memoire du RNN : y_t = x_(t-3) - une impulsion d'entree en t = 3 doit ressortir en t = 6. La mise a jour d'etat doit porter l'impulsion exactement trois pas : pas trop peu (elle s'evanouit), pas trop (elle bave sur les sorties suivantes). Ce fil est la ou l'analyse des gradients evanescents du chapitre mord." />
+
 ## Un RNN à $n$ unités, en Lean
 
 Pour des vecteurs réels nous utilisons des tableaux. (L'`Expr` arborescente du chapitre 4 recopierait tout l'historique chaque fois qu'une unité lit l'état précédent, ce qui est exponentiel en $T$.) La passe avant conserve tous les états cachés :

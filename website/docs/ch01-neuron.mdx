@@ -56,6 +56,8 @@ The dot product is defined by recursion on the length:
 
 They are written for any scalar type: the step uses `≤`, sigmoid and tanh use an exponential `HasExp.exp`. With `α := Float`, `HasExp.exp` is `Float.exp`.
 
+<Figure src="neuron_halfplane.svg" alt="A boundary line w.x = b in the plane, with the firing region above it" caption="A single neuron is a half-plane: the equation w.x = b draws a straight boundary (blue) and the neuron fires exactly on one side of it (orange). AND, OR and the logic gates of this chapter are just positions of that line; XOR fails because no single line realizes it - the geometry of Chapter 2 in one picture." />
+
 ## The neuron
 
 ```mermaid

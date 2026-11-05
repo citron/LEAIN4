@@ -105,6 +105,8 @@ Nos données sont un **demi-cercle** bruité dans le plan. L'espace latent a une
 Nous n'avons jamais écrit de gradient pour ce modèle. `backprop_correct` (chapitre 4) est un théorème sur *toute* expression : le gradient de cette perte particulière, y compris l'étape de tirage et le terme KL, est donc correct par ce seul théorème. Les seules parties non démontrées sont les arrondis Float et le générateur de nombres aléatoires.
 :::
 
+<Figure src="beta_vae.svg" alt="Deux courbes selon beta : la distortion 1/(1+beta) tombe, le taux beta/(1+beta) monte, croisement a beta = 1" caption="L'objectif du VAE est un cadran, rendu visible dans le jouet execute au chapitre : monter beta achete du taux (information serree dans z, le terme KL) paye en distortion (la reconstruction floue) - la paire de courbes que le beta-VAE mesure. L'autoencodeur (beta = 0) est en distortion pure sans code du tout, exactement pourquoi son espace latent est structurellement desordonne." />
+
 ## Autoencodeur contre VAE
 
 `lake exe vae` entraîne les deux modèles (l'autoencodeur est le même code avec $\beta=0$) pendant 3000 pas d'Adam sur de nouveaux lots de 16 points, puis évalue sur 200 points de test et sur 400 décodages d'échantillons de l'a priori $z\sim\mathcal N(0,1)$.

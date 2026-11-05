@@ -341,4 +341,59 @@ def main : IO Unit := do
     [("L0 = 4, Linf = 1.5, c = 0.9", blue, curve xs19 fun n =>
         1.5 + Float.pow 0.9 n * 2.5),
      ("irreducible floor Linf", orange, curve xs19 fun _ => 1.5)]
+  -- Salve 4
+  -- Ch01: a neuron is a half-plane
+  let xsA := grid (0.0 - 3.0) 3.0 40
+  save "neuron_halfplane" <| lineSvg 480 260 (0.0 - 3.0) 3.0 (0.0 - 3.0) 3.0
+    "A neuron is a half-plane: w.x = b is the boundary line" "x1" "x2"
+    [("boundary 2 x1 - x2 = 0.5", blue, curve xsA fun x => 2.0 * x - 0.5),
+     ("fires: w.x > b (shifted)", orange, curve xsA fun x => 2.0 * x + 0.5)]
+  -- Ch03: 4 ReLU units bend a piecewise-linear sin
+  save "mlp_stairs" <| lineSvg 480 250 0.0 6.3 (0.0 - 1.2) 1.2
+    "A 4-unit ReLU MLP fits sin by straight segments" "x" "value"
+    [("sin(x)", blue, curve (grid 0.0 6.3 80) Float.sin),
+     ("ReLU fit, 4 units", orange,
+      curve (grid 0.0 6.3 80) fun x =>
+        2.0 / 3.141593 * x
+        - 4.0 / 3.141593 * (if x > 1.570796 then x - 1.570796 else 0.0)
+        + 4.0 / 3.141593 * (if x > 4.712389 then x - 4.712389 else 0.0))]
+  -- Ch04: finite differences in Float hit the roundoff wall
+  save "fd_drift" <| lineSvg 480 250 1.0 50.0 (0.0 - 52.0) 3.0
+    "Central difference of sin at x = 1, h = 2^-k (log2 error): U-curve in Float" "k (h = 2^-k)" "log2 error"
+    [("log2 |approx - cos 1|", blue,
+      (Id.run do
+        let mut out := #[(0.0, 0.0)]
+        for k in List.range 50 do
+          let h := Float.pow 0.5 (k.toFloat + 1.0)
+          let app := (Float.sin (1.0 + h) - Float.sin (1.0 - h)) / (2.0 * h)
+          let e := Float.abs (app - Float.cos 1.0)
+          out := out.push (k.toFloat + 1.0, Float.log e / Float.log 2.0)
+        return out))]
+  -- Ch06: receptive field of stacked 3x3 convolutions
+  save "rf_growth" <| lineSvg 480 250 1.0 8.0 0.0 18.0
+    "Stacked 3x3 convs: receptive field 2L + 1 grows linearly with depth" "layers L" "field (pixels)"
+    [("stacked 3x3: 2L + 1", blue, curve (grid 1.0 8.0 15) fun l => 2.0 * l + 1.0),
+     ("one wide 5x5", orange, curve (grid 1.0 8.0 15) fun _ => 5.0)]
+  -- Ch07: delayed copy, the RNN memory task
+  save "lag_copy" <| lineSvg 480 240 0.0 10.0 (0.0 - 0.15) 1.2
+    "Memory task y_t = x_(t-3): the pulse must arrive 3 steps late" "time t" "signal"
+    [("input pulse x_t", blue, #[(0.0, 0.0), (2.5, 0.0), (3.0, 1.0), (3.5, 0.0), (10.0, 0.0)]),
+     ("target y_t = x_(t-3)", orange, #[(0.0, 0.0), (5.5, 0.0), (6.0, 1.0), (6.5, 0.0), (10.0, 0.0)])]
+  -- Ch08: the cell state carries a value with factor f
+  save "cell_hold" <| lineSvg 480 250 0.0 40.0 0.0 1.05
+    "Cell state written 1 at t = 0: f = 1 carries it forever, f < 1 fades" "steps t" "cell state c_t"
+    [("f = 1", blue, curve (grid 0.0 40.0 41) fun _ => 1.0),
+     ("f = 0.95", orange, curve (grid 0.0 40.0 41) fun t => Float.pow 0.95 t),
+     ("f = 0.5 (plain RNN)", grey, curve (grid 0.0 40.0 41) fun t => Float.pow 0.5 t)]
+  -- Ch09: the attention temperature
+  save "attn_sharp" <| lineSvg 480 250 0.0 6.0 0.0 1.05
+    "Attention: a logit gap beta puts e^beta / (e^beta + 3) on the top key" "logit gap beta" "weight, 4 keys"
+    [("top key weight", blue, curve (grid 0.0 6.0 40) fun b =>
+        Float.exp b / (Float.exp b + 3.0)),
+     ("uniform 1/4", orange, curve (grid 0.0 6.0 40) fun _ => 0.25)]
+  -- Ch10: the beta-VAE rate-distortion tradeoff
+  save "beta_vae" <| lineSvg 480 250 0.1 10.0 0.0 1.05
+    "beta-VAE model: distortion 1/(1+beta) vs rate beta/(1+beta)" "beta" "value"
+    [("distortion 1/(1+beta)", blue, curve (grid 0.1 10.0 50) fun b => 1.0 / (1.0 + b)),
+     ("rate beta/(1+beta)", orange, curve (grid 0.1 10.0 50) fun b => b / (1.0 + b))]
   IO.println "figures written to ../website/static/img/"

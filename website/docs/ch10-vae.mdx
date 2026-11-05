@@ -105,6 +105,8 @@ Our data is a noisy **half circle** in the plane. The latent space has a single 
 We never wrote a gradient for this model. `backprop_correct` (Chapter 4) is a theorem about *every* expression, so the gradient of this particular loss, including the sampling step and the KL term, is correct by that single theorem. The only unproved parts are Float rounding and the random-number generator.
 :::
 
+<Figure src="beta_vae.svg" alt="Two curves against beta: distortion 1/(1+beta) falling, rate beta/(1+beta) rising, crossing at beta = 1" caption="The VAE objective is a dial, made visible in the toy the chapter runs: pushing beta up buys rate (information squeezed into z, the KL term) and pays in distortion (the blurred reconstruction) - the curve pair the beta-VAE measures. The autoencoder (beta = 0) sits at pure distortion with no code at all, which is exactly why its latent space is unstructured." />
+
 ## Autoencoder against VAE
 
 `lake exe vae` trains both models (the autoencoder is the same code with $\beta=0$) for 3000 Adam steps on fresh batches of 16 points, then evaluates on 200 held-out points and on 400 decodings of prior samples $z\sim\mathcal N(0,1)$.
