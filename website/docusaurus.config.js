@@ -10,7 +10,8 @@ const config = {
   tagline: 'Learn Lean 4 and deep learning at the same time — Apprenez Lean 4 et le deep learning ensemble',
   favicon: 'img/favicon.svg',
   url: 'https://example.github.io',
-  baseUrl: '/LEAIN4/',
+  // /LEAIN4/ for GitHub Pages; local viewing: SITE_BASE_URL=/ npx docusaurus build && npx docusaurus serve
+  baseUrl: process.env.SITE_BASE_URL || '/LEAIN4/',
   organizationName: 'leandl',
   projectName: 'LEAIN4',
   onBrokenLinks: 'throw',
