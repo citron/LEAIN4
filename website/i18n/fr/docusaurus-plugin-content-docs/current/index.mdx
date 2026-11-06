@@ -41,6 +41,9 @@ flowchart LR
   c17 -.->|à lire avant| c15
   c17 -->|perte symétrique| c19["19 Multimodal : CLIP"]
   c5 -.-> c18["18 Efficacité"]
+  c20["20 Capstone : boucle prouvée"]
+  c19 --> c20
+  c18 --> c20
   c10 -.-> c16
   c13 -.-> c16
 ```
@@ -70,5 +73,6 @@ flowchart LR
 | 16 | Outils mathématiques : probabilité, entropie, KL | récursion sur `Nat` pour les produits scalaires, classes de types abstraites (`LawfulLog`), inégalités sur `Rat` | espérance, variance, entropie, entropie croisée = entropie + KL, inégalité de Gibbs KL ≥ 0 |
 | 18 | Efficacité : quantification, MoE, distillation, lois d'échelle | bornes sur `Rat`, sommes de carrés, héritage en une ligne du chapitre 16 | erreur de quantification < un pas, équilibrage MoE `Somme p^2 >= 1/E`, distillation `CE = H + KL`, lois d'échelle démontrées |
 | 19 | Apprentissage multimodal : la perte symétrique de CLIP | composition de la machine du chapitre 17 dans les deux directions | InfoNCE symétrique, positif partagé, plancher d'effondrement `log B` dans chaque direction, forme close du batch 2x2 |
+| 20 | Capstone : toute la boucle d'entraînement, prouvée | composition du kit du chapitre 5 : décroissance + clipping + schedule en une recette | pas invisible dans la boîte, forme close `(1-lr(2+wd))^t w0`, perte jamais croissante à aucun itéré, budget de schedule fini, MNIST 90 % en 3 époques |
 
 Commencez par le [chapitre 0](ch00-setup).

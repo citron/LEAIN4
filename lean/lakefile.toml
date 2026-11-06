@@ -116,5 +116,9 @@ name = "ch19"
 root = "Demos.Ch19"
 
 [[lean_exe]]
+name = "capstone"
+root = "Demos.Capstone"
+
+[[lean_exe]]
 name = "props"
 root = "Demos.Props"

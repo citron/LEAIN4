@@ -225,3 +225,11 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Positif partagé** : les deux directions notent la MÊME score de paire S = x1 . y1 — une seule cellule de la matrice du batch alimente les deux questions.
 - **Transposition** : la direction texte-vers-image est la machine image-vers-texte appliquée à la matrice de scores transposée — il n'existe pas de seconde fonction de perte.
 - **Plancher moyenné** : un modèle CLIP effondré perd log (n + 1) dans CHAQUE direction ; la moyenne de deux planchers identiques est ce même log B — la ligne de départ de toute courbe CLIP.
+
+## Chapitre 20 — Capstone
+
+- **Recette d'entraînement** : décroître les poids, clipper le gradient, faire le pas, réduire le taux — l'ordre fixe que implémentent les cases de tout entraîneur, comme une seule définition sur `Rat`.
+- **Pas invisible** : dans la boîte de clipping la recette calcule bit pour bit le pas SGD L2 ordinaire (`recipe_step_eq`) ; la machinerie ne mord que sur les pics.
+- **Facteur de contraction** : `c = 1 - lr·(2 + wd)` ; chaque itéré est `cᵗ · w₀` — les époques deviennent un exposant.
+- **Borne d'itéré** : sous `0 ≤ lr·(2+wd) ≤ 2`, `w_t² ≤ w₀²` à chaque époque, exactement (`recipe_iter_sq_le`).
+- **Budget de schedule** : le total cumulé de pas du schedule exponentiel sature à `η₀/(1-γ)`, quel que soit le nombre d'époques.

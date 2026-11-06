@@ -1,0 +1,85 @@
+---
+sidebar_position: 21
+title: "Chapitre 20 — Capstone : tout le cours en une boucle prouvée"
+---
+
+# Chapitre 20 — Capstone : une recette d'entraînement, prouvée
+
+:::tip[TL;DR]
+**En bref.** Tout le cours est une boucle vue sous vingt angles : initialiser, forward, perte, gradient, cliper, pas, décroître le taux, mesurer. Ce chapitre soude les théorèmes du kit du Chapitre 5 en **une seule recette** — weight decay découplé + clipping de gradient + schedule exponentiel — et la prouve sur la quadratique de référence : dans la boîte de clipping la recette est **invisible** (`recipe_step_eq : décroissance d'abord + clipping = SGD L2 ordinaire) ; la recette itérée a la **forme fermée** $(1 - \eta(2+w))^t w_0$ (`recipe_closed`) ; sous la condition de stabilité $0 \le \eta(2+w) \le 2$ le carré de la perte **ne croît jamais, à aucun itéré** (`recipe_iter_sq_le`) ; et le schedule dépense un **budget total fini** $\eta_0/(1-\gamma)$ (`recipe_budget`). La démo lance la même recette en `Float` sur de vrais pixels MNIST : **90,0 % de précision test en 3 époques**, pendant que chaque instance `Rat` imprimée au-dessus décide `true`.
+
+**Mots nouveaux, en simple :**
+
+- **Recette** : la séquence fixe — décroître les poids, clipper le gradient, faire le pas, réduire le taux — que implémentent les cases de tout entraîneur moderne.
+- **Pas invisible** : quand le gradient est petit (dans la boîte), la recette compliquée calcule exactement le pas SGD ordinaire avec L2 : la machinerie ne mord que sur les pics.
+- **Contraction** : chaque pas multiplie le poids par un seul facteur $c = 1 - \eta(2+w)$ ; le compteur d'époques devient un exposant, et la preuve tient en une ligne géométrique.
+- **Budget** : un taux décroissant ne peut jamais déplacer les poids de plus de $\eta_0/(1-\gamma)$ au total, quel que soit le nombre d'époques ajoutées.
+:::
+
+Les chapitres 1–19 ont construit les pièces. Un capstone n'est pas une architecture de plus — c'est **la boucle elle-même**, certifiée : chaque case d'un entraîneur moderne (weight decay, clipping, schedule) est un théorème ici, et leur composition est une chaîne de preuves `Rat`. Puis les mêmes définitions, exécutées en `Float`, apprennent MNIST.
+
+<Figure src="cap_contract.svg" alt="Deux courbes de décroissance géométrique depuis w0 = 2 : avec wd = 0 le poids décroît d'un facteur 0,9 par époque ; avec wd = 0,02 légèrement plus vite, facteur 0,899" caption="recipe_closed, tracé : la recette sur la quadratique est de la géométrie pure — w_t = c^t w0 avec c = 1 - lr(2 + wd). Le weight decay raidit la contraction de exactement lr·wd. Les nombres exacts (899/500, 808201/500000, ...) sont imprimés par lake exe capstone et concordent avec la forme fermée chiffre par chiffre." />
+
+<Figure src="cap_budget.svg" alt="Deux courbes à saturation : le taux d'apprentissage cumulé dépensé sur les époques, gamma 0,5 sature à 1,0 et gamma 0,75 sature à 2,0" caption="recipe_budget, tracé : le budget cumulé de pas du schedule exponentiel sature à eta0/(1-gamma). Lancez 10 époques ou 1000 — les poids ne peuvent jamais aller au-delà de l'asymptote. C'est le contenu exact du folklore « décroître le taux stabilise l'entraînement »." />
+
+## La recette, comme définitions
+
+```lean file=Ch20/Capstone.lean#recipe
+```
+
+```lean file=Ch20/Capstone.lean#decay
+```
+
+La chute de `recipe_step_eq` : pour **SGD ordinaire, le decay découplé est un mensonge que l'on se raconte** — appliquer la décroissance au poids puis marcher sur le gradient clipé calcule bit pour bit le pas L2 régularisé. Le découplage ne mérite son nom que sous Adam (exercice 4 du kit du Chapitre 5), où le gradient est normalisé et les deux règles divergent vraiment.
+
+## La boucle, certifiée à chaque époque
+
+```lean file=Ch20/Capstone.lean#loop
+```
+
+`recipe_iter_sq_le` est toute la boucle vue comme système dynamique : sous une condition de stabilité douce sur le produit « taux × courbure », aucun itéré de la recette complète — décroissance, clipping, pas — n'augmente le carré de la perte. Pas « en moyenne », pas « à la limite » : à l'époque $t$, pour tout poids de départ, exactement. La chaîne de preuve tient en une ligne de théorie du cours : le pas est une multiplication par $c \in [-1,1]$, donc $c^2 \le 1$ (`sq_le_one` du Chapitre 5), donc $c^{2t} \le 1$ (`powN_le_one`), donc $w_t^2 = c^{2t} w_0^2 \le w_0^2$.
+
+## La case schedule, citée verbatim
+
+```lean file=Ch20/Capstone.lean#budget
+```
+
+## L'exécuter : la face exacte et MNIST
+
+`lake exe capstone` imprime les deux faces. La face exacte évalue les théorèmes sur $w_0 = 2$, $\eta = 1/20$, $w = 1/50$ :
+
+```text
+  t = 0: w = 2          closed form = 2                       w^2 <= w0^2: true
+  t = 1: w = 899/500    closed form = 899/500                 w^2 <= w0^2: true
+  t = 2: w = 808201/500000  closed form = 808201/500000       w^2 <= w0^2: true
+  ...
+  clipped gradient at w = 3: clip 5 6 = 5
+  schedule budget (10 epochs): spent 6513215599/10000000000 <= bound 1: true
+```
+
+La face `Float` lance les mêmes définitions — `decay` sur chaque poids, `clamp` sur chaque coordonnée du gradient, schedule `lrAt` — sur de vrais MNIST avec le réseau du Chapitre 5 :
+
+```text
+MNIST face: train 4000, test 2000
+  epoch 1: lr = 0.050000, test accuracy = 0.833000
+  epoch 2: lr = 0.035000, test accuracy = 0.895000
+  epoch 3: lr = 0.024500, test accuracy = 0.900000
+```
+
+Lisez les deux faces ensemble : les preuves disent que la boucle **ne peut pas** aggraver sa perte à aucune époque ; le parcours MNIST est cet énoncé, dépensé en virgule flottante sur 4 000 images réelles, finissant à 90 % avec 64 unités cachées et sans GPU.
+
+## Exercices
+
+```lean file=Ch20/Exercises.lean#ex1
+```
+
+```lean file=Ch20/Exercises.lean#ex2
+```
+
+## Corrigés
+
+```lean file=Ch20/Solutions.lean#sol1
+```
+
+```lean file=Ch20/Solutions.lean#sol2
+```

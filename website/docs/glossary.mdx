@@ -218,6 +218,13 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Distillation floor**: The student's cross-entropy against the teacher is the teacher's entropy plus a nonnegative KL: the loss can never go under H(teacher), and the gap is exactly the KL.
 - **Scaling shape**: The law L(N) = Linf + C/N is strictly decreasing and doubling N halves the excess C/N; optimization steps decay exponentially instead — the two curves have opposite curvature.
 
+## Chapter 20 — Capstone
+
+- **Training recipe**: decay the weights, clip the gradient, step, shrink the rate — the fixed order every trainer's boxes implement, as one definition over `Rat`.
+- **Invisible step**: inside the clipping box the recipe computes bit-for-bit the plain L2-SGD step (`recipe_step_eq`); the machinery only bites on spikes.
+- **Contraction factor**: `c = 1 - lr·(2 + wd)`; every iterate is `cᵗ · w₀` — epochs become an exponent.
+- **Iterate bound**: under `0 ≤ lr·(2+wd) ≤ 2`, `w_t² ≤ w₀²` at every epoch, exactly (`recipe_iter_sq_le`).
+- **Schedule budget**: the exponential schedule's cumulative step total saturates at `η₀/(1-γ)`, no matter how many epochs.
 ## Chapter 19 — Multimodal learning
 
 - **Multimodal model**: Two encoders — pixels, text — mapped into one shared space so a picture and its caption land near each other.

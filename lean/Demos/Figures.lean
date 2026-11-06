@@ -461,4 +461,18 @@ def main : IO Unit := do
     "Collapsed CLIP model pays log (n + 1): batch size raises the floor" "batch B = n + 1" "loss"
     [("log (B)", blue, curve (grid 1.0 16.0 16) fun b => Float.log b)]
 
+  -- Ch20: the recipe contracts the weight geometrically; decay steepens the rate
+  save "cap_contract" <| lineSvg 480 250 0.0 12.0 0.0 2.2
+    "w_t = (1 - lr(2 + wd))^t w0 with lr = 0.05, w0 = 2" "epoch t" "weight w_t"
+    [("wd = 0", blue, curve (grid 0.0 12.0 25) fun t => 2.0 * Float.pow (1.0 - 0.05 * 2.0) t),
+     ("wd = 0.02", orange, curve (grid 0.0 12.0 25) fun t =>
+        2.0 * Float.pow (1.0 - 0.05 * (2.0 + 0.02)) t)]
+  -- Ch20: the exponential schedule spends a finite budget eta0 / (1 - gamma)
+  save "cap_budget" <| lineSvg 480 240 0.0 10.0 0.0 1.8
+    "Cumulative lr spent: finite budget eta0/(1-gamma) = 1.0 vs 2.0" "epochs n" "total lr spent"
+    [("gamma = 0.5 (budget 1.0)", blue, curve (grid 1.0 10.0 10) fun n =>
+        (List.range n.toUInt32.toNat).foldl (fun acc t => acc + 0.5 * Float.pow 0.5 t.toFloat) 0.0),
+     ("gamma = 0.75 (budget 2.0)", orange, curve (grid 1.0 10.0 10) fun n =>
+        (List.range n.toUInt32.toNat).foldl (fun acc t => acc + 0.5 * Float.pow 0.75 t.toFloat) 0.0)]
+
   IO.println "figures written to ../website/static/img/"

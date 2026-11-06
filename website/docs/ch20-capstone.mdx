@@ -1,0 +1,85 @@
+---
+sidebar_position: 21
+title: "Chapter 20 — Capstone: the whole course in one proved loop"
+---
+
+# Chapter 20 — Capstone: one training recipe, proved
+
+:::tip[TL;DR]
+**In short.** The whole course is one loop seen from twenty angles: initialise, forward, loss, gradient, clip, step, decay the rate, measure. This chapter welds the Chapter 5 kit's theorems into **one recipe** — decoupled weight decay + gradient clipping + exponential schedule — and proves it on the running quadratic: inside the clipping box the recipe is **invisible** (`recipe_step_eq`: decay first + clipping = plain L2-SGD); the iterated recipe has the **closed form** $(1 - \eta(2+w))^t w_0$ (`recipe_closed`); under the stability condition $0 \le \eta(2+w) \le 2$ the squared loss **never grows at any iterate** (`recipe_iter_sq_le`); and the schedule spends a **finite** total budget $\eta_0/(1-\gamma)$ (`recipe_budget`). The demo runs the identical recipe in `Float` on real MNIST pixels: **90.0 % test accuracy in 3 epochs**, while every `Rat` instance printed above it decides `true`.
+
+**New words, in simple terms:**
+
+- **Recipe**: the fixed sequence — decay the weights, clip the gradient, take the step, shrink the rate — that every trainer's boxes implement.
+- **Invisible step**: when the gradient is small (inside the box), the fancy recipe computes exactly what plain SGD with L2 would: the machinery only bites on spikes.
+- **Contraction**: each step multiplies the weight by one factor $c = 1 - \eta(2+w)$; the epoch count becomes an exponent, and the proof is one geometric line.
+- **Budget**: a decaying rate can never move the weights more than $\eta_0/(1-\gamma)$ in total, no matter how many epochs you add.
+:::
+
+Chapters 1–19 built the parts. A capstone is not a new architecture — it is the **loop itself**, certified: every box of a modern trainer (weight decay, clipping, schedule) is a theorem here, and their composition is one chain of `Rat` proofs. Then the same definitions, run in `Float`, learn MNIST.
+
+<Figure src="cap_contract.svg" alt="Two geometric decay curves from w0 = 2: with wd = 0 the weight decays by factor 0.9 per epoch; with wd = 0.02 slightly faster, factor 0.899" caption="recipe_closed, drawn: the recipe on the quadratic is pure geometry — w_t = c^t w0 with c = 1 - lr(2 + wd). Weight decay steepens the contraction by exactly lr·wd. The exact numbers (899/500, 808201/500000, ...) are printed by lake exe capstone and match the closed form digit for digit." />
+
+<Figure src="cap_budget.svg" alt="Two saturating curves: cumulative learning rate spent over epochs, gamma 0.5 saturating at 1.0 and gamma 0.75 saturating at 2.0" caption="recipe_budget, drawn: the exponential schedule's cumulative step budget saturates at eta0/(1-gamma). Run 10 epochs or 1000 — the weights can never travel further than the asymptote. This is the exact content of the folklore 'decaying the rate stabilises training'." />
+
+## The recipe, as definitions
+
+```lean file=Ch20/Capstone.lean#recipe
+```
+
+```lean file=Ch20/Capstone.lean#decay
+```
+
+The punchline of `recipe_step_eq`: for **plain SGD, decoupled decay is a lie people tell** — applying the shrink to the weight, then stepping the clipped gradient, computes bit-for-bit the L2-regularised step. Decoupling only earns its name under Adam (Chapter 5's kit exercise), where the gradient is normalised and the two rules genuinely diverge.
+
+## The loop, certified at every epoch
+
+```lean file=Ch20/Capstone.lean#loop
+```
+
+`recipe_iter_sq_le` is the whole loop seen as a dynamical system: under a mild stability condition on the product "rate × curvature", no iterate of the full recipe — decay, clipping, step — ever increases the squared loss. Not "on average", not "in the limit": at epoch $t$, for every starting weight, exactly. The proof chain is one line of course theory: the step is multiplication by $c \in [-1,1]$, so $c^2 \le 1$ (Chapter 5's `sq_le_one`), so $c^{2t} \le 1$ (`powN_le_one`), so $w_t^2 = c^{2t} w_0^2 \le w_0^2$.
+
+## The schedule box, cited verbatim
+
+```lean file=Ch20/Capstone.lean#budget
+```
+
+## Running it: the exact face and MNIST
+
+`lake exe capstone` prints both faces. The exact face evaluates the theorems on $w_0 = 2$, $\eta = 1/20$, $w = 1/50$:
+
+```text
+  t = 0: w = 2          closed form = 2                       w^2 <= w0^2: true
+  t = 1: w = 899/500    closed form = 899/500                 w^2 <= w0^2: true
+  t = 2: w = 808201/500000  closed form = 808201/500000       w^2 <= w0^2: true
+  ...
+  clipped gradient at w = 3: clip 5 6 = 5
+  schedule budget (10 epochs): spent 6513215599/10000000000 <= bound 1: true
+```
+
+The `Float` face runs the same definitions — `decay` on every weight, `clamp` on every gradient coordinate, `lrAt` schedule — on real MNIST with the Chapter 5 network:
+
+```text
+MNIST face: train 4000, test 2000
+  epoch 1: lr = 0.050000, test accuracy = 0.833000
+  epoch 2: lr = 0.035000, test accuracy = 0.895000
+  epoch 3: lr = 0.024500, test accuracy = 0.900000
+```
+
+Read the two faces together: the proofs say the loop **cannot** worsen its loss at any epoch; the MNIST run is that statement, spent in floating point on 4 000 real images, ending at 90 % with 64 hidden units and no GPU.
+
+## Exercises
+
+```lean file=Ch20/Exercises.lean#ex1
+```
+
+```lean file=Ch20/Exercises.lean#ex2
+```
+
+## Solutions
+
+```lean file=Ch20/Solutions.lean#sol1
+```
+
+```lean file=Ch20/Solutions.lean#sol2
+```

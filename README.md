@@ -13,7 +13,7 @@ Un cours bilingue qui enseigne Lean 4 et le deep learning ensemble. Tous les mod
 ## Build
 
 ```bash
-cd lean && lake build LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 ch19 figures && lake exe ch05
+cd lean && lake build LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 ch19 ch20 figures && lake exe ch05
 cd ../website && npm install && npm start          # English (dev, hot reload)
 npm run build && npm run serve                      # bilingual EN+FR, static
 node ../scripts/check.mjs
@@ -47,6 +47,7 @@ node ../scripts/check.mjs
 | 17 Contrastive learning: InfoNCE, exactly | done | done | done |
 | 18 Efficiency: quantization, MoE, distillation, scaling | done | done | done |
 | 19 Multimodal: CLIP symmetric loss | done | done | done |
+| 20 Capstone: proved training loop | done | done | done |
 
 ## Licence / License
 
