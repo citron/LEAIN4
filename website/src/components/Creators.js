@@ -1,4 +1,5 @@
 import React from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 // Creators of the architectures taught in this course. Every portrait below is
 // a verified free-license image from Wikimedia Commons (see
@@ -87,6 +88,8 @@ export default function Creators({slugs, fr}) {
     .split(",")
     .map((s) => s.trim())
     .filter((s) => CREATORS[s]);
+  // One hook call; strip the leading slash of each "/img/creators/…" path.
+  const imgBase = useBaseUrl("/");
   if (list.length === 0) return null;
   const label = lang === "fr" ? "Les créateurs" : "The creators";
   const credit = lang === "fr" ? "Crédit" : "Credit";
@@ -101,7 +104,7 @@ export default function Creators({slugs, fr}) {
       }}
     >
       <div style={{width: "100%", fontWeight: 600, fontSize: "0.95rem"}}>{label}</div>
-      {list.map((slug) => {
+      {list.map((slug, idx) => {
         const c = CREATORS[slug];
         return (
           <figure
@@ -114,7 +117,7 @@ export default function Creators({slugs, fr}) {
             }}
           >
             <img
-              src={c.img}
+              src={imgBase + c.img.slice(1)}
               alt={`Portrait of ${c.name}`}
               style={{
                 width: "96px",
