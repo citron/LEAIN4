@@ -30,6 +30,10 @@ A **neuron** takes $n$ numbers $x_1,\dots,x_n$, computes a weighted sum plus a b
 
 $$ y = \varphi\Big(\sum_{i=1}^{n} w_i x_i + b\Big) = \varphi(w \cdot x + b). $$
 
+
+<Figure src="arch_neuron.svg"
+caption="A neuron: a weighted sum, then one nonlinearity"
+ />
 ## Vectors whose length is in the type
 
 We represent a vector of length $n$ as a function `Fin n → α`. The length is part of the type, so adding a 2-vector to a 3-vector is a *type error*, not a runtime bug.

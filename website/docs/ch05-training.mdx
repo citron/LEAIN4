@@ -28,6 +28,10 @@ title: "Chapter 5 — Losses, optimizers, regularisation and MNIST"
 
 Chapter 4 gave us gradients. This chapter turns them into *learning*: which function to minimise (the **loss**), how to follow the gradient (the **optimizer**), how to keep the model from over-fitting (**regularisation**), and a first real dataset, **MNIST** handwritten digits.
 
+
+<Figure src="arch_pipeline.svg"
+caption="The training loop: data, model, loss, gradients, optimizer"
+ />
 ## Cross-entropy and softmax
 
 For classification, the network outputs $m$ numbers $z$ (the *logits*). The softmax turns them into probabilities $p_k = e^{z_k} / \sum_i e^{z_i}$, and the loss for true class $y$ is $-\log p_y = \log\sum_i e^{z_i} - z_y$. As an expression:

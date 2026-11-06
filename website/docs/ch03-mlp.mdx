@@ -27,6 +27,10 @@ Chapter 2 ended with a wall: one neuron cannot compute XOR. The way around it is
 
 <Creators slugs="werbos,rumelhart,hinton,lecun" />
 
+
+<Figure src="arch_mlp.svg"
+caption="MLP: stacked dense layers, ReLU between, softmax on top"
+ />
 ## Layers and shapes
 
 A layer with `nin` inputs and `nout` neurons holds one weight row and one bias per neuron. Its weights are a matrix `Mat α nout nin`; the shapes appear in the type, so a layer cannot be fed a vector of the wrong size.

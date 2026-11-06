@@ -26,6 +26,10 @@ Le chapitre 7 s'est terminé sur un diagnostic : dans un RNN simple, le gradient
 
 <Creators fr slugs="hochreiter,schmidhuber" />
 
+
+<Figure src="arch_gru.svg"
+caption="Cellule GRU : la porte de mise à jour z mélange, la porte de réinitialisation r lit"
+ />
 ## Le LSTM
 
 En plus de l'état caché $h_t$, le LSTM porte un **état de cellule** $c_t$. Quatre petites couches (les *portes*) lisent $h_{t-1}$ et $x_t$ :

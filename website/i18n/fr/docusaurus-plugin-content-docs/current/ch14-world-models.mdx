@@ -46,6 +46,10 @@ flowchart LR
 
 <Creators fr slugs="schmidhuber" />
 
+
+<Figure src="arch_worldmodel.svg"
+caption="Modèle du monde : encodeur, modèle latent récurrent, politique entraînée dans le rêve"
+ />
 ## La tâche
 
 Un point est posé sur une pente : position $x$, vitesse $v$, et une poussée $u\in[-1,1]$ que nous choisissons. La gravité le pousse **loin** de $x=0$, donc ne rien faire échoue. Le coût par pas est $x^2+0{,}1v^2+0{,}01u^2$ : le contrôleur doit maintenir le point en $0$.

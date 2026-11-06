@@ -45,6 +45,10 @@ flowchart LR
 
 <Creators fr slugs="sutton" />
 
+
+<Figure src="arch_rl.svg"
+caption="Actor-critic : politique et valeur dans la boucle de l'environnement"
+ />
 ## Par les valeurs : Q-learning
 
 La **valeur d'action** $Q(s,a)$ est le retour espéré après avoir pris $a$ en $s$ puis agi au mieux. Elle satisfait l'**équation de Bellman** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Le Q-learning en fait une mise à jour vers une **cible** $r+\gamma\max_{a'}Q(s',a')$.

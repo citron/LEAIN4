@@ -28,6 +28,10 @@ Les *mêmes* poids servent à chaque pas (l'analogue temporel du partage des poi
 
 <Creators fr slugs="werbos,rumelhart" />
 
+
+<Figure src="arch_rnn.svg"
+caption="RNN : un état h transmis le long de la séquence, mêmes poids à chaque pas"
+ />
 ## L'état d'un réseau récurrent est un produit
 
 Comprenons le gradient avec le réseau le plus simple possible : une unité, $h_{t+1} = \tanh(w\,h_t + c_t)$, l'entrée étant intégrée dans $c_t$. Nous construisons le réseau déroulé comme une `Expr` à une seule variable $h_0$ :

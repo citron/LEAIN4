@@ -24,6 +24,10 @@ Les chapitres 15 et 17 expliquaient un embedding et une direction. Les modèles 
 
 <Figure src="clip_floor.svg" alt="Courbe log B montant lentement de 0 en B = 1 à environ 2,8 en B = 16 : le plancher du modèle effondré croît avec la taille du batch" caption="symm_collapse, tracée : un modèle effondré perd exactement log (n + 1) = log B dans CHAQUE direction, donc la perte moyenne démarre à ce même log B. Des batchs plus gros n'ajoutent pas du signal de gradient — ils relèvent la ligne de départ. Lisez votre courbe CLIP contre cet escalier exact : 0,69 en B = 2, 1,39 en B = 4, 2,08 en B = 8." />
 
+
+<Figure src="arch_clip.svg"
+caption="CLIP : tour image et tour texte, une matrice de similarité n × n"
+ />
 ## La perte symétrique
 
 ```lean file=Ch19/Multimodal.lean#symm

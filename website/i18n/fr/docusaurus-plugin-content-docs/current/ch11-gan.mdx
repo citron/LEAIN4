@@ -45,6 +45,10 @@ flowchart LR
 
 <Creators fr slugs="goodfellow" />
 
+
+<Figure src="arch_gan.svg"
+caption="GAN : générateur contre discriminateur, un minimax"
+ />
 ## Que dit le meilleur discriminateur ?
 
 Fixons un point $x$. Soit $a=p_{\text{data}}(x)$ la densité des données réelles en ce point et $b=p_G(x)$ celle des données générées. Le gain du discriminateur en $x$ est $a\log d + b\log(1-d)$ avec $d=D(x)$. Annuler la dérivée, $\frac ad-\frac b{1-d}=0$, donne

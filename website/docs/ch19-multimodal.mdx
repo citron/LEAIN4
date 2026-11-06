@@ -24,6 +24,10 @@ Chapters 15 and 17 explained one embedding and one direction. Real deployed mode
 
 <Figure src="clip_floor.svg" alt="log B curve rising slowly from 0 at B = 1 to about 2.8 at B = 16: the collapsed-model floor grows with the batch" caption="symm_collapse, drawn: a collapsed model loses exactly log (n + 1) = log B in EACH direction, so the averaged loss starts at the same log B. Bigger batches do not just add gradient signal — they raise the starting line. Read your CLIP curve against this exact staircase: 0.69 at B = 2, 1.39 at B = 4, 2.08 at B = 8." />
 
+
+<Figure src="arch_clip.svg"
+caption="CLIP: image tower and text tower, one n-by-n similarity matrix"
+ />
 ## The symmetric loss
 
 ```lean file=Ch19/Multimodal.lean#symm

@@ -26,6 +26,10 @@ $$ p(v, h) \;=\; \frac{\mathrm e^{-E(v,h)}}{Z}, \qquad Z = \sum_{v',h'} \mathrm 
 
 C'est la **machine de Boltzmann** (Ackley, Hinton et Sejnowski, 1985), d'après les verres de spin de la physique statistique. Elle est l'ancêtre direct du deep learning moderne — le rêve de 2006 de Hinton d'empiler des RBM a lancé l'essor du deep learning — et son cousin générateur, la divergence contrastive, est ce qui les a rendues entraînables.
 
+
+<Figure src="arch_boltzmann.svg"
+caption="RBM : visible et caché totalement connectés, balayage de Gibbs sur le côté"
+ />
 ## La machine canonique, exactement
 
 Un bit visible $v$, un bit caché $h$. L'énergie a un biais $a$ pour l'unité cachée, un biais $b$ pour l'unité visible et un couplage $g$ pour la paire allumée ensemble ; la jauge est $E(0,0)=0$. Dans la paramétrisation exponentielle $a = \mathrm e^{\alpha}$, $b = \mathrm e^{\beta}$, $g = \mathrm e^{\delta}$, les quatre poids non normalisés et la fonction de partition sont :

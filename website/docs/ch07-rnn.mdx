@@ -28,6 +28,10 @@ The *same* weights are used at every step (the temporal analogue of the weight s
 
 <Creators slugs="werbos,rumelhart" />
 
+
+<Figure src="arch_rnn.svg"
+caption="RNN: one state h handed along the sequence, same weights each step"
+ />
 ## The state of a recurrent network is a product
 
 Let us understand the gradient with the simplest possible network: one unit, $h_{t+1} = \tanh(w\,h_t + c_t)$, with the input folded into $c_t$. We build the unrolled network as an `Expr` in the single variable $h_0$:

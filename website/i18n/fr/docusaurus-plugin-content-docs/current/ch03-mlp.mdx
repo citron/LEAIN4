@@ -27,6 +27,10 @@ Le chapitre 2 s'est terminé sur un mur : un neurone seul ne peut pas calculer l
 
 <Creators fr slugs="werbos,rumelhart,hinton,lecun" />
 
+
+<Figure src="arch_mlp.svg"
+caption="MLP : couches denses empilées, ReLU entre les couches, softmax en sortie"
+ />
 ## Couches et formes
 
 Une couche à `nin` entrées et `nout` neurones contient une ligne de poids et un biais par neurone. Ses poids forment une matrice `Mat α nout nin` ; les formes apparaissent dans le type, donc on ne peut pas donner à une couche un vecteur de mauvaise taille.

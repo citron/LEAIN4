@@ -23,6 +23,10 @@ title: "Chapter 10 — Autoencoders and the VAE"
 
 So far our networks *recognised* things. A **generative model** learns to *produce* new data that looks like the training data. This chapter starts with the simplest idea, the autoencoder, and then fixes its main weakness with the variational autoencoder (VAE).
 
+
+<Figure src="arch_ae.svg"
+caption="Autoencoder: compress to z, reconstruct x-hat"
+ />
 ## The autoencoder
 
 An **autoencoder** is two networks. The **encoder** compresses a data point $x$ into a short code $z$ (the *latent* variable); the **decoder** reconstructs $x$ from $z$. It is trained to minimise the reconstruction error $\|x - \mathrm{dec}(\mathrm{enc}(x))\|^2$. The space in which the codes live is called the **latent space** (*latent* means hidden: we never observe it, the network invents it). With a code of two numbers it is a plane, and every point of that plane decodes into one possible data point.
@@ -38,6 +42,9 @@ flowchart LR
 
 To *generate*, we would pick a code $z$ at random and run the decoder. The problem: nothing forces the codes of the training data to occupy a region we know how to sample from. Random codes can land where the decoder was never trained.
 
+<Figure src="arch_vae.svg"
+caption="VAE: the posterior sampled through z = mu + sigma * epsilon"
+ />
 ## The variational autoencoder
 
 The VAE (Kingma and Welling, 2013) makes the codes sampleable by design:

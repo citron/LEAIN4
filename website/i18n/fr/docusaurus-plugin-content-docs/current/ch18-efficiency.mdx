@@ -19,6 +19,10 @@ title: "Chapitre 18 — Efficacité : quantification, MoE, distillation, scaling
 
 Les chapitres 0 à 17 construisent des modèles qui *apprennent*. Un modèle qui part en production doit aussi être petit, rapide et abordable — et chaque astuce de déploiement de l'industrie repose sur une inégalité. Ce chapitre prouve les quatre qui comptent : toutes élémentaires sur `Rat` (aucune analyse, aucune théorie de la mesure), et leurs énoncés sont exactement le folklore du machine learning de production.
 
+
+<Figure src="arch_moe.svg"
+caption="Mélange d'experts : le routeur garde k experts sur E par jeton"
+ />
 ## Quantification : la grille et son erreur
 
 ```lean file=Ch18/Efficiency.lean#quant

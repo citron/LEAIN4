@@ -31,6 +31,10 @@ Une couche dense sur une image de $28\times 28$ a $784$ poids *par neurone*, et 
 
 <Creators fr slugs="lecun" />
 
+
+<Figure src="arch_cnn.svg"
+caption="CNN : les convolutions rétrécissent la carte et élargissent les canaux"
+ />
 ## Convolution en dimension un, avec les formes dans le type
 
 Commençons en dimension un, où les preuves sont courtes. Un noyau de longueur $k+1$ glisse sur une entrée de longueur $m+k$ et produit exactement $m$ sorties. En Lean, cette arithmétique fait partie du type : un noyau qui ne rentre pas ne passe tout simplement pas le typage.

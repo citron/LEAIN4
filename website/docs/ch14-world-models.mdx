@@ -46,6 +46,10 @@ flowchart LR
 
 <Creators slugs="schmidhuber" />
 
+
+<Figure src="arch_worldmodel.svg"
+caption="World model: encoder, recurrent latent model, policy trained on imagined rollouts"
+ />
 ## The task
 
 A point sits on a slope: position $x$, velocity $v$, and a push $u\in[-1,1]$ that we choose. Gravity pushes it **away** from $x=0$, so doing nothing fails. The cost per step is $x^2+0.1v^2+0.01u^2$: the controller must hold the point at $0$.

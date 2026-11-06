@@ -18,6 +18,10 @@ title: "Chapter 18 — Efficiency: quantization, MoE, distillation, scaling"
 
 Chapters 0–17 build models that *learn*. A model that ships must also be small, fast, and affordable — and every deployment trick in the industry stands on one inequality. This chapter proves the four that matter: they are all elementary on `Rat` (no analysis, no measure theory), and their statements are exactly the folklore of production machine learning.
 
+
+<Figure src="arch_moe.svg"
+caption="Mixture of experts: the router keeps k of E experts per token"
+ />
 ## Quantization: the grid and its error
 
 ```lean file=Ch18/Efficiency.lean#quant

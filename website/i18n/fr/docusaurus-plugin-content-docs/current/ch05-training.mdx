@@ -28,6 +28,10 @@ title: "Chapitre 5 — Pertes, optimiseurs, régularisation et MNIST"
 
 Le chapitre 4 nous a donné les gradients. Ce chapitre les transforme en *apprentissage* : quelle fonction minimiser (la **perte**), comment suivre le gradient (l'**optimiseur**), comment éviter le surapprentissage (la **régularisation**), et un premier vrai jeu de données, **MNIST**, des chiffres manuscrits.
 
+
+<Figure src="arch_pipeline.svg"
+caption="La boucle d'entraînement : données, modèle, perte, gradients, optimiseur"
+ />
 ## Entropie croisée et softmax
 
 Pour la classification, le réseau produit $m$ nombres $z$ (les *logits*). Le softmax les transforme en probabilités $p_k = e^{z_k} / \sum_i e^{z_i}$, et la perte pour la vraie classe $y$ vaut $-\log p_y = \log\sum_i e^{z_i} - z_y$. Sous forme d'expression :

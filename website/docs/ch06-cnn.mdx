@@ -31,6 +31,10 @@ A dense layer on a $28\times 28$ image has $784$ weights *per neuron*, and has n
 
 <Creators slugs="lecun" />
 
+
+<Figure src="arch_cnn.svg"
+caption="CNN: convolutions shrink the map and grow the channels"
+ />
 ## One-dimensional convolution, with the shapes in the type
 
 We start in one dimension, where the proofs are short. A kernel of length $k+1$ slides over an input of length $m+k$ and produces exactly $m$ outputs. In Lean this arithmetic is part of the type, so a kernel that does not fit simply does not type-check.

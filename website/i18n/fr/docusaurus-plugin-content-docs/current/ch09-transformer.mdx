@@ -28,6 +28,10 @@ Les réseaux récurrents lisent une séquence un pas à la fois : l'information 
 
 <Creators fr slugs="bengio" />
 
+
+<Figure src="arch_transformer.svg"
+caption="Transformer : encodeur et décodeur, piles de blocs d'attention"
+ />
 ## L'attention par produit scalaire normalisé
 
 Chaque position $t$ a une *requête* $q_t$, une *clé* $k_t$ et une *valeur* $v_t$ (trois applications linéaires de sa représentation $x_t$). La position $t$ compare sa requête à toutes les clés, transforme les scores en poids par un softmax, et prend la moyenne pondérée des valeurs :

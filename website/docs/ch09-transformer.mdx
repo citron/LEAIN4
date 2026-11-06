@@ -28,6 +28,10 @@ Recurrent networks read a sequence one step at a time, so information from far b
 
 <Creators slugs="bengio" />
 
+
+<Figure src="arch_transformer.svg"
+caption="Transformer: encoder and decoder stacks of attention blocks"
+ />
 ## Scaled dot-product attention
 
 Each position $t$ has a *query* $q_t$, a *key* $k_t$ and a *value* $v_t$ (three linear maps of its representation $x_t$). Position $t$ compares its query with all keys, turns the scores into weights with a softmax, and takes the weighted average of the values:

@@ -30,6 +30,10 @@ Un **neurone** reçoit $n$ nombres $x_1,\dots,x_n$, calcule une somme pondérée
 
 $$ y = \varphi\Big(\sum_{i=1}^{n} w_i x_i + b\Big) = \varphi(w \cdot x + b). $$
 
+
+<Figure src="arch_neuron.svg"
+caption="Un neurone : une somme pondérée, puis une non-linéarité"
+ />
 ## Des vecteurs dont la longueur est dans le type
 
 Un vecteur de longueur $n$ est représenté par une fonction `Fin n → α`. La longueur fait partie du type : additionner un vecteur de taille 2 et un vecteur de taille 3 est une *erreur de typage*, pas un bug d'exécution.

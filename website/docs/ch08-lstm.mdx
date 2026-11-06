@@ -26,6 +26,10 @@ Chapter 7 ended with a diagnosis: in a plain RNN the gradient is a product of $T
 
 <Creators slugs="hochreiter,schmidhuber" />
 
+
+<Figure src="arch_gru.svg"
+caption="GRU cell: the update gate z mixes, the reset gate r reads"
+ />
 ## The LSTM
 
 Besides the hidden state $h_t$ the LSTM carries a **cell state** $c_t$. Four small neural layers (the *gates*) read $h_{t-1}$ and $x_t$:

@@ -45,6 +45,10 @@ flowchart LR
 
 <Creators slugs="goodfellow" />
 
+
+<Figure src="arch_gan.svg"
+caption="GAN: generator against discriminator, one minimax"
+ />
 ## What does the best discriminator say?
 
 Fix a point $x$. Let $a=p_{\text{data}}(x)$ be the density of real data there and $b=p_G(x)$ the density of generated data. The discriminator's payoff at $x$ is $a\log d + b\log(1-d)$ with $d=D(x)$. Setting the derivative to zero, $\frac ad-\frac b{1-d}=0$, gives

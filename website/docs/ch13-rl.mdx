@@ -45,6 +45,10 @@ flowchart LR
 
 <Creators slugs="sutton" />
 
+
+<Figure src="arch_rl.svg"
+caption="Actor-critic: policy and value networks in the environment loop"
+ />
 ## Value-based: Q-learning
 
 The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterwards. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.
