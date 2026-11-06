@@ -335,6 +335,21 @@ Vérification : build 89 jobs ; audit 2084 déclarations propres (0 `sorry`, 0 a
 
 
 
+## Phase V — Chapitre 19 « Apprentissage multimodal » (fait)
+
+- `lean/LeanDL/Ch19/Multimodal.lean` : `pairSample`, `infoNce_ext`, `symmInfoNce`, `symm_ge_zero`,
+  `symm_collapse`, `row_is_matched`, `col_is_matched`, `symm_matched`, `symm_le_log_two` — composition
+  exacte de la machine Ch17 dans les deux directions (CLIP), sans axiome ni `sorry`.
+- 2 exercices + corrigés prouvés (`Ch19/Exercises.lean`, `Ch19/Solutions.lean`).
+- Démo `lake exe ch19` : planchers d'effondrement Float = log B (0.69 / 1.39 / 2.08), forme close
+  `symm_matched` confirmée numericallement, 5000 batchs séparés : 0 violation de la borne log 2.
+- Figures générées : `clip_symm.svg`, `clip_floor.svg` (via `lake exe figures`) + schéma statique
+  `clip_grid.svg` ; insérées FR/EN.
+- Docs FR/EN `ch19-multimodal.mdx` (sidebar_position 20, 5 ancres, section Exercices/Exercices) ;
+  index FR/EN : lignes 18/19 du programme + arêtes du graphe de prérequis.
+- Build complet : 94 jobs. Audit : `checked 2208 declarations; using sorry: []; non-standard axioms: []`.
+  `node scripts/check.mjs` : `OK: 23 pages in en and fr`.
+
 ## Phase U — Cours ultime : vitrine, kit, théorie (RÉSOLU)
 
 **Vitrine** : `LICENSE` = texte officiel EUPL-1.2 (SPDX, anglais) + en-tête de copyright — l'UEPL n'a pas de version 2 officielle, v1.2 est la dernière ; lien EUR-Lex pour le texte français authentique. README complété (table Ch18, section licence, garanties CI). Recherche locale FR/EN sur le site (`@easyops-cn/docusaurus-search-local`, index `search-index.json` EN + FR).

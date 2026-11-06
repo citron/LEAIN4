@@ -217,3 +217,11 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Collapsed router**: All routing mass on one expert; the balance loss pays exactly 1 = E times the floor, and E−1 experts sit idle.
 - **Distillation floor**: The student's cross-entropy against the teacher is the teacher's entropy plus a nonnegative KL: the loss can never go under H(teacher), and the gap is exactly the KL.
 - **Scaling shape**: The law L(N) = Linf + C/N is strictly decreasing and doubling N halves the excess C/N; optimization steps decay exponentially instead — the two curves have opposite curvature.
+
+## Chapter 19 — Multimodal learning
+
+- **Multimodal model**: Two encoders — pixels, text — mapped into one shared space so a picture and its caption land near each other.
+- **Symmetric loss**: The model is asked twice, "which text matches this image?" and "which image matches this text?", and pays the average of both answers.
+- **Shared positive**: Both directions grade the SAME pair score S = x1 . y1 — one cell of the batch matrix feeds both questions.
+- **Transposition**: The text-to-image direction is the image-to-text machine run on the transposed score matrix — there is no second loss function.
+- **Averaged floor**: A collapsed CLIP model pays log (n + 1) in EACH direction; the average of two identical floors is that same log B — the starting line of every CLIP curve.

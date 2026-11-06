@@ -217,3 +217,11 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Routeur effondré** : toute la masse de routage sur un seul expert ; la perte d'équilibrage paie exactement 1 = E fois le plancher, et E−1 experts sont au chômage.
 - **Plancher de distillation** : le cross-entropy de l'élève contre le professeur vaut l'entropie du professeur plus un KL positif : la perte ne descend jamais sous H(professeur), et l'écart est exactement le KL.
 - **Forme du scaling** : la loi L(N) = Linf + C/N est strictement décroissante et doubler N divise l'excès C/N par deux ; les pas d'optimisation décroissent en exponentielle — les deux courbes ont des courbures opposées.
+
+## Chapitre 19 — Apprentissage multimodal
+
+- **Modèle multimodal** : deux encodeurs — pixels, texte — projetés dans un espace partagé pour qu'une photo et sa légende atterrissent près l'une de l'autre.
+- **Perte symétrique** : le modèle est interrogé deux fois, « quel texte correspond à cette image ? » et « quelle image correspond à ce texte ? », et paie la moyenne des deux réponses.
+- **Positif partagé** : les deux directions notent la MÊME score de paire S = x1 . y1 — une seule cellule de la matrice du batch alimente les deux questions.
+- **Transposition** : la direction texte-vers-image est la machine image-vers-texte appliquée à la matrice de scores transposée — il n'existe pas de seconde fonction de perte.
+- **Plancher moyenné** : un modèle CLIP effondré perd log (n + 1) dans CHAQUE direction ; la moyenne de deux planchers identiques est ce même log B — la ligne de départ de toute courbe CLIP.

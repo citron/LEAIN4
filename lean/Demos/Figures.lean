@@ -449,4 +449,16 @@ def main : IO Unit := do
     [("loss (3 negatives)", blue, curve (grid 0.0 6.0 40) fun s =>
         -(Float.log (Float.exp s / (Float.exp s + 3.0))))]
 
+  -- Ch19: the symmetric (CLIP) matched loss vs the shared positive gap
+  save "clip_symm" <| lineSvg 480 250 0.0 10.0 0.0 0.75
+    "CLIP loss [softplus(-g1) + softplus(-g2)] / 2 vs gaps" "gap (both directions)" "loss"
+    [("both gaps = g", blue, curve (grid 0.0 10.0 50) fun g =>
+        (Float.log (1.0 + Float.exp (-g)) + Float.log (1.0 + Float.exp (-g))) / 2.0),
+     ("row gap 2, col gap g", orange, curve (grid 0.0 10.0 50) fun g =>
+        (Float.log (1.0 + Float.exp (-2.0)) + Float.log (1.0 + Float.exp (-g))) / 2.0)]
+  -- Ch19: the collapse floor of the symmetric loss grows with the batch
+  save "clip_floor" <| lineSvg 480 240 1 16 0.0 4.0
+    "Collapsed CLIP model pays log (n + 1): batch size raises the floor" "batch B = n + 1" "loss"
+    [("log (B)", blue, curve (grid 1.0 16.0 16) fun b => Float.log b)]
+
   IO.println "figures written to ../website/static/img/"

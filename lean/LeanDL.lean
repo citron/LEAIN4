@@ -55,6 +55,9 @@ import LeanDL.Ch15.Solutions
 import LeanDL.Ch16.Solutions
 import LeanDL.Ch17.Contrastive
 import LeanDL.Ch17.Solutions
+import LeanDL.Ch19.Multimodal
+import LeanDL.Ch19.Exercises
+import LeanDL.Ch19.Solutions
 import LeanDL.Ch18.Efficiency
 import LeanDL.Ch18.Exercises
 import LeanDL.Ch18.Solutions

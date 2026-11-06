@@ -1,0 +1,95 @@
+---
+sidebar_position: 20
+title: "Chapitre 19 — Apprentissage multimodal : deux encodeurs, une perte"
+---
+
+# Chapitre 19 — Apprentissage multimodal : la perte symétrique de CLIP, prouvée
+
+:::tip[TL;DR]
+**En bref.** CLIP entraîne **deux encodeurs** — une tour image et une tour texte — dans un espace d'embedding partagé, notés par un seul produit scalaire. Le signal d'entraînement est la **perte InfoNCE symétrique** : dans un batch de $B$ paires, chaque image est une requête contre les $B$ textes (son propre texte en positif, les autres en négatifs) **et** chaque texte est une requête contre les $B$ images ; la perte est la **moyenne des deux directions**. Quatre théorèmes, tous construits sur la machine du chapitre 17 : la perte symétrique est $\ge 0$ ; un modèle **effondré** paie le MÊME plancher $\log (n+1)$ dans chaque direction, donc le plancher moyen est cette même constante ; la ligne et la colonne du batch sont *toutes deux* le couple apparié du chapitre 17 — scores transposés (« deux encodeurs, un produit scalaire », formalisé) ; et la perte 2×2 a la forme close $\tfrac12[\log(1+e^{x_1 y_2 - S}) + \log(1+e^{y_1 x_2 - S})]$ — deux écarts softplus sur le **même** positif $S = x_1 y_1$.
+
+**Mots nouveaux, en termes simples :**
+
+- **Modèle multimodal** : deux encodeurs (ou plus) — pixels, texte, audio — projetés dans UN espace partagé, pour qu'une photo et sa légende atterrissent près l'une de l'autre.
+- **Perte symétrique** : le modèle est interrogé deux fois, « quel texte correspond à cette image ? » et « quelle image correspond à ce texte ? », et paie la moyenne des deux réponses.
+- **Positif partagé** : les deux questions notent la MÊME score de paire $S = x_1 \cdot y_1$ — une seule cellule de la matrice du batch alimente les deux directions.
+- **Transposition** : la direction texte-vers-image est la machine image-vers-texte appliquée à la matrice de scores transposée — il n'existe pas de seconde fonction de perte.
+:::
+
+Les chapitres 15 et 17 expliquaient un embedding et une direction. Les modèles déployés — CLIP, SigLIP, BLIP — alignent **deux** tours, et tout praticien connaît la perte « par cœur », en folklore : *moyenne sur les deux directions, et elle démarre à* $\log B$. Ce chapitre prouve le folklore. La machine est celle du chapitre 17, mot pour mot ; la nouveauté est ce que les deux orientations font l'une à l'autre.
+
+<Figure src="clip_grid.svg" alt="Matrice du batch 2x2 : la cellule positive S = x1.y1 en verte partagée par les deux directions, le négatif de ligne x1.y2 et le négatif de colonne y1.x2 en rouge, la cellule du bas à droite x2.y2 en pointillés, hors de la perte" caption="Tout un pas de CLIP en une image : la matrice du batch a QUATRE cellules et la perte en utilise TROIS. Le positif partagé S (vert) est noté dans les deux directions ; la requête de ligne rejette x1.y2, la requête de colonne rejette y1.x2 ; la cellule du bas à droite n'est pas notée du tout. symm_matched est la forme close exactement de cette matrice." />
+
+<Figure src="clip_symm.svg" alt="Deux courbes décroissantes : la perte CLIP symétrique contre un écart g appliqué aux deux directions tombe de 0,69 à zéro ; avec un écart fixé à 2 la perte s'aplatit vers 0,13" caption="symm_matched, tracée : quand les DEUX mésappariements perdent de l'écart g, la perte symétrique vaut softplus(-g) et tombe à 0. Fixez un écart à 2 et élargissez l'autre : la perte s'aplatit vers softplus(-2)/2 = 0,13. Un modèle bon dans une seule direction est plafonné — la moyenne punit la direction faible. C'est pourquoi CLIP doit améliorer LES DEUX alignements, à chaque pas." />
+
+<Figure src="clip_floor.svg" alt="Courbe log B montant lentement de 0 en B = 1 à environ 2,8 en B = 16 : le plancher du modèle effondré croît avec la taille du batch" caption="symm_collapse, tracée : un modèle effondré perd exactement log (n + 1) = log B dans CHAQUE direction, donc la perte moyenne démarre à ce même log B. Des batchs plus gros n'ajoutent pas du signal de gradient — ils relèvent la ligne de départ. Lisez votre courbe CLIP contre cet escalier exact : 0,69 en B = 2, 1,39 en B = 4, 2,08 en B = 8." />
+
+## La perte symétrique
+
+```lean file=Ch19/Multimodal.lean#symm
+```
+
+Chaque direction est l'`infoNce` du chapitre 17 appliquée aux lignes du batch (`pairSample` construit un enregistrement `Samples` à partir des vecteurs bruts — requête, positif, négatifs). La perte symétrique est leur moyenne. Le premier fait s'hérite en une ligne :
+
+```lean file=Ch19/Multimodal.lean#collapse
+```
+
+`symm_collapse` est le point de départ de toute courbe d'entraînement CLIP : plongez tout vecteur vers le même embedding et **les deux** directions s'effondrent sur le plancher du chapitre 17 `log (n + 1)` — et la moyenne de deux planchers identiques est ce plancher, *pas* son double. La démo l'affiche exactement : scores plats 2×2 donnent `0.69 = log 2`, plats 8×8 donnent `2.08 = log 8`. Des batchs plus gros relèvent le plancher : le nombre que votre courbe doit battre est $\log B$, prouvé, pas folklore.
+
+## Deux encodeurs, un produit scalaire
+
+Le cœur formel : qu'est *exactement* la direction texte-vers-image ? C'est la **même machine sur des scores transposés**.
+
+La ligne du batch — l'image $x_1$ interrogant les textes — a les scores $(x_1 y_1,\; x_1 y_2)$ : exactement le couple `matched` du chapitre 17 en `(hi, lo) = (x_1 y_1, x_1 y_2)`. La colonne — le texte $y_1$ interrogeant les images — a les scores $(x_1 y_1,\; y_1 x_2)$ : le couple apparié en $(x_1 y_1, y_1 x_2)$. Un positif, deux orientations :
+
+```lean file=Ch19/Multimodal.lean#matched
+```
+
+`symm_matched` referme le batch 2×2 en une identité : la perte est la moyenne de deux écarts softplus sur le positif **partagé** $S$. Les deux gradients améliorent la MÊME cellule $S$ — l'un contre $x_1 y_2$, l'autre contre $y_1 x_2$. C'est ainsi que la perte symétrique fait du positif unique le maître de toute la matrice, et c'est pourquoi la température de CLIP (l'échelle de $S$) se comporte comme le $\tau$ du chapitre 17 : elle mise les deux écarts à la fois.
+
+Le dernier théorème dit ce que « bon dans les deux directions » coûte — et ce que cela n'achète pas :
+
+Si le positif bat les deux mésappariements, la perte symétrique est $\le \log 2$ : chaque direction est sous le plancher d'effondrement à un négatif par `matched_mono`. Mais $\log 2 > 0$ : un modèle qui a *raison* est seulement certifié **sous le plancher** — la perte ne signale jamais « parfait », elle signale « sous le hasard-à-un-négatif ». La démo échantillonne 5000 batchs séparés aléatoires : 0 violation de la borne, numériquement.
+
+## Lire une courbe CLIP
+
+Trois théorèmes, trois diagnostics :
+
+1. **Ligne de départ** `symm_collapse` : la courbe démarre à $\log B$ (0,69 en $B=2$, 2,08 en $B=8$). Une course qui démarre *sous* $\log B$ au pas 0 est mal rapportée (d'habitude : la perte a été moyennée incorrectement — la moyenne du chapitre 19 porte sur $2B$ directions, pas $B$, pas $2$).
+2. **Forme** `symm_matched` : la perte est une moyenne d'écarts softplus, donc lisse et convexe en chaque écart — la longue traîne plate est la direction *faible* qui atteint son plancher (la courbe orange ci-dessus : plafonnée à 0,13). Réparer une modalité sans l'autre plafonne à exactement un demi-softplus.
+3. **Plancher** `symm_le_log_two` : sous $\log 2$ (en 2×2), les deux directions sont déjà séparées ; la perte ne peut rien certifier de plus. Poussez les écarts, pas la perte.
+
+## Exercices
+
+1. Prouvez la forme close unidirectionnelle : `infoNce 1 (pairSample x1 y1 (fun _ => y2)) = log (1 + exp (x1*y2 - x1*y1))` — combinez `row_is_matched` avec `matched_loss` du chapitre 17.
+2. À partir de `infoNce_collapse` seul, concluez le plancher moyen `symm_collapse` pour le batch effondré dans les deux directions.
+3. Sur papier : montrez que si un écart $g_1 \to \infty$ et l'autre reste à $c$, la perte symétrique tend vers $\tfrac12 \log(1+e^{-c})$ — le plateau de la figure ci-dessus. Qu'en déduire sur le minage de négatifs difficiles dans une seule modalité ?
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch19/Exercises.lean` contient les énoncés ci-dessous, avec `sorry` à remplacer. Les solutions prouvées sont dans `Solutions.lean` à côté : essayez d'abord.
+
+```lean file=Ch19/Exercises.lean#ex1
+```
+
+```lean file=Ch19/Exercises.lean#ex2
+```
+
+<details>
+<summary>Indice 1</summary>
+
+`infoNce_ext τ hτ (row_is_matched x1 y1 y2)` réécrit la ligne du batch en `infoNce ... (matched (x1*y1) (x1*y2))` ; puis `matched_loss` conclut le but.
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+Le vecteur de scores du batch effondré est la constante `e * e` ; celui de `collapseSample (c := e*e)` aussi. Donnez l'égalité à `infoNce_ext`, appliquez `infoNce_collapse`, et moyennez les deux résultats identiques.
+
+</details>
+
+## Ce que ce chapitre ne prouve pas
+
+- **Pas d'encodeurs ici.** Les théorèmes quantifient sur les *scores* ; une tour image qui produit $x_1$ relève des chapitres 6–9, pas de cette perte. La perte est prouvée pour toute fonction qui émet des scores — c'est la force de l'abstraction.
+- **Pas de SigLIP.** La perte sigmoïde par paires (remplacer le softmax sur les négatifs par des sigmoïdes indépendantes) est une machine différente ; le couple apparié du chapitre 17 EN EST déjà le cas particulier 2×2, mais la forme close pour $B > 2$ reste en exercice pour le lecteur.
+- **Pas d'apprentissage de la température.** $\tau$ (ici absorbée dans les scores, `τ = 1`) est un paramètre fixe ; sa valeur optimale est une question de scaling laws (chapitre 18), pas une identité de perte.
+- **Écart Float.** La démo évalue les mêmes expressions en `Float` ; l'accord (`log 8 = 2.08` exact à la précision d'affichage) est de l'arrondi, pas une preuve — même règle que dans tous les chapitres.
