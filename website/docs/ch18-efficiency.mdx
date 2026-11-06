@@ -3,7 +3,6 @@ sidebar_position: 19
 title: "Chapter 18 — Efficiency: quantization, MoE, distillation, scaling"
 ---
 
-<Figure src="quant_grid.svg" alt="Sawtooth of the rounding error x - roundq(x) on a grid of step 1, oscillating between the drawn bounds -1/2 and +1/2" caption="roundq_err_le, drawn: round-to-nearest on a grid of step s leaves a sawtooth error that never escapes [-s/2, +s/2] - the bound is attained exactly at the grid midpoints. Every weight in a quantized model pays at most s/2, which is why the step size (not the bit count alone) is what the error bound speaks about." />
 
 # Chapter 18 — Efficiency: what the deployed models do, proved
 
@@ -29,6 +28,8 @@ Chapters 0–17 build models that *learn*. A model that ships must also be small
 **The floor error is exactly one cell** (`quant_le`, `quant_lt`, `quant_err_lt`): $\text{quant}\;s\;x \le x < \text{quant}\;s\;x + s$, so $|x - \text{quant}\;s\;x| < s$. The proof is `Rat.floor_le` and `Rat.lt_floor_add_one` multiplied by the positive step — the whole content of the INT8 datasheet, in nine lines.
 
 **Round-to-nearest pays half** (`roundq_err_le`): $|x - \text{roundq}\;s\;x| \le s/2$. The nearest point is at most half a cell away: rounding buys a factor 2 over flooring, for free, and the bound is attained (a point midway between grid points pays exactly $s/2$). The proof sandwiches the error between $-s/2$ and $s/2$ using `Rat.floor_le` on $x/s + 1/2$.
+
+<Figure src="quant_grid.svg" alt="Sawtooth of the rounding error x - roundq(x) on a grid of step 1, oscillating between the drawn bounds -1/2 and +1/2" caption="roundq_err_le, drawn: round-to-nearest on a grid of step s leaves a sawtooth error that never escapes [-s/2, +s/2] - the bound is attained exactly at the grid midpoints. Every weight in a quantized model pays at most s/2, which is why the step size (not the bit count alone) is what the error bound speaks about." />
 
 **Quantizing is idempotent** (`quant_quant`): $\text{quant}\;s\;(\text{quant}\;s\;x) = \text{quant}\;s\;x$. Grid points are fixed: a second quantization pass changes nothing, which is why a quantized model can be re-saved losslessly. The proof cancels $s$ against $s^{-1}$ (`Rat.inv_mul_cancel`) so the floor of an integer is itself.
 

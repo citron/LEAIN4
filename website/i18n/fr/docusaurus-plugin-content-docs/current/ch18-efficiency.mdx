@@ -3,7 +3,6 @@ sidebar_position: 19
 title: "Chapitre 18 — Efficacité : quantification, MoE, distillation, scaling"
 ---
 
-<Figure src="quant_grid.svg" alt="Dent de scie de l'erreur d'arrondi x - roundq(x) sur une grille de pas 1, oscillant entre les bornes tracees -1/2 et +1/2" caption="roundq_err_le, dessine : l'arrondi a la maille la plus proche sur une grille de pas s laisse une erreur en dent de scie qui ne sort jamais de [-s/2, +s/2] - la borne est atteinte exactement aux milieux de maille. Chaque poids d'un modele quantifie paie au plus s/2, c'est pourquoi la taille du pas (pas seulement le nombre de bits) est ce que la borne d'erreur enonce." />
 
 # Chapitre 18 — L'efficacité : ce que font les modèles déployés, prouvé
 
@@ -30,6 +29,8 @@ Les chapitres 0 à 17 construisent des modèles qui *apprennent*. Un modèle qui
 **L'erreur du plancher fait exactement une cellule** (`quant_le`, `quant_lt`, `quant_err_lt`) : $\text{quant}\;s\;x \le x < \text{quant}\;s\;x + s$, donc $|x - \text{quant}\;s\;x| < s$. La preuve est `Rat.floor_le` et `Rat.lt_floor_add_one` multipliés par le pas positif — tout le contenu de la fiche INT8, en neuf lignes.
 
 **L'arrondi au plus proche paie la moitié** (`roundq_err_le`) : $|x - \text{roundq}\;s\;x| \le s/2$. Le point le plus proche est à demi-cellule au plus : l'arrondi achète un facteur 2 sur le plancher, gratuitement, et la borne est atteinte (un point à mi-chemin de deux nœuds paie exactement $s/2$). La preuve encadre l'erreur entre $-s/2$ et $s/2$ via `Rat.floor_le` sur $x/s + 1/2$.
+
+<Figure src="quant_grid.svg" alt="Dent de scie de l'erreur d'arrondi x - roundq(x) sur une grille de pas 1, oscillant entre les bornes tracees -1/2 et +1/2" caption="roundq_err_le, dessine : l'arrondi a la maille la plus proche sur une grille de pas s laisse une erreur en dent de scie qui ne sort jamais de [-s/2, +s/2] - la borne est atteinte exactement aux milieux de maille. Chaque poids d'un modele quantifie paie au plus s/2, c'est pourquoi la taille du pas (pas seulement le nombre de bits) est ce que la borne d'erreur enonce." />
 
 **Quantifier est idempotent** (`quant_quant`) : $\text{quant}\;s\;(\text{quant}\;s\;x) = \text{quant}\;s\;x$. Les nœuds de la grille sont fixes : une seconde passe de quantification ne change rien, ce qui explique qu'un modèle quantifié se re-sauve sans perte. La preuve annule $s$ contre $s^{-1}$ (`Rat.inv_mul_cancel`) si bien que le plancher d'un entier est lui-même.
 
