@@ -43,6 +43,8 @@ flowchart LR
 
 <Figure src="vi_contractions.svg" alt="The error to the optimal value shrinking geometrically per sweep, faster for gamma = 0.5" caption="Value iteration is a contraction: each sweep multiplies the gap to the fixed point V* by at most gamma (the theorem of this chapter). gamma = 0.5 reaches it in a few sweeps; gamma = 0.9 needs about ten times longer - the price of caring about the far future." />
 
+<Creators slugs="sutton" />
+
 ## Value-based: Q-learning
 
 The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterwards. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.

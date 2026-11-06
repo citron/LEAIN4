@@ -37,6 +37,9 @@ import LeanDL.Ch10.Model
 import LeanDL.Ch10.Elbo
 import LeanDL.Ch10.Solutions
 import LeanDL.Ch10.Vae
+import LeanDL.Ch105.Boltzmann
+import LeanDL.Ch105.Solutions
+import LeanDL.Ch105.Exercises
 import LeanDL.Ch11.Gan
 import LeanDL.Ch11.Model
 import LeanDL.Ch11.Solutions

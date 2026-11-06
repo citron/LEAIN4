@@ -26,6 +26,8 @@ Recurrent networks read a sequence one step at a time, so information from far b
 
 <Figure src="attn_sharp.svg" alt="Softmax weight of the top key over four keys against the logit gap beta, rising from 1/4 to 1, with the uniform 1/4 line" caption="Attention as a tunable spotlight: with three rival keys, a logit gap beta puts e^beta / (e^beta + 3) on the winner - 1/4 when blind, 98 % at gap 6 (the softmax facts proved in this chapter). Temperature is this dial: large beta selects hard, beta = 0 degenerates to the uniform average." />
 
+<Creators slugs="bengio" />
+
 ## Scaled dot-product attention
 
 Each position $t$ has a *query* $q_t$, a *key* $k_t$ and a *value* $v_t$ (three linear maps of its representation $x_t$). Position $t$ compares its query with all keys, turns the scores into weights with a softmax, and takes the weighted average of the values:

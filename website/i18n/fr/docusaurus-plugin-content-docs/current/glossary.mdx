@@ -138,6 +138,17 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Divergence KL**: Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
 - **Astuce de reparamétrisation**: Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
 
+## Chapitre 10.5 — Machines de Boltzmann
+
+- **Modèle à base d'énergie**: Un modèle qui note chaque configuration par une énergie ; basse énergie signifie probable. La distribution est le modèle - pas de réseau générateur.
+- **Machine de Boltzmann**: Un réseau d'unités binaires dont la distribution jointe est proportionnelle à exp(-E), E étant une somme de biais et de couplages (Ackley, Hinton, Sejnowski 1985).
+- **RBM (machine de Boltzmann restreinte)**: Une machine de Boltzmann bipartie : unités visibles et cachées, aucun lien dans une couche, donc conditionner sur une couche rend l'autre indépendante.
+- **Energie E**: Un nombre attaché à chaque configuration ; en physique l'énergie d'un système de spins, ici le moins la log-probabilité à une constante près.
+- **Fonction de partition Z**: La somme de exp(-E) sur toutes les configurations ; elle transforme les énergies en probabilités. La calculer demande 2^n termes - l'intraitabilité au coeur du modèle.
+- **Distribution de Gibbs**: La distribution de masse exp(-E(s)) / Z sur l'état s ; le module prouve qu'elle est normalisée exactement sur `Rat` (Ch105, `w_sum`).
+- **Balayage Gibbs**: Echantillonnage alterné : redessiner toutes les unités cachées étant donné les visibles, puis toutes les visibles étant donné les cachées. Le module prouve qu'un balayage complet laisse la mesure d'équilibre invariante (`sweep_invariance`).
+- **Divergence contrastive**: Entraîner en faisant quelques pas de balayage depuis les données au lieu de la thermalisation complète qu'exige le gradient exact (Hinton 2002) ; le moteur de l'ère RBM du deep learning.
+
 ## Chapitre 11 — GAN
 
 - **GAN**: Deux réseaux jouent un jeu : un faussaire fabrique des faux, un détective distingue le faux du vrai, et les deux s’améliorent.

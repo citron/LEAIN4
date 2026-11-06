@@ -26,6 +26,8 @@ $$ h_t = \tanh(W_h\,h_{t-1} + W_x\,x_t + b), \qquad \hat y = \sigma(w_o\cdot h_T
 
 The *same* weights are used at every step (the temporal analogue of the weight sharing of Chapter 6). To train it we **unroll** it: a recurrence of length $T$ is a feed-forward network of depth $T$ whose layers share their weights. Backpropagation on the unrolled network is called **backpropagation through time** (BPTT).
 
+<Creators slugs="werbos,rumelhart" />
+
 ## The state of a recurrent network is a product
 
 Let us understand the gradient with the simplest possible network: one unit, $h_{t+1} = \tanh(w\,h_t + c_t)$, with the input folded into $c_t$. We build the unrolled network as an `Expr` in the single variable $h_0$:

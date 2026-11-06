@@ -24,6 +24,8 @@ title: "Chapter 4 — Deep networks and automatic differentiation"
 
 In Chapter 3 we derived the gradient of a 2-layer network by hand. For ten layers, or a Transformer, nobody does that: the computer applies the chain rule mechanically. This is **automatic differentiation** (autodiff), and it is the engine of every deep learning framework. In this chapter we build one in Lean, **and prove it correct**.
 
+<Creators slugs="werbos,rumelhart" />
+
 ## Expressions
 
 We describe a computation as an expression tree over $n$ input variables (the parameters).

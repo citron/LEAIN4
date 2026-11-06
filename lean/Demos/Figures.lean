@@ -31,6 +31,21 @@ def save (name : String) (svg : String) : IO Unit :=
 def normalPdf (m s x : Float) : Float :=
   Float.exp (-(x - m) * (x - m) / (2.0 * s * s)) / (s * Float.sqrt (2.0 * 3.141592653589793))
 
+def vOfF (s : Nat) : Nat := s / 2
+def hOfF (s : Nat) : Nat := s % 2
+def qhF (a b g : Float) (v h : Nat) : Float :=
+  if v == 0 then (if h == 0 then 1.0 / (1.0 + a) else a / (1.0 + a))
+  else (if h == 0 then b / (b + g) else g / (b + g))
+def qvF (a b g : Float) (h j : Nat) : Float :=
+  if h == 0 then (if j == 0 then 1.0 / (1.0 + b) else b / (1.0 + b))
+  else (if j == 0 then a / (a + g) else g / (a + g))
+def massF (a b g : Float) (s : Nat) : Float :=
+  (if s == 0 then 1.0 else if s == 1 then a else if s == 2 then b else g)
+    / (1.0 + a + b + g)
+def sweptF (a b g : Float) (t : Nat) : Float :=
+  (List.range 4).foldl (fun acc s =>
+    acc + massF a b g s * qhF a b g (vOfF s) (hOfF t) * qvF a b g (hOfF t) (vOfF t)) 0.0
+
 def main : IO Unit := do
   -- Chapter 1: the four activation functions
   let xs := grid (-4.0) 4.0 160
@@ -474,5 +489,33 @@ def main : IO Unit := do
         (List.range n.toUInt32.toNat).foldl (fun acc t => acc + 0.5 * Float.pow 0.5 t.toFloat) 0.0),
      ("gamma = 0.75 (budget 2.0)", orange, curve (grid 1.0 10.0 10) fun n =>
         (List.range n.toUInt32.toNat).foldl (fun acc t => acc + 0.5 * Float.pow 0.75 t.toFloat) 0.0)]
+
+  -- Ch105: equilibrium mass p(h=1|v) as a function of the coupling g
+  let eq (g : Float) : Float :=
+    let a := 0.8
+    let b := 0.6
+    (a + g) / (1.0 + a + b + g)
+  save "boltzmann_equilibrium" <| lineSvg 480 240 0.0 8.0 0.0 1.0
+    "Equilibrium p(h = 1): coupling g turns the hidden unit on (a = 0.8, b = 0.6)"
+    "coupling g" "p(h = 1)"
+    [("p(h = 1)", blue, curve (grid 0.0 8.0 40) eq)]
+
+  -- Ch105: the Gibbs conditional p(h = 1 | v) rises with the coupling; the
+  -- visible-off curve is flat at a / (1 + a)
+  save "boltzmann_cond" <| lineSvg 480 240 0.0 8.0 0.0 1.0
+    "Hidden conditional p(h = 1 | v): the coupling only acts on v = 1"
+    "coupling g" "p(h = 1 | v)"
+    [("v = 1: (a + g) / (a + g + exp(-bias))", blue,
+      curve (grid 0.0 8.0 40) fun g => (0.8 + g) / (0.8 + g + 1.0)),
+     ("v = 0: a / (1 + a) = 0.44, flat", orange,
+      curve (grid 0.0 8.0 40) fun _ => 0.8 / 1.8)]
+
+  -- Ch105: sweep invariance - the sweep of the equilibrium equals the
+  -- equilibrium at every state, for every coupling g
+  save "boltzmann_sweep" <| lineSvg 480 240 0.0 8.0 0.0 0.62
+    "One Gibbs sweep of the equilibrium lands back on the equilibrium (state (1, 1))"
+    "coupling g" "mass of state (1, 1)"
+    [("equilibrium g / Z", blue, curve (grid 0.0 8.0 40) fun g => g / (1.0 + 0.8 + 0.6 + g)),
+     ("after one sweep", orange, curve (grid 0.0 8.0 40) fun g => sweptF 0.8 0.6 g 3)]
 
   IO.println "figures written to ../website/static/img/"

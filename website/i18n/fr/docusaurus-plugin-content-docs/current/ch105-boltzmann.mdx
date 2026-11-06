@@ -1,0 +1,113 @@
+---
+sidebar_position: 11.5
+title: "Chapitre 10.5 — Machines de Boltzmann"
+---
+
+# Chapitre 10.5 — Machines de Boltzmann et divergence contrastive
+
+:::tip[TL;DR]
+**En bref.** Une machine de Boltzmann définit une distribution en attribuant une *énergie* à chaque configuration : la probabilité est proportionnelle à $\mathrm e^{-E}$. Nous prouvons, sur la machine canonique exacte (un bit visible, un bit caché, arithmétique rationnelle), que la distribution de Gibbs est normalisée, que ses conditionnelles sont les conditionnelles de Boltzmann, et qu'**un balayage Gibbs complet laisse la mesure d'équilibre invariante** — le théorème derrière la divergence contrastive.
+
+**Nouveaux mots, en termes simples :**
+
+- **Modèle à base d'énergie** : un modèle qui note les configurations par une énergie ; basse énergie signifie probable.
+- **Fonction de partition $Z$** : la somme de $\mathrm e^{-E}$ sur toutes les configurations ; elle transforme les énergies en probabilités.
+- **Distribution de Gibbs** : l'unique distribution de masse $\mathrm e^{-E(s)} / Z$ sur chaque état.
+- **Machine de Boltzmann restreinte (RBM)** : une machine de Boltzmann bipartie : unités visibles, unités cachées, aucun lien à l'intérieur d'une couche.
+- **Balayage Gibbs** : mises à jour alternées : redessiner toutes les unités cachées étant donné les visibles, puis toutes les visibles étant donné les cachées.
+- **Divergence contrastive** : entraîner en exécutant un (seul) balayage bon marché au lieu de la chaîne à l'infini qu'exige le gradient exact.
+:::
+
+<Creators fr slugs="ackley-hinton-sejnowski,hinton,lehriche-pinto-hinton" />
+
+Le VAE donne un générateur avec un code latent *explicite* ; le GAN donne un générateur entraîné par un *adversaire*. Il existe une troisième famille, plus ancienne : des modèles **sans réseau générateur**, où la distribution est le modèle lui-même, écrite directement comme
+
+$$ p(v, h) \;=\; \frac{\mathrm e^{-E(v,h)}}{Z}, \qquad Z = \sum_{v',h'} \mathrm e^{-E(v',h')}. $$
+
+C'est la **machine de Boltzmann** (Ackley, Hinton et Sejnowski, 1985), d'après les verres de spin de la physique statistique. Elle est l'ancêtre direct du deep learning moderne — le rêve de 2006 de Hinton d'empiler des RBM a lancé l'essor du deep learning — et son cousin générateur, la divergence contrastive, est ce qui les a rendues entraînables.
+
+## La machine canonique, exactement
+
+Un bit visible $v$, un bit caché $h$. L'énergie a un biais $a$ pour l'unité cachée, un biais $b$ pour l'unité visible et un couplage $g$ pour la paire allumée ensemble ; la jauge est $E(0,0)=0$. Dans la paramétrisation exponentielle $a = \mathrm e^{\alpha}$, $b = \mathrm e^{\beta}$, $g = \mathrm e^{\delta}$, les quatre poids non normalisés et la fonction de partition sont :
+
+```lean file=Ch105/Boltzmann.lean#canonical_model
+```
+
+`w_sum` prouve la normalisation sur $\mathbb{Q}$ : les quatre masses $u(s)/Z$ somment exactement à $1$. Chaque probabilité de ce chapitre est un `Rat` calculé en arithmétique exacte — aucun point flottant n'intervient dans aucune preuve.
+
+## Les conditionnelles de Gibbs
+
+Sur un graphe biparti, les conditionnelles sont locales : étant donné l'unité visible, l'unité cachée est une pièce biaisée dont les cotes sont
+
+$$ \frac{p(h=1 \mid v)}{p(h=0 \mid v)} \;=\; \frac{u(1,v)}{u(0,v)}, $$
+
+et symétriquement pour le visible. C'est pourquoi le balayage d'une RBM coûte si peu : conditionner sur une couche rend l'autre couche *indépendante*.
+
+```lean file=Ch105/Boltzmann.lean#gibbs_conditionals
+```
+
+Le module prouve `qh_pos` / `qh_sum` (les conditionnelles sont de vraies probabilités) et les **identités de cotes** `odds_hidden_on` / `odds_hidden_off` : les paramètres d'échantillonnage sont exactement des rapports de poids — le mécanisme qu'exploite la divergence contrastive.
+
+<Figure src="boltzmann_cond.svg" alt="Conditionnelle p(h=1|v) en fonction du couplage g : la courbe v=1 monte de a/(a+1) vers 1, la courbe v=0 est plate" caption="La conditionnelle de Gibbs p(h = 1 | v) en fonction du couplage g (a = 0,8). Conditionnée sur v = 0, le couplage est invisible — la ligne plate ; conditionnée sur v = 1, le couplage allume l'unité cachée avec les cotes (a + g). C'est exactement la formule en deux lignes que code `qh`." />
+
+## Un balayage laisse l'équilibre tranquille : le théorème
+
+La chaîne de Gibbs : depuis un état visible $v$, tirer $h \sim p(h \mid v)$, puis tirer $v' \sim p(v' \mid h)$. Le fait profond — l'ombre finie du théorème ergodique des chaînes de Gibbs — est que **la distribution de Gibbs est invariante par un balayage complet**. Le module le prouve état par état, en arithmétique rationnelle exacte, pour la machine canonique :
+
+```lean file=Ch105/Boltzmann.lean#sweep_invariance
+```
+
+La preuve factorise le noyau du balayage,
+
+$$ S(s, t) \;=\; p(h_t \mid v_s)\; p(v_t \mid h_t), $$
+
+et ramène l'invariance à deux familles d'**identités marginales** (`therm_hidden` et `gibbs_factor`) : thermaliser une couche depuis l'équilibre reproduit exactement la marginale d'équilibre de cette couche. Pas de limites, pas de temps de mélange — pour une machine finie c'est de l'algèbre.
+
+<Figure src="boltzmann_sweep.svg" alt="Masse d'équilibre et masse après un balayage de l'état (1,1) en fonction du couplage : les deux courbes coïncident" caption="L'invariance par balayage, dessinée : la masse exacte de l'état (1, 1) à l'équilibre (g / Z) et la masse après un balayage Gibbs complet de l'équilibre, pour chaque couplage g. Les courbes coïncident — pas approximativement : le module prouve les deux rationnels égaux, état par état, couplage par couplage." />
+
+<Figure src="boltzmann_equilibrium.svg" alt="La probabilité d'équilibre p(h=1) croît avec le couplage g et sature" caption="Le p(h = 1) d'équilibre = (a + g) / Z en fonction du couplage (a = 0,8, b = 0,6). Le couplage charge les deux états où la paire est allumée ; la montée sigmoïde de la conditionnelle devient une montée saturée de la marginale — la fonction de partition est le frein." />
+
+## La forme énergie
+
+En écrivant $a = \mathrm e^{\alpha}$, $b = \mathrm e^{\beta}$, $g = \mathrm e^{\delta}$, les poids sont des exponentielles d'une énergie,
+
+$$ E(v,h) \;=\; -\alpha\, h \;-\; \beta\, v \;-\; \delta\, v h, $$
+
+et le module prouve la **forme de Boltzmann** $u(s) = \mathrm e^{-E(s)}$ et l'identité de partition $Z = \sum_s \mathrm e^{-E(s)}$ pour toute exponentielle licite (`LawfulExp`), avec la positivité de $\mathrm e^{x}$ prouvée par l'astuce du carré $\mathrm e^{x} = (\mathrm e^{x/2})^2$ :
+
+```lean file=Ch105/Boltzmann.lean#energy_form
+```
+
+C'est le pont du modèle combinatoire vers la physique statistique : les poids *sont* des facteurs de Boltzmann, donc la machine entière est l'ensemble canonique d'un système à deux spins, et l'énergie libre $\log Z$ est une perte que le modèle minimise implicitement.
+
+## De l'invariance à la divergence contrastive
+
+Le gradient exact de $\log p(v)$ est
+
+$$ \nabla_\theta \log p(v) \;=\; \mathbb E_{p(\cdot \mid v)}[\nabla_\theta E] \;-\; \mathbb E_{p}[\nabla_\theta E], $$
+
+une phase *positive* aux données et une phase *négative* à l'équilibre du modèle. La phase négative est intraitable en général : elle exige la chaîne thermalisée. La **divergence contrastive** (Hinton, 2002) fait tourner la chaîne $k$ pas depuis les données au lieu de la mener à l'équilibre, et le théorème `sweep_invariance` est exactement ce qui justifie l'astuce quand $k \to \infty$ : une chaîne thermalisée échantillonne dans le modèle, et un balayage est le travail minimum qui l'y maintient. À $k = 1$ (CD-1) on paie un balayage par gradient ; l'argument de Hinton — et le théorème ci-dessus — est que les paramètres bougent à peine, donc la chaîne dérive à peine de l'équilibre, et un balayage la maintient proche.
+
+Où ce chapitre se situe dans le cours :
+
+- **Chapitre 10 (VAE)** : un générateur à *codeur*, avec un latent explicite ; la RBM n'a pas de codeur — l'inférence est un balayage conditionnel exact, prouvé ci-dessus.
+- **Chapitre 11 (GAN)** : un générateur entraîné par un adversaire ; la machine de Boltzmann s'entraîne par *énergie libre*, sans adversaire.
+- **Chapitres 17 / 19 (contrastif, multimodal)** : InfoNCE contraste des paires positives et négatives ; la divergence contrastive contraste les phases positive et négative *de la même énergie* — même forme d'idée, une génération plus tôt.
+
+## Exercices
+
+1. Calculer à la main la distribution de Gibbs de la machine canonique pour $a = b = g = 1$, et vérifier les quatre masses contre `w_sum`.
+2. Prouver l'analogue visible de `therm_hidden` : thermaliser la couche visible depuis l'équilibre reproduit la marginale visible d'équilibre (les identités que code `gibbs_factor`).
+3. Montrer que la cote de la conditionnelle cachée sur $v = 1$ vaut $g$, *indépendamment* du biais visible $b$, et expliquer en une phrase pourquoi le couplage ne « s'allume » que quand les deux unités sont allumées.
+4. Pour une machine à $n$ visibles et $m$ cachées, la somme de partition a $2^{n+m}$ termes. Expliquer pourquoi l'entraînement exact est intraitable et quelle partie de la preuve de balayage survit au cas biparti général.
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch105/Exercises.lean` contient les énoncés ci-dessous, avec `sorry` à remplacer. Les solutions prouvées sont dans `Solutions.lean` à côté : essayez d'abord.
+
+```lean file=Ch105/Exercises.lean#ex1
+```
+
+```lean file=Ch105/Exercises.lean#ex2
+```
+
+```lean file=Ch105/Exercises.lean#ex3
+```

@@ -24,6 +24,8 @@ Chapter 7 ended with a diagnosis: in a plain RNN the gradient is a product of $T
 
 <Figure src="cell_hold.svg" alt="Cell state written 1 at t = 0: f = 1 carries it flat, f = 0.95 fades slowly, f = 0.5 collapses" caption="The cell state is the highway: a value written at t = 0 with factor f survives t steps as f^t. f = 1 (the gates open) carries it forever - the exact gradient path of the highway theorem; f = 0.95 fades in 40 steps; f = 0.5 is the plain-RNN collapse of Chapter 7 in one line. The LSTM learns f close to 1 for the steps it must remember." />
 
+<Creators slugs="hochreiter,schmidhuber" />
+
 ## The LSTM
 
 Besides the hidden state $h_t$ the LSTM carries a **cell state** $c_t$. Four small neural layers (the *gates*) read $h_{t-1}$ and $x_t$:

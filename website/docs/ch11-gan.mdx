@@ -43,6 +43,8 @@ flowchart LR
 
 <Figure src="disc_posterior.svg" alt="The optimal discriminator D*(x) = p/(p+q) for two Gaussians, a smooth S falling from 1 to 0" caption="The optimal discriminator is not a classifier output but a posterior: D*(x) = p(x)/(p(x)+q(x)) - here 1 where only the data lives, 1/2 where generator and data overlap (x = 0), 0 in pure fake territory. The S-shape is the exact formula proved in this chapter." />
 
+<Creators slugs="goodfellow" />
+
 ## What does the best discriminator say?
 
 Fix a point $x$. Let $a=p_{\text{data}}(x)$ be the density of real data there and $b=p_G(x)$ the density of generated data. The discriminator's payoff at $x$ is $a\log d + b\log(1-d)$ with $d=D(x)$. Setting the derivative to zero, $\frac ad-\frac b{1-d}=0$, gives

@@ -26,6 +26,8 @@ $$ h_t = \tanh(W_h\,h_{t-1} + W_x\,x_t + b), \qquad \hat y = \sigma(w_o\cdot h_T
 
 Les *mêmes* poids servent à chaque pas (l'analogue temporel du partage des poids du chapitre 6). Pour l'entraîner on le **déroule** : une récurrence de longueur $T$ est un réseau sans rebouclage de profondeur $T$ dont les couches partagent leurs poids. La rétropropagation sur le réseau déroulé s'appelle la **rétropropagation à travers le temps** (BPTT).
 
+<Creators fr slugs="werbos,rumelhart" />
+
 ## L'état d'un réseau récurrent est un produit
 
 Comprenons le gradient avec le réseau le plus simple possible : une unité, $h_{t+1} = \tanh(w\,h_t + c_t)$, l'entrée étant intégrée dans $c_t$. Nous construisons le réseau déroulé comme une `Expr` à une seule variable $h_0$ :

@@ -24,6 +24,8 @@ title: "Chapitre 4 — Réseaux profonds et différentiation automatique"
 
 Au chapitre 3, nous avons calculé à la main le gradient d'un réseau à 2 couches. Pour dix couches, ou un Transformer, personne ne le fait : l'ordinateur applique mécaniquement la règle de dérivation en chaîne. C'est la **différentiation automatique** (autodiff), le moteur de tous les frameworks de deep learning. Dans ce chapitre nous en construisons un en Lean, **et nous démontrons qu'il est correct**.
 
+<Creators fr slugs="werbos,rumelhart" />
+
 ## Expressions
 
 Nous décrivons un calcul comme un arbre d'expression sur $n$ variables d'entrée (les paramètres).

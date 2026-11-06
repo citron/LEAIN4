@@ -43,6 +43,8 @@ flowchart LR
 
 <Figure src="vi_contractions.svg" alt="L'erreur vers la valeur optimale retombe geometriquement par balayage, plus vite pour gamma = 0,5" caption="L'iteration de valeur est une contraction : chaque balayage multiplie l'ecart au point fixe V* par gamma au plus (le theoreme du chapitre). gamma = 0,5 l'atteint en quelques balayages ; gamma = 0,9 met dix fois plus de temps - le prix a payer pour se soucier de l'avenir lointain." />
 
+<Creators fr slugs="sutton" />
+
 ## Par les valeurs : Q-learning
 
 La **valeur d'action** $Q(s,a)$ est le retour espéré après avoir pris $a$ en $s$ puis agi au mieux. Elle satisfait l'**équation de Bellman** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Le Q-learning en fait une mise à jour vers une **cible** $r+\gamma\max_{a'}Q(s',a')$.

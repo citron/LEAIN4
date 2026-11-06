@@ -44,6 +44,8 @@ flowchart LR
 
 *The recipe: learn a model from a little real experience, train the controller inside the model’s dream, then test it once in the real world.*
 
+<Creators slugs="schmidhuber" />
+
 ## The task
 
 A point sits on a slope: position $x$, velocity $v$, and a push $u\in[-1,1]$ that we choose. Gravity pushes it **away** from $x=0$, so doing nothing fails. The cost per step is $x^2+0.1v^2+0.01u^2$: the controller must hold the point at $0$.

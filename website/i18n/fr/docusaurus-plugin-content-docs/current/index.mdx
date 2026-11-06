@@ -32,7 +32,7 @@ flowchart LR
   c0["0 Lean"] --> c1["1 Neurone"] --> c2["2 Perceptron, XOR"] --> c3["3 MLP"] --> c4["4 Autodiff"] --> c5["5 Entraînement, MNIST"]
   c5 --> c6["6 CNN"]
   c5 --> c7["7 RNN"] --> c8["8 LSTM"] --> c9["9 Transformer"]
-  c5 --> c10["10 VAE"] --> c11["11 GAN"] --> c12["12 Diffusion"]
+  c5 --> c10["10 VAE"] --> c105["10.5 Boltzmann"] --> c11["11 GAN"] --> c12["12 Diffusion"]
   c5 --> c13["13 Apprentissage par renforcement"] --> c14["14 Modèles du monde"]
   c10 --> c15["15 JEPA"]
   c14 --> c15
@@ -65,6 +65,7 @@ flowchart LR
 | 8 | LSTM et mémoire à portes | bornes sur les produits, Rat | porte d'oubli, chemin additif, expériences honnêtes sur la mémoire |
 | 9 | L'attention et le Transformer | corps abstraits, listes et permutations | softmax, ensemble vs séquence, masque causal, normalisation de couche, mini-Transformer |
 | 10 | Autoencodeurs et VAE | l'astuce de reparamétrisation comme théorème | variables latentes, pénalité KL, échantillonnage |
+| 10.5 | Machines de Boltzmann | algèbre de Gibbs exacte sur `Rat` | modèles à base d'énergie, fonction de partition, invariance par balayage Gibbs, divergence contrastive |
 | 11 | GAN | optimalité par complétion du carré | jeu minimax, discriminateur optimal, instabilité |
 | 12 | Modèles de diffusion | récurrence sur les calendriers, identités de corps | processus direct en forme fermée, pas de débruitage exact |
 | 13 | Apprentissage par renforcement | récursion, identités d'anneau | mises à jour de Bellman, Q-learning, REINFORCE avec ligne de base |

@@ -64,7 +64,7 @@
 64|| I Fondations | 0 Tour de Lean ; **M Outils mathématiques (nouveau)** |
 65|| II Réseaux de neurones | 1 Neurone ; 2 Perceptron/XOR ; 3 MLP ; 4 Autodiff ; 5 Entraînement, MNIST ; **généralisation (nouveau, intégré au 5 ou séparé)** |
 66|| III Données structurées | 6 CNN ; 7 RNN ; 8 LSTM **et GRU** ; 9 Transformer (**multi-têtes, bloc empilé**) |
-67|| IV Génératifs | 10 VAE ; 11 GAN ; 12 Diffusion |
+67|| IV Génératifs | 10 VAE ; 10.5 Boltzmann (RBM, divergence contrastive) ; 11 GAN ; 12 Diffusion |
 68|| V Représentations | **16 Contrastif et auto-supervisé (nouveau)** ; 15 JEPA ; **multimodal (nouveau)** |
 69|| VI Décision | 13 RL ; 14 World models |
 70|| VII Passage à l'échelle | **MoE, quantification, distillation (nouveau)** ; **scaling laws et limites (nouveau)** |

@@ -29,6 +29,8 @@ A dense layer on a $28\times 28$ image has $784$ weights *per neuron*, and has n
 
 <Figure src="rf_growth.svg" alt="Receptive field size against depth: stacked 3x3 layers grow 2L+1 linearly while one wide 5x5 stays flat" caption="Stacked convolutions grow a receptive field linearly: L layers of 3x3 see 2L + 1 pixels, while a single 5x5 stays stuck at 5 (the composition identity proved in this chapter is exactly the reason). Depth buys context, with far fewer parameters than a wide kernel - the trade that makes deep CNNs deep." />
 
+<Creators slugs="lecun" />
+
 ## One-dimensional convolution, with the shapes in the type
 
 We start in one dimension, where the proofs are short. A kernel of length $k+1$ slides over an input of length $m+k$ and produces exactly $m$ outputs. In Lean this arithmetic is part of the type, so a kernel that does not fit simply does not type-check.

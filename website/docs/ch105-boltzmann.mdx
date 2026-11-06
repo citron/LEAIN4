@@ -1,0 +1,113 @@
+---
+sidebar_position: 11.5
+title: "Chapter 10.5 — Boltzmann Machines"
+---
+
+# Chapter 10.5 — Boltzmann machines and contrastive divergence
+
+:::tip[TL;DR]
+**In short.** A Boltzmann machine defines a distribution by assigning an *energy* to every configuration: probability is proportional to $\mathrm e^{-E}$. We prove, on the exact canonical machine (one visible bit, one hidden bit, rational arithmetic), that the Gibbs distribution is normalised, that its conditionals are the Boltzmann conditionals, and that **one full Gibbs sweep leaves the equilibrium measure invariant** - the theorem behind contrastive divergence.
+
+**New words, in simple terms:**
+
+- **Energy-based model**: A model that scores configurations by an energy; low energy means likely.
+- **Partition function $Z$**: The sum of $\mathrm e^{-E}$ over all configurations; it turns energies into probabilities.
+- **Gibbs distribution**: The unique distribution with mass $\mathrm e^{-E(s)} / Z$ on each state.
+- **Restricted Boltzmann machine (RBM)**: A bipartite Boltzmann machine: visible units, hidden units, no links inside a layer.
+- **Gibbs sweep**: Alternate updates: redraw all hidden units given the visible, then all visible given the hidden.
+- **Contrastive divergence**: Train by running one (cheap) sweep instead of the infinite one the exact gradient asks for.
+:::
+
+<Creators slugs="ackley-hinton-sejnowski,hinton,lehriche-pinto-hinton" />
+
+The VAE gives you a generator with an *explicit* latent code; the GAN gives you a generator trained by an *adversary*. There is a third, older family: models with **no generator network at all**, where the distribution itself is the model, written directly as
+
+$$ p(v, h) \;=\; \frac{\mathrm e^{-E(v,h)}}{Z}, \qquad Z = \sum_{v',h'} \mathrm e^{-E(v',h')}. $$
+
+This is the **Boltzmann machine** (Ackley, Hinton and Sejnowski, 1985), after the spin glasses of statistical physics. It is the direct ancestor of modern deep learning - Hinton's 2006 dream of stacking RBMs launched the deep learning boom - and its generative cousin, contrastive divergence, is what made them trainable.
+
+## The canonical machine, exactly
+
+One visible bit $v$, one hidden bit $h$. The energy has a bias $a$ for the hidden unit, a bias $b$ for the visible unit and a coupling $g$ for the pair being on together; the gauge is $E(0,0)=0$. In the exponential parameterisation $a = \mathrm e^{\alpha}$, $b = \mathrm e^{\beta}$, $g = \mathrm e^{\delta}$, the four unnormalised weights and the partition function are:
+
+```lean file=Ch105/Boltzmann.lean#canonical_model
+```
+
+`w_sum` proves the normalisation on $\mathbb{Q}$: the four masses $u(s)/Z$ sum to exactly $1$. Every probability in this chapter is a `Rat` computed from exact arithmetic - no floating point is involved in any proof.
+
+## The Gibbs conditionals
+
+On a bipartite graph the conditionals are local: given the visible unit, the hidden unit is a coin with odds
+
+$$ \frac{p(h=1 \mid v)}{p(h=0 \mid v)} \;=\; \frac{u(1,v)}{u(0,v)}, $$
+
+and symmetrically for the visible. This is why the RBM sweeps so cheaply: conditioning on one layer makes the other layer *independent*.
+
+```lean file=Ch105/Boltzmann.lean#gibbs_conditionals
+```
+
+The module proves `qh_pos` / `qh_sum` (the conditionals are genuine probabilities) and the **odds-ratio identities** `odds_hidden_on` / `odds_hidden_off`: sampling parameters are exactly ratios of weights - the mechanism contrastive divergence exploits.
+
+<Figure src="boltzmann_cond.svg" alt="Conditional p(h=1|v) as a function of the coupling g: the curve for v=1 rises from a/(a+1) towards 1, the curve for v=0 is flat" caption="The Gibbs conditional p(h = 1 | v) as a function of the coupling g (a = 0.8). Conditioning on v = 0, the coupling is invisible - the flat line; conditioning on v = 1, the coupling turns the hidden unit on with odds (a + g). This is the two-line formula `qh` implements." />
+
+## One sweep leaves equilibrium alone: the theorem
+
+The Gibbs chain: from a visible state $v$, draw $h \sim p(h \mid v)$, then draw $v' \sim p(v' \mid h)$. The deep fact - the finite shadow of the ergodic theorem for Gibbs chains - is that **the Gibbs distribution is invariant under one full sweep**. The module proves it state by state, in exact rational arithmetic, for the canonical machine:
+
+```lean file=Ch105/Boltzmann.lean#sweep_invariance
+```
+
+The proof factorises the sweep kernel,
+
+$$ S(s, t) \;=\; p(h_t \mid v_s)\; p(v_t \mid h_t), $$
+
+and reduces invariance to two families of **marginal identities** (`therm_hidden` and `gibbs_factor`): thermalising one layer from equilibrium reproduces exactly that layer's equilibrium marginal. No limits, no mixing times - for a finite machine this is algebra.
+
+<Figure src="boltzmann_sweep.svg" alt="Equilibrium mass and one-sweep mass of the state (1,1) as functions of the coupling: the two curves coincide" caption="Sweep invariance, drawn: the exact mass of state (1, 1) at equilibrium (g / Z) and the mass after one full Gibbs sweep of the equilibrium, for every coupling g. The curves coincide - not approximately: the module proves the two rationals equal, state by state, coupling by coupling." />
+
+<Figure src="boltzmann_equilibrium.svg" alt="Equilibrium probability p(h=1) rising with the coupling g and saturating" caption="The equilibrium p(h = 1) = (a + g) / Z against the coupling (a = 0.8, b = 0.6). The coupling charges both states where the pair is on; the sigmoidal rise of the conditional becomes a saturating rise of the marginal - the partition function is the brake." />
+
+## The energy form
+
+Writing $a = \mathrm e^{\alpha}$, $b = \mathrm e^{\beta}$, $g = \mathrm e^{\delta}$, the weights are exponentials of an energy,
+
+$$ E(v,h) \;=\; -\alpha\, h \;-\; \beta\, v \;-\; \delta\, v h, $$
+
+and the module proves the **Boltzmann form** $u(s) = \mathrm e^{-E(s)}$ and the partition identity $Z = \sum_s \mathrm e^{-E(s)}$ on any lawful exponential (`LawfulExp`), with the positivity of $\mathrm e^{x}$ proved from the square trick $\mathrm e^{x} = (\mathrm e^{x/2})^2$:
+
+```lean file=Ch105/Boltzmann.lean#energy_form
+```
+
+This is the bridge from the combinatorial model to statistical physics: the weights *are* Boltzmann factors, so the whole machine is the canonical ensemble of a two-spin system, and free energy $\log Z$ is a loss the model implicitly minimises.
+
+## From invariance to contrastive divergence
+
+The exact gradient of $\log p(v)$ is
+
+$$ \nabla_\theta \log p(v) \;=\; \mathbb E_{p(\cdot \mid v)}[\nabla_\theta E] \;-\; \mathbb E_{p}[\nabla_\theta E], $$
+
+a *positive* phase at the data and a *negative* phase at the model equilibrium. The negative phase is intractable in general: it needs the thermalised chain. **Contrastive divergence** (Hinton, 2002) runs the chain for $k$ steps from the data instead of to equilibrium, and the `sweep_invariance` theorem is exactly what justifies the trick at $k \to \infty$: a chain that has thermalised samples from the model, and one sweep is the minimum work that keeps it there. At $k = 1$ (CD-1) you pay one sweep per gradient; Hinton's argument - and the theorem above - is that the parameters barely move, so the chain barely drifts away from equilibrium, and one sweep keeps it close.
+
+Where this chapter sits in the course:
+
+- **Chapter 10 (VAE)**: an *encoder-based* generator with an explicit latent; the RBM has no encoder - inference is one exact conditional sweep, proved above.
+- **Chapter 11 (GAN)**: a generator trained by an adversary; the Boltzmann machine is trained by *free energy*, no adversary.
+- **Chapters 17 / 19 (contrastive, multimodal)**: InfoNCE contrasts positive and negative pairs; contrastive divergence contrasts positive and negative *phases of the same energy* - the same shape of idea, one generation earlier.
+
+## Exercises
+
+1. Compute by hand the Gibbs distribution of the canonical machine for $a = b = g = 1$, and check the four masses against `w_sum`.
+2. Prove the visible analogue of `therm_hidden`: thermalising the visible layer from equilibrium reproduces the equilibrium visible marginal (the identities `gibbs_factor` encodes).
+3. Show that the odds-ratio of the hidden conditional on $v = 1$ is $g$ *independent* of the visible bias $b$, and explain in one sentence why the coupling only "fires" when both units are on.
+4. For a machine with $n$ visible and $m$ hidden units, the partition sum has $2^{n+m}$ terms. Explain why exact training is intractable and which part of the sweep proof survives to the general bipartite case.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch105/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch105/Exercises.lean#ex1
+```
+
+```lean file=Ch105/Exercises.lean#ex2
+```
+
+```lean file=Ch105/Exercises.lean#ex3
+```

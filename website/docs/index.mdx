@@ -32,7 +32,7 @@ flowchart LR
   c0["0 Lean"] --> c1["1 Neuron"] --> c2["2 Perceptron, XOR"] --> c3["3 MLP"] --> c4["4 Autodiff"] --> c5["5 Training, MNIST"]
   c5 --> c6["6 CNN"]
   c5 --> c7["7 RNN"] --> c8["8 LSTM"] --> c9["9 Transformer"]
-  c5 --> c10["10 VAE"] --> c11["11 GAN"] --> c12["12 Diffusion"]
+  c5 --> c10["10 VAE"] --> c105["10.5 Boltzmann"] --> c11["11 GAN"] --> c12["12 Diffusion"]
   c5 --> c13["13 Reinforcement learning"] --> c14["14 World models"]
   c10 --> c15["15 JEPA"]
   c14 --> c15
@@ -65,6 +65,7 @@ flowchart LR
 | 8 | LSTM and gated memory | bounds on products, `Rat` | forget gate, additive path, honest memory experiments |
 | 9 | Attention and the Transformer | abstract fields, lists and permutations | softmax, set vs sequence, causal mask, layer norm, a small Transformer |
 | 10 | Autoencoders and the VAE | the reparameterisation trick as a theorem | latent variables, KL penalty, sampling |
+| 10.5 | Boltzmann machines | exact Gibbs algebra on `Rat` | energy-based models, partition function, Gibbs sweep invariance, contrastive divergence |
 | 11 | GANs | optimality by completing the square | the minimax game, optimal discriminator, instability |
 | 12 | Diffusion models | induction over schedules, field identities | forward process in closed form, exact denoising step |
 | 13 | Reinforcement learning | recursion, ring identities | Bellman updates, Q-learning, REINFORCE with a baseline |

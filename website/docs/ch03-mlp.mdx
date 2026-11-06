@@ -25,6 +25,8 @@ title: "Chapter 3 — The multi-layer perceptron"
 
 Chapter 2 ended with a wall: one neuron cannot compute XOR. The way around it is to **stack** neurons into layers.
 
+<Creators slugs="werbos,rumelhart,hinton,lecun" />
+
 ## Layers and shapes
 
 A layer with `nin` inputs and `nout` neurons holds one weight row and one bias per neuron. Its weights are a matrix `Mat α nout nin`; the shapes appear in the type, so a layer cannot be fed a vector of the wrong size.

@@ -26,6 +26,8 @@ Les réseaux récurrents lisent une séquence un pas à la fois : l'information 
 
 <Figure src="attn_sharp.svg" alt="Poids softmax de la cle dominante sur quatre cles selon l'ecart de logit beta, de 1/4 a 1, avec la ligne uniforme 1/4" caption="L'attention comme projecteur reglable : avec trois cles rivales, un ecart de logit beta met e^beta / (e^beta + 3) sur la gagnante - 1/4 aveugle, 98 % a l'ecart 6 (les faits softmax demontres au chapitre). La temperature est ce cadran : grand beta selectionne fort, beta = 0 degengere en moyenne uniforme." />
 
+<Creators fr slugs="bengio" />
+
 ## L'attention par produit scalaire normalisé
 
 Chaque position $t$ a une *requête* $q_t$, une *clé* $k_t$ et une *valeur* $v_t$ (trois applications linéaires de sa représentation $x_t$). La position $t$ compare sa requête à toutes les clés, transforme les scores en poids par un softmax, et prend la moyenne pondérée des valeurs :

@@ -138,6 +138,17 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **KL divergence**: A number measuring how different one distribution is from another. It is zero when they are the same.
 - **Reparameterisation trick**: Draw the random noise first, then compute the sample from it with ordinary maths, so that gradients can flow.
 
+## Chapter 10.5 — Boltzmann machines
+
+- **Energy-based model**: A model that scores every configuration by an energy; low energy means likely. The distribution is the model - there is no generator network.
+- **Boltzmann machine**: A network of binary units whose joint distribution is proportional to exp(-E), where E is a sum of biases and couplings (Ackley, Hinton, Sejnowski 1985).
+- **RBM (restricted Boltzmann machine)**: A bipartite Boltzmann machine: visible units and hidden units, no links within a layer, so conditioning on one layer makes the other independent.
+- **Energy E**: A number attached to each configuration; in physics the energy of a spin system, here the negative log-probability up to a constant.
+- **Partition function Z**: The sum of exp(-E) over all configurations; it turns energies into probabilities. Computing it needs 2^(n) terms - the intractability at the heart of the model.
+- **Gibbs distribution**: The distribution with mass exp(-E(s)) / Z on state s; the module proves it is normalised exactly on `Rat` (Ch105, `w_sum`).
+- **Gibbs sweep**: Alternate sampling: redraw all hidden units given the visible, then all visible given the hidden. The module proves one full sweep leaves the equilibrium measure invariant (`sweep_invariance`).
+- **Contrastive divergence**: Train by running a few sweep steps from the data instead of the full thermalisation the exact gradient demands (Hinton 2002); the engine of the RBM era of deep learning.
+
 ## Chapter 11 — GANs
 
 - **GAN**: Two networks play a game: a forger makes fakes, a detective tells fake from real, and both improve.

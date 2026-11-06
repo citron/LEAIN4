@@ -38,6 +38,7 @@ node ../scripts/check.mjs
 | 8 LSTM + GRU | done | done | done |
 | 9 Transformer | done | done | done |
 | 10 VAE | done | done | done |
+| 10.5 Boltzmann machines | done | done | done |
 | 11 GAN | done | done | done |
 | 12 Diffusion | done | done | done |
 | 13 Reinforcement learning | done | done | done |

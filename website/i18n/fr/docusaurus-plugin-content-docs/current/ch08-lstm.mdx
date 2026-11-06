@@ -24,6 +24,8 @@ Le chapitre 7 s'est terminé sur un diagnostic : dans un RNN simple, le gradient
 
 <Figure src="cell_hold.svg" alt="Etat de cellule ecrit 1 en t = 0 : f = 1 le porte plat, f = 0,95 s'efface lentement, f = 0,5 s'effondre" caption="L'etat de cellule est l'autoroute : une valeur ecrite en t = 0 avec le facteur f survit t pas comme f^t. f = 1 (portees ouvertes) le porte pour toujours - le chemin de gradient exact du theoreme de l'autoroute ; f = 0,95 s'efface en 40 pas ; f = 0,5 est l'effondrement RNN du Ch7 en une ligne. Le LSTM apprend f proche de 1 pour les pas a memoriser." />
 
+<Creators fr slugs="hochreiter,schmidhuber" />
+
 ## Le LSTM
 
 En plus de l'état caché $h_t$, le LSTM porte un **état de cellule** $c_t$. Quatre petites couches (les *portes*) lisent $h_{t-1}$ et $x_t$ :
