@@ -124,6 +124,27 @@ The corridor is deliberately easy: the state is fully observed, the best policy 
 Proved: geometric convergence of the Bellman update (one state), the TD error factor, the REINFORCE identity for the two-armed bandit and baseline invariance, and (Chapter 4) the correct gradients of the loss. Not proved: convergence of Q-learning or REINFORCE in general MDPs, or that the experiments above would repeat on other seeds.
 :::
 
+## The Bellman operator on finite MDPs — proved
+
+Chapter 13's headline proof is one-state. `Ch13/Bellman.lean` lifts it to a **whole finite MDP at once**, over exact `Rat` arithmetic. Fix a policy; the Bellman operator acts on value vectors $V \in \mathbb{Q}^S$:
+
+$$(TV)(s) \;=\; r(s) + \gamma \sum_{s'} P(s' \mid s)\, V(s')$$
+
+With the sup norm $\lVert V \rVert = \max_s |V(s)|$ (`maxV`), three theorems, no analysis library:
+
+```lean file=Ch13/Bellman.lean#contraction
+```
+
+- **`cheb_le` — contraction.** $\lVert TV - TW \rVert \le \gamma \lVert V - W \rVert$. Each coordinate's difference is $\gamma$ times an *expectation* of the pointwise differences; an expectation of bounded numbers is bounded by the same bound (`Dist.expect_abs_bound`), and the max over states inherits it.
+- **`fixed_point_unique` — at most one fixed point.** If $TV = V$ and $TW = W$, then $\lVert V - W\rVert \le \gamma\lVert V-W\rVert$ forces $V = W$ (the scalar lemma `le_self_mul_of_lt`: $a \le \gamma a$ with $\gamma < 1$ gives $a = 0$).
+- **`vIter_rate` — value iteration converges geometrically.** From the start $V_0$, the $k$-th iterate satisfies $\lVert V_k - V_* \rVert \le \gamma^k \lVert V_1 - V_0 \rVert$ — the textbook bound, by induction on `cheb_le`.
+
+The executable `lake exe bellman` runs the iteration on a 4-state chain (advance with probability 3/4, diffuse 1/12 to the others, reward at the end, $\gamma = 1/2$) in **exact rationals**, printing the gap $d_k$ and the bound $\gamma\, d_{k-1}$ at every sweep — every line obeys the theorem, with no floating point anywhere. (Exact arithmetic is expensive: numerators grow like $24^k$, so the demo stops at 8 sweeps — the contraction factor is made on every printed line.)
+
+:::warning What is proved, and what is not
+Proved here: contraction in sup norm, uniqueness of the fixed point, and the geometric rate of *value iteration under a fixed policy*, all over exact rationals on finite state spaces. Not proved: that **learning** algorithms (Q-learning, TD, SARSA) converge — those add sampling noise and the fixed-point argument no longer applies directly, a standing scope limit of this course.
+:::
+
 ## References
 
 - R. S. Sutton and A. G. Barto, *Reinforcement Learning: An Introduction*, MIT Press (1998) — TD learning, eligibility-free updates and the bandit REINFORCE this chapter implements.

@@ -32,6 +32,8 @@ import LeanDL.Ch08.Solutions
 import LeanDL.Ch09.Attention
 import LeanDL.Ch09.Transformer
 import LeanDL.Ch09.Gpt
+import LeanDL.Ch09.GptStacked
+import LeanDL.Ch09.Stack
 import LeanDL.Ch09.Solutions
 import LeanDL.Ch10.Model
 import LeanDL.Ch10.Elbo
@@ -48,6 +50,7 @@ import LeanDL.Ch12.Model
 import LeanDL.Ch12.Solutions
 import LeanDL.Ch13.Model
 import LeanDL.Ch13.Rl
+import LeanDL.Ch13.Bellman
 import LeanDL.Ch13.Solutions
 import LeanDL.Ch14.Model
 import LeanDL.Ch14.Solutions

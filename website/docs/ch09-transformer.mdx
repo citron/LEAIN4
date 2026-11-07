@@ -164,6 +164,24 @@ z = layerNorm (y + FFN(y))                     -- feed-forward sub-layer
 
 The GPT executable (`lake exe gpt`) computes exactly this structure in `Float`, with ReLU for `σ` — the theorems are over an exact field, the demo runs in floating point, and both are the same block.
 
+## Stacking the block: a provably causal GPT of any depth
+
+One block is causal. Is a **stack** of blocks causal? The naive answer ("of course") is exactly the kind of thing this course exists to check: the stack is defined by recursion, so causality must be proved **by induction on the number of blocks**. `Ch09/Stack.lean` does it:
+
+```lean file=Ch09/Stack.lean#stack_no_leak
+```
+
+`stack bs xs` runs a **list** of blocks `bs = [b₁, …, bₙ]` in order over a sequence matrix: the output of block 1 is the input of block 2, and so on. The theorem `stack_no_leak` says: if two input sequences agree on all rows `j ≤ t`, then the **stacked outputs agree at row `t`, for any number of blocks**. The proof is one induction:
+
+- **nil**: the stack is the identity, and the hypothesis applies directly;
+- **cons b rest**: the output is `runBlock b (stack rest xs)`. By the induction hypothesis, `stack rest xs` and `stack rest xs'` agree on every row `i ≤ t` — feeding those equal sequences into `runBlock b` gives equal outputs at `t` by the single-block lemma `runBlock_no_leak` (which packages `blockOut_no_leak`).
+
+Induction turns the block's causality into the model's causality, at any depth, with no analytic assumptions: exact field arithmetic, arbitrary parameters, any number of heads. The `minigpt` executable (`lake exe minigpt`) trains a **stacked** GPT (`nLayer` blocks) on character-level text with a hand-coded backward that chains through the stack, and certifies that backward with a finite-difference gradient check over **all** parameters of a 2-layer config — the same discipline as the one-block `gpt` demo, one level deeper.
+
+:::warning Scope
+`stack_no_leak` is a structural guarantee about the exact block definitions in this chapter (exact field, idealised activations). It says nothing about the `Float` executable's rounding, about trainability, or about production GPTs; the gradient check in `minigpt` is the numerical evidence on the implementation side.
+:::
+
 ## Experiments
 
 `lake exe gpt` first checks the gradient of all 171 parameters of a tiny model against central finite differences (maximum error below $10^{-6}$, printed as 0.000000).

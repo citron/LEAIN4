@@ -12,7 +12,7 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: lean
-          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 ch19 capstone figures
+          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt minigpt mhead vae gan diffusion rl bellman worldmodel jepa ch16 ch17 ch18 ch19 capstone figures
       - name: "Audit axioms (expects: using sorry #[])"
         run: lake env lean ../scripts/audit_axioms.lean
         working-directory: lean
@@ -21,7 +21,7 @@ jobs:
       - name: Smoke-run representative demos (one per area; MNIST-heavy ones live in dedicated steps)
         run: |
           set -e
-          for exe in ch01 ch02 ch03 ch04 ch05 ch16 ch17 ch18 ch19 capstone gru mhead gan rl; do
+          for exe in ch01 ch02 ch03 ch04 ch05 ch16 ch17 ch18 ch19 capstone gru mhead gan rl bellman minigpt; do
             echo "== lake exe $exe =="
             lake exe "$exe"
           done
