@@ -128,6 +128,11 @@ The controller trained **only on imagined episodes** performs as well in the rea
 - Proved: the error-propagation bound and the gradients of the regression loss (Chapter 4). Not proved: that the trained model has small $\varepsilon$ or $L$, or that a controller optimised in the dream is good in reality.
 :::
 
+## References
+
+- R. S. Sutton, *Dyna, an Integrated Architecture for Learning, Planning, and Reacting*, SIGART Bulletin 2 (1991) — learning a model and planning with it.
+- D. Ha and J. Schmidhuber, *World Models*, arXiv:1803.10122 (2018) — the learned-model-plus-policy architecture whose error propagation this chapter bounds on its toy transition.
+
 ## Exercises
 
 1. Prove that for $L=1$, `geom 1 k` equals $k$ (as a rational), by induction on $k$; the induction step is the first Lean exercise below.

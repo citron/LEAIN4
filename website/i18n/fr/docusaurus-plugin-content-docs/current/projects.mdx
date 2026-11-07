@@ -1,0 +1,54 @@
+---
+sidebar_position: 24
+title: "Projets de synthèse"
+---
+
+# Projets de synthèse
+
+Trois projets de bout en bout. Chacun réutilise les abstractions Lean du cours, fournit un squelette exécutable, et note les **garanties prouvées** séparément des **objectifs empiriques** — une note qui passe ne mélange jamais les deux.
+
+Grille d'évaluation commune aux trois projets :
+
+| Composante | Poids | Preuve exigée |
+|---|---|---|
+| Exécution reproductible | 20 % | commande exacte, graine, préparation de `data/`, journal de sortie |
+| Propriétés démontrées | 30 % | déclarations Lean qui compilent ; chacune avec ses hypothèses en une ligne |
+| Objectifs empiriques | 30 % | métrique, référence (baseline), split, graines (≥ 3 graines pour toute affirmation comparative ; moyenne ± dispersion) |
+| Honnêteté du rapport | 20 % | chaque affirmation étiquetée par son statut (prouvé / hypothèse / test numérique / observé / hors périmètre) |
+
+## Projet 1 — Pipeline MNIST de bout en bout
+
+**Cahier des charges.** Charger MNIST (`scripts/get-mnist.sh`), construire un MLP avec les tenseurs de `LeanDL.Core`, entraîner avec le kit du Ch05 (SGD + la recette du Ch20), évaluer sur le split test officiel, et prouver au moins trois propriétés locales de votre pipeline (par ex. le softmax est une distribution, la perte est positive, un pas SGD sur la quadratique ne croît jamais la perte).
+
+**Livrables.** `Demos/Project1.lean` (cible `project1`), une section préparation des données, graine fixée et imprimée, tailles des splits train/test énoncées, perte par époque et précision finale sur le test.
+
+**Critères de réussite.** Compile avec la chaîne du dépôt ; exécution < 5 min ; précision test ≥ 90 % à la graine documentée (régression, pas une affirmation de généralisation) ; ≥ 3 preuves ajoutées sans `sorry` hors exercices ; le rapport sépare les preuves scalaires du parcours vectoriel (la frontière du Ch20).
+
+**Évaluation.** Objectif empirique = précision documentée sur ≥ 3 graines ; prouvé = vos lemmes ajoutés ; la généralisation du MLP est explicitement hors périmètre.
+
+## Projet 2 — Mini-GPT
+
+**Cahier des charges.** Tokeniseur octet minimal sur un corpus généré localement (par ex. quelques centaines de lignes de texte déterministe committé dans le dépôt) ; une pile de `N` blocs Transformer causaux construits à partir du bloc du Ch09, avec la propriété de non-fuite conservée par récurrence sur le nombre de blocs ; entropie croisée next-token via la boîte à outils du Ch16 ; génération gloutonne.
+
+**Livrables.** `Demos/Project2.lean` (cible `project2`), une preuve inductive de type stackNoLeak_N établissant qu'une pile de `N` blocs ne lit jamais le futur, un échantillon de bytes générés imprimé, logits et perte par pas visibles.
+
+**Critères de réussite.** stackNoLeak_N compile (l'induction sur le nombre de blocs est la preuve notée) ; la perte décroît sur le parcours documenté à graine fixe ; le texte généré montre une structure locale (le rapport ne doit pas affirmer de qualité linguistique) ; le KV cache est documenté comme extension, pas simulé.
+
+**Évaluation.** Prouvé = induction structurelle de non-fuite ; empirique = courbe de perte et échantillons avec limites explicites ; les capacités d'un vrai GPT sont hors périmètre.
+
+## Projet 3 — Apprentissage de représentations
+
+**Cahier des charges.** Deux encodeurs sur un petit jeu de données jouet étiqueté (par ex. des chiffres MNIST rotationnés) : entraînement contrastif avec la perte InfoNCE du Ch17, variante symétrique type CLIP (Ch19) avec un encodeur par vue ; analyse de l'effondrement en s'appuyant sur le théorème d'effondrement du Ch15 comme référence.
+
+**Livrables.** `Demos/Project3.lean` (cible `project3`), une évaluation par sonde linéaire (régression logistique sur embeddings gelés, entraînée de façon déterministe), courbe de perte InfoNCE, une exécution de contrôle effondrée (encodeur constant) montrant que la sonde détecte l'effondrement.
+
+**Critères de réussite.** Le plancher InfoNCE ≥ log(n+1) est observé sur la statistique de batch (raccord avec le plancher prouvé) ; la précision de la sonde linéaire sur le contrôle ≈ le hasard, sur le parcours entraîné nettement au-dessus ; courbe de perte imprimée avec graine ; le rapport énonce que le théorème du Ch15 couvre l'objectif d'effondrement du jouet, pas vos encodeurs.
+
+**Évaluation.** Prouvé = réutilisation des théorèmes du cours avec citation correcte des hypothèses ; empirique = précision de la sonde sur ≥ 3 graines (moyenne ± dispersion) ; le transfert vers de vrais modèles vision-langage est hors périmètre.
+
+## Règles communes aux trois projets
+
+1. Pas de Mathlib, pas de bibliothèque externe, pas de Python : Lean 4.35.0 et le cœur du cours uniquement.
+2. Chaque nombre rapporté nomme sa graine et sa commande.
+3. Une affirmation sans preuve n'utilise pas le mot « prouvé » ; une graine unique n'est pas présentée comme une évaluation.
+4. Citer l'article source pour chaque architecture implémentée (les sections Références par chapitre donnent les sources primaires).

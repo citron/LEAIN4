@@ -49,6 +49,10 @@ flowchart LR
 <Figure src="arch_gan.svg"
 caption="GAN: generator against discriminator, one minimax"
  />
+:::info[Prerequisites]
+The minimax objective ranges over expectations of log-likelihoods: read **Expectation** and **Entropy, cross-entropy, KL** in [Chapter 16](ch16-tools) first. The chapter's proofs are exact over `Rat`; the general minimax theory is out of scope.
+:::
+
 ## What does the best discriminator say?
 
 Fix a point $x$. Let $a=p_{\text{data}}(x)$ be the density of real data there and $b=p_G(x)$ the density of generated data. The discriminator's payoff at $x$ is $a\log d + b\log(1-d)$ with $d=D(x)$. Setting the derivative to zero, $\frac ad-\frac b{1-d}=0$, gives
@@ -124,6 +128,11 @@ The honest reading:
 :::warning What is proved here, and what is not
 Proved: the optimal-discriminator formulas above, and (from Chapter 4) the gradients of both losses. Not proved: that the game converges. In general it does not, and the numbers above show it.
 :::
+
+## References
+
+- I. Goodfellow, J. Pouget-Abadie, M. Mirza, et al., *Generative Adversarial Nets*, NeurIPS 2014, arXiv:1406.2661 — the minimax objective and the optimal discriminator this chapter proves in closed form on its two-mode toy.
+- A. B. Metropolis, A. W. Rosenbluth, M. N. Rosenbluth, et al., *Equation of State by Fast Computing Machines*, J. Chem. Phys. 21 (1953) — the adversarial-sampling idea cited by the original GAN paper.
 
 ## Exercises
 

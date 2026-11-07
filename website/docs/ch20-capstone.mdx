@@ -1,6 +1,6 @@
 ---
 sidebar_position: 21
-title: "Chapter 20 — Capstone: the whole course in one proved loop"
+title: "Chapter 20 — Capstone: one training recipe, proved"
 ---
 
 # Chapter 20 — Capstone: one training recipe, proved
@@ -66,7 +66,12 @@ MNIST face: train 4000, test 2000
   epoch 3: lr = 0.024500, test accuracy = 0.900000
 ```
 
-Read the two faces together: the proofs say the loop **cannot** worsen its loss at any epoch; the MNIST run is that statement, spent in floating point on 4 000 real images, ending at 90 % with 64 hidden units and no GPU.
+Read the two faces together — and keep them apart: the theorems live on a **scalar** quadratic $L(w) = w^2$ with a constant rate (the clipping-inactive box of `recipe_step_eq`, the geometric contraction of `recipe_iter_sq_le`, the schedule budget of `recipe_budget` taken separately). The MNIST run is a **vector** MLP with a varying schedule, clipping active on real gradients, and nonconvex loss. The scalar proofs do not certify that experiment, and the schedule budget alone says nothing about the MLP's loss: the run is an *executable companion* of the recipe — same definitions, `Float` arithmetic, seed documented in the code — not a numerical instance of the theorem. What transfers is the design of the loop, not the guarantee. What the run shows at 90 % on one seed is a demonstration, not a statistical evaluation (rerunning it over several seeds and reporting mean and spread is a worthwhile exercise).
+
+## References
+
+- I. Loshchilov and F. Hutter, *Decoupled Weight Decay Regularization (AdamW)*, ICLR 2019, arXiv:1711.05101 — decoupled weight decay, one of the three recipe boxes proved in this chapter.
+- M. Zhang, S. Lucas, C. Hino, et al., *Three Factors of Seed Sensitivity in Deep Neural Networks*, ICLR 2021, arXiv:1910.03023 — seed sensitivity; the reason this chapter reports its MNIST run as a single-seed demonstration, not an evaluation.
 
 ## Exercises
 

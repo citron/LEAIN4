@@ -29,7 +29,9 @@ Le chapitre est aussi un tournant méthodologique. Dès ici, tout scalaire d'un 
 ```lean file=Core/Prob.lean#dist
 ```
 
-Une `Dist n` est un vecteur de poids `w : Vec Rat n` avec deux champs : chaque poids est positif (`pos`), et les poids somment à 1 (`sum1`, écrit comme produit scalaire avec le vecteur de tous les 1). Le champ `n` est un nombre au niveau des *types* : une distribution sur 4 issues est un type différent d'une distribution sur 5 — une incompatibilité de taille est une erreur de type, pas un plantage à l'exécution.
+Une `Dist n` est un vecteur de poids `w : Vec Rat n` avec deux champs : chaque poids est positif (`pos`), et les poids somment à 1 (`sum1`, écrit comme un produit scalaire avec le vecteur de 1). Le paramètre `n` est un nombre *au niveau des types* : une loi sur 4 issues est un type différent d'une loi sur 5 — un désaccord de taille est une erreur de type, pas un plantage à l'exécution.
+
+Noter la positivité stricte dans `pos` : les issues de poids nul sont exclues **par choix de conception**, pour garder `log` et `KL` finis sans conventions. Les conventions usuelles des manuels — `0 · log 0 = 0`, et `KL = +∞` quand `p` est positif là où `q` est nul — vivent sur les réels étendus et **ne sont pas** couvertes par le modèle de ce chapitre ; toute `Dist` ici est une loi strictement positive, finie et discrète. Les énoncés sur des densités continues ou des lois gaussiennes générales ne se transfèrent pas à `Dist` sans travail supplémentaire.
 
 Le logarithme est la seule pièce d'analyse du chapitre, et nous ne faisons pas semblant de le construire : `LawfulLog` est une **opération abstraite à lois nommées** (le même style que `LawfulExp` dans le noyau d'algèbre) :
 
@@ -114,7 +116,7 @@ Le dernier bloc de la démo calcule l'identité numériquement : trois modèles 
 
 L'identité biais-variance explique *comment* une famille généralise. Trois faits exacts expliquent ce qu'*aucun* apprenant ne contourne. Ils vivent dans `Core/Theory.lean`, prouvés avec la même algèbre de poids finis que tout ce qui précède.
 
-**Atome 1 — l'union bornée.** À poids positifs, une somme pondérée domine chacun de ses termes :
+**Atome 1 — l'algèbre de la borne d'union.** À poids positifs, une somme pondérée domine chacun de ses termes :
 
 ```lean file=Core/Theory.lean#unionbound
 ```
@@ -128,7 +130,7 @@ Toute affirmation « avec probabilité ≥ 1 − M·δ, toute hypothèse de la c
 
 Le nombre calculé pour « le point d'entraînement » et pour « le point de test » est *le même nombre* — tant que l'hypothèse est choisie indépendamment du point. L'écart de généralisation est créé entièrement par l'ajustement : dès que l'hypothèse dépend de l'échantillon, la symétrie est brisée, et mesurer cette rupture est le rôle d'un jeu de test conservé.
 
-**Atome 3 — No Free Lunch.** Sous des étiquettes tirées uniformément, toute prédiction — déterministe *ou randomisée* — a une erreur 0-1 espérée exactement égale à 1/2 :
+**Atome 3 — la base binaire sans information.** Sous des étiquettes tirées uniformément, toute prédiction — déterministe *ou randomisée* — a une erreur 0-1 espérée exactement égale à 1/2 :
 
 ```lean file=Core/Theory.lean#nfl
 ```
@@ -169,6 +171,13 @@ Ensemble de 3 modèles, poids uniformes sur les hypothèses :
 :::warning Ce qui est prouvé, et ce qui ne l'est pas
 Prouvé, sur `Rat` avec un logarithme abstrait : $E$, la variance, $H$, CE et KL satisfont les quatre lois de l'espérance, l'identité de variance centrée, $\mathrm{CE} = H + \mathrm{KL}$, Gibbs $\mathrm{KL} \ge 0$, $H = 0$ sur une masse ponctuelle, variance nulle des constantes, et la décomposition biais–variance du risque d'ensemble (ponctuelle et sommée sur les entrées). **Non prouvé :** que le logarithme réel satisfait `LawfulLog` (analyse, hors du cours), que les programmes `Float` satisfont quoi que ce soit (ils arrondissent), et que les chiffres imprimés se reproduisent sur d'autres distributions au-delà de l'arrondi. Entre le théorème et l'expérience se tient un écart explicite et non refermé — cet écart est le sujet de l'analyse numérique, pas de ce cours.
 :::
+
+## Références
+
+- C. E. Shannon, *A Mathematical Theory of Communication*, Bell System Technical Journal 27 (1948) — l'entropie et l'unité logarithmique que le modèle `Dist` de ce chapitre implémente exactement sur `Rat`.
+- T. M. Cover et J. A. Thomas, *Elements of Information Theory*, Wiley (2006) — l'inégalité de Gibbs, l'identité CE = H + KL et les conventions sur les issues de probabilité nulle que ce chapitre exclut délibérément de `Dist`.
+- V. Vapnik et A. Chervonenkis, *On the Uniform Convergence of Relative Frequencies of Events to Their Probabilities*, Dokl. Akad. Nauk 192 (1971) — la théorie de la généralisation dont ce chapitre prouve l'atome biais/variance à une couche.
+- D. H. Wolpert, *The Supervised Learning No Free Lunch Theorems*, Neural Networks 9 (1996) — le théorème NFL général ; l'atome 3 de ce chapitre est la base binaire sans information, pas ce théorème.
 
 ## Exercices
 

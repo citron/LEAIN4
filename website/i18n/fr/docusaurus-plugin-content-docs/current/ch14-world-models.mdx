@@ -128,6 +128,11 @@ Le contrôleur entraîné **uniquement sur des épisodes imaginés** se comporte
 - Prouvé : la borne de propagation d'erreur et les gradients de la perte de régression (chapitre 4). Non prouvé : que le modèle entraîné ait un $\varepsilon$ ou un $L$ petit, ou qu'un contrôleur optimisé dans le rêve soit bon dans la réalité.
 :::
 
+## Références
+
+- R. S. Sutton, *Dyna, an Integrated Architecture for Learning, Planning, and Reacting*, SIGART Bulletin 2 (1991) — apprendre un modèle et planifier avec.
+- D. Ha et J. Schmidhuber, *World Models*, arXiv:1803.10122 (2018) — l'architecture modèle appris + politique dont ce chapitre borne la propagation d'erreur sur sa transition jouet.
+
 ## Exercices
 
 1. Prouvez que pour $L=1$, `geom 1 k` vaut $k$ (comme rationnel), par récurrence sur $k$ ; le pas de récurrence est le premier exercice Lean ci-dessous.

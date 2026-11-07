@@ -118,6 +118,11 @@ On the same data, the GAN of Chapter 11 reached a TV of 0.42; the diffusion mode
 Proved: the coefficient algebra of the forward process and the exactness of the denoising step for a perfect predictor, and (Chapter 4) the gradients of the loss. Not proved: that the trained network is close to perfect, or any statement about distributions.
 :::
 
+## References
+
+- J. Sohl-Dickstein, E. Weiss, N. Ruoco, et al., *Deep Unsupervised Learning Using Nonequilibrium Thermodynamics*, ICML 2015, arXiv:1503.03585 — the forward/reverse Markov-chain algebra whose closed form this chapter computes.
+- P. Dhariwal and A. Nichol, *Diffusion Models Beat GANs on Image Synthesis*, NeurIPS 2021, arXiv:2105.05233 — the modern practice whose discrete-step planning the chapter models.
+
 ## Exercises
 
 1. Show `noiseVar_closed` for a *constant* schedule $(a,s)$ repeated $n$ times: $\bar a=a^n$.

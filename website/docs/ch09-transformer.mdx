@@ -200,6 +200,11 @@ The text has the right words, spaces and punctuation, and sentence shapes from t
 - The four theorems are about the *abstractions* (a softmax over scores, attention over a set, a mask, layer norm); the array code of the model is checked by finite differences, not proved.
 - Multi-head attention is implemented (formal layout in `Ch09/Attention.lean`, running block in `Demos/MHead.lean`); sinusoidal position encodings and stacked blocks are described but not implemented.
 
+## References
+
+- A. Vaswani, N. Shazeer, N. Parmar, et al., *Attention Is All You Need*, NeurIPS 2017, arXiv:1706.03762 — scaled dot-product attention, multi-head attention and the causal mask this chapter assembles and proves leak-free.
+- The Transformer family, *The Annotated Transformer* — https://nlp.seas.harvard.edu/annotated-transformer/ (the reference implementation whose layout the Lean block follows).
+
 ## Exercises
 
 1. Prove that the weights of `weights_sum` are non-negative when the `exp` is positive (add a hypothesis `0 < exp x`).

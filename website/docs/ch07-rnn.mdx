@@ -133,6 +133,12 @@ The *memory task*: the label is the **first** bit of a random bit sequence, so t
 
 For $T\le 20$ the network learns the rule. For $T\ge 60$ it fits the 32 training sequences (it *memorises* them) but is at chance level on new ones: the gradient from the label never reached the first input, so it could not discover the rule. This is a single seed and a single configuration, so the exact cut-off is not meaningful; the *shape* of the result is. (Adam and 8 units are good enough to delay the failure far beyond what plain gradient descent achieves.)
 
+## References
+
+- M. I. Jordan, *Serial Order: A General Parallel Network Model*, Tech. Report BL-86-118, Bell Systems Technical Journal (1986) — recurrent state networks.
+- J. L. Elman, *Finding Structure in Time*, Cognitive Science 14 (1990) — the simple recurrent cell this chapter formalises.
+- Y. Bengio, P. Simard and P. Frasconi, *Learning Long-Term Dependencies with Gradient Descent Fails*, IEEE Trans. Neural Networks 5 (1994) — the vanishing/exploding gradient this chapter proves as a product of Jacobians.
+
 ## Exercises
 
 1. In `jacRec_sq_le`, what happens if some factor $g_s$ is allowed to exceed 1? Find the smallest counter-example.

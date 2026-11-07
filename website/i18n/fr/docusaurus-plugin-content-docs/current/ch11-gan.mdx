@@ -49,6 +49,10 @@ flowchart LR
 <Figure src="arch_gan.svg"
 caption="GAN : générateur contre discriminateur, un minimax"
  />
+:::info[Prérequis]
+L'objectif minimax porte sur des espérances de log-vraisemblances : lire d'abord **Espérance** et **Entropie, entropie croisée, KL** du [Chapitre 16](ch16-tools). Les preuves du chapitre sont exactes sur `Rat` ; la théorie minimax générale est hors périmètre.
+:::
+
 ## Que dit le meilleur discriminateur ?
 
 Fixons un point $x$. Soit $a=p_{\text{data}}(x)$ la densité des données réelles en ce point et $b=p_G(x)$ celle des données générées. Le gain du discriminateur en $x$ est $a\log d + b\log(1-d)$ avec $d=D(x)$. Annuler la dérivée, $\frac ad-\frac b{1-d}=0$, donne
@@ -122,6 +126,11 @@ Lecture honnête :
 :::warning Ce qui est prouvé ici, et ce qui ne l'est pas
 Prouvé : les formules du discriminateur optimal ci-dessus et (par le chapitre 4) les gradients des deux pertes. Non prouvé : que le jeu converge. En général il ne converge pas, et les chiffres ci-dessus le montrent.
 :::
+
+## Références
+
+- I. Goodfellow, J. Pouget-Abadie, M. Mirza, et al., *Generative Adversarial Nets*, NeurIPS 2014, arXiv:1406.2661 — l'objectif minimax et le discriminateur optimal que ce chapitre prouve en forme fermée sur son jouet à deux modes.
+- A. B. Metropolis, A. W. Rosenbluth, M. N. Rosenbluth, et al., *Equation of State by Fast Computing Machines*, J. Chem. Phys. 21 (1953) — l'idée d'échantillonnage adversarial citée par l'article fondateur des GAN.
 
 ## Exercices
 

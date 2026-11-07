@@ -128,6 +128,27 @@ for (const f of fr.filter((x) => /^ch\d/.test(x))) {
   if (!/^## Exercices$/m.test(read(b))) errors.push(`fr/${f}: missing '## Exercices' section`);
 }
 
+// 8. syllabus coverage: every chapter page (sidebar_position) has a row in the index syllabus table (EN and FR)
+const posOf = (file) => {
+  const m = read(file).match(/^sidebar_position:\s*([\d.]+)/m);
+  return m ? String(Number(m[1])) : null;
+};
+for (const [dir, label] of [[enDir, 'en'], [frDir, 'fr']]) {
+  const idx = path.join(dir, 'index.mdx');
+  if (!fs.existsSync(idx)) { errors.push(`${label}: index.mdx missing`); continue; }
+  const idxText = read(idx);
+  for (const f of list(dir, '.mdx').filter((x) => /^ch\d/.test(x))) {
+    const pos = posOf(path.join(dir, f));
+    if (pos === null) { errors.push(`${label}/${f}: no sidebar_position`); continue; }
+    // syllabus rows start with "| <num> |" ; chapter number from filename: ch105- -> 10.5, ch07- -> 7
+    const mnum = f.match(/^ch(\d+)-/);
+    const num = Number(mnum[1]);
+    const label_ = num >= 100 && num % 10 === 5 ? `${Math.floor(num / 10)}.5` : `${num}`;
+    const row = new RegExp(`^\\|\\s*${label_.replace('.', '\\.')}\\s*\\|`, 'm');
+    if (!row.test(idxText)) errors.push(`${label}/index.mdx: syllabus table has no row for chapter ${label_} (${f})`);
+  }
+}
+
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exit(1);

@@ -63,6 +63,11 @@ Trois théorèmes, trois diagnostics :
 2. **Forme** `symm_matched` : la perte est une moyenne d'écarts softplus, donc lisse et convexe en chaque écart — la longue traîne plate est la direction *faible* qui atteint son plancher (la courbe orange ci-dessus : plafonnée à 0,13). Réparer une modalité sans l'autre plafonne à exactement un demi-softplus.
 3. **Plancher** `symm_le_log_two` : sous $\log 2$ (en 2×2), les deux directions sont déjà séparées ; la perte ne peut rien certifier de plus. Poussez les écarts, pas la perte.
 
+## Références
+
+- A. Radford, J. W. Kim, C. Killian, et al., *Learning Transferable Visual Models From Natural Language Supervision (CLIP)*, ICML 2021, arXiv:2103.00020 — la perte InfoNCE symétrique que ce chapitre prouve bornée et symétrique.
+- T.-Y. Lin, Y. G. et al., *On the Versatility of the Symmetric InfoNCE Loss*, arXiv:2312.15129 (2023) — l'analyse de la perte symétrique à laquelle le résultat de plancher du chapitre se rattache.
+
 ## Exercices
 
 1. Prouvez la forme close unidirectionnelle : `infoNce 1 (pairSample x1 y1 (fun _ => y2)) = log (1 + exp (x1*y2 - x1*y1))` — combinez `row_is_matched` avec `matched_loss` du chapitre 17.

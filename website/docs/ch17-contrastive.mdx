@@ -77,6 +77,10 @@ Then a real training run: five items on a circle, fixed queries at radius 1.5, e
 
 <Figure src="softmax_sharp.svg" alt="Softmax mass on the positive as temperature varies: a step at tau = 0, nearly flat at tau = 2, the S-curve through tau = 1" caption="Temperature is the sharpness dial: scores 1 and 0, mass on the positive is exp(1/t)/(exp(1/t)+1). Cold (small tau): winner-take-all, gradients saturate. Hot (large tau): everything is mushy and the contrastive signal vanishes. Around tau = 1 the curve is steepest - which is why the temperature is the single most-tuned hyper-parameter of every contrastive run." />
 
+## References
+
+- A. van den Oord, Y. Li and O. Vinyals, *Representation Learning with Contrastive Predictive Coding*, arXiv:1807.03748 (2018) — the InfoNCE bound this chapter proves exactly on finite samples (`infoNce_ge_zero`, `infoNce_collapse`); the mutual-information reading of the bound is the paper's, not a theorem of this chapter.
+
 ## Exercises
 
 1. Prove that **adding one more negative raises the collapsed floor by exactly** $\log \frac{n+2}{n+1}$: the collapsed loss is the log of the number of candidates, so the marginal cost of a negative is the log of the ratio.

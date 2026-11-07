@@ -76,6 +76,10 @@ Puis une vraie campagne d'entraînement : cinq objets sur un cercle, requêtes f
 
 <Figure src="softmax_sharp.svg" alt="Masse softmax sur le positif selon la température : un escalier en tau = 0, presque plat en tau = 2, la sigmoïde qui passe par tau = 1" caption="La température est le bouton de netteté : scores 1 et 0, la masse sur le positif vaut exp(1/t)/(exp(1/t)+1). Froid (tau petit) : le gagnant rafle tout, les gradients saturent. Chaud (tau grand) : tout est pâteux et le signal contrastif s'évanouit. Autour de tau = 1 la courbe est la plus raide - c'est pourquoi la température est l'hyperparamètre le plus réglé de toute campagne contrastive." />
 
+## Références
+
+- A. van den Oord, Y. Li et O. Vinyals, *Representation Learning with Contrastive Predictive Coding*, arXiv:1807.03748 (2018) — la borne InfoNCE que ce chapitre prouve exactement sur échantillons finis (`infoNce_ge_zero`, `infoNce_collapse`) ; la lecture par information mutuelle de la borne est celle de l'article, pas un théorème de ce chapitre.
+
 ## Exercices
 
 1. Prouver qu'**ajouter un négatif de plus relève le plancher effondré exactement de** $\log \frac{n+2}{n+1}$ : la perte effondrée est le log du nombre de candidats, donc le coût marginal d'un négatif est le log du rapport.

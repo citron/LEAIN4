@@ -98,6 +98,16 @@ Where this chapter sits in the course:
 - **Chapter 11 (GAN)**: a generator trained by an adversary; the Boltzmann machine is trained by *free energy*, no adversary.
 - **Chapters 17 / 19 (contrastive, multimodal)**: InfoNCE contrasts positive and negative pairs; contrastive divergence contrasts positive and negative *phases of the same energy* - the same shape of idea, one generation earlier.
 
+:::warning What is proved here, and what is not
+Proved, exactly and over `Rat`: the normalisation of the canonical 4-state machine, the Gibbs conditionals, the invariance of equilibrium under one full Gibbs sweep (state by state, coupling by coupling), and the energy form of the joint law. Not proved — and out of this model's scope: that *many* sweeps mix (no mixing-time theory here), that the results extend beyond four states to real RBMs with many hidden units, that contrastive divergence trains a realistic RBM, and anything about sampling quality at scale. The toy is small on purpose: it is the smallest machine where every claim is a closed identity.
+:::
+
+## References
+
+- D. H. Ackley, G. E. Hinton and T. J. Sejnowski, *A Learning Algorithm for Boltzmann Machines*, Cognitive Science 8 (1984) — the energy-based joint law and Gibbs sampling this chapter's canonical 4-state machine proves exactly.
+- G. E. Hinton, S. Osindero and Y.-W. Teh, *A Fast Learning Algorithm for Deep Belief Nets*, Neural Computation 18 (2006) — contrastive divergence, the practical objective the chapter's limits section discusses.
+- G. E. Hinton and R. R. Salakhutdinov, *Reducing the Dimensionality of Data with Neural Networks*, Science 313 (2006) — RBMs at realistic scale, explicitly out of this chapter's proof scope.
+
 ## Exercises
 
 1. Compute by hand the Gibbs distribution of the canonical machine for $a = b = g = 1$, and check the four masses against `w_sum`.

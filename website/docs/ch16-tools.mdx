@@ -31,6 +31,8 @@ The chapter is also a methodological turning point. From here, every scalar in a
 
 A `Dist n` is a weight vector `w : Vec Rat n` with two fields: every weight is positive (`pos`), and the weights sum to 1 (`sum1`, written as a dot product with the all-ones vector). The field `n` is a *type-level* number: a distribution on 4 outcomes is a different type from one on 5 — a size mismatch is a type error, not a runtime crash.
 
+Note the strict positivity in `pos`: zero-weight outcomes are excluded **by design**, to keep `log` and `KL` finite without conventions. The usual textbook conventions — `0 · log 0 = 0`, and `KL = +∞` when `p` is positive where `q` is zero — live on the extended reals and are **not** covered by this chapter's model; every `Dist` here is a strictly positive, finite, discrete law. Statements about continuous densities or general Gaussian laws do not transfer to `Dist` without further work.
+
 The logarithm is the chapter's one piece of analysis, and we do not pretend to construct it: `LawfulLog` is an **abstract operation with named laws** (the same style as `LawfulExp` in the algebra core):
 
 ```lean file=Core/Prob.lean#haslog
@@ -114,7 +116,7 @@ The demo's last block runs the identity numerically: three noisy models around a
 
 The bias-variance identity explains *how* a family generalizes. Three exact facts explain what *no* learner escapes. They live in `Core/Theory.lean`, proved with the same finite-weight algebra as everything above.
 
-**Atom 1 — the union bound.** With nonnegative weights, a weighted sum dominates any single term:
+**Atom 1 — the union-bound algebra.** With nonnegative weights, a weighted sum dominates any single term:
 
 ```lean file=Core/Theory.lean#unionbound
 ```
@@ -128,7 +130,7 @@ Every "with probability ≥ 1 − M·δ, every hypothesis in the class is ε-goo
 
 The number computed for "the training point" and for "the test point" is *the same number* — as long as the hypothesis was chosen independently of the point. The generalization gap is created entirely by fitting: the moment the hypothesis depends on the sample, the symmetry is broken, and measuring the break is what a held-out set does.
 
-**Atom 3 — No Free Lunch.** Under labels drawn uniformly, every prediction — deterministic *or randomized* — has expected 0-1 error exactly 1/2:
+**Atom 3 — the binary no-information baseline.** Under labels drawn uniformly, every prediction — deterministic *or randomized* — has expected 0-1 error exactly 1/2:
 
 ```lean file=Core/Theory.lean#nfl
 ```
@@ -169,6 +171,13 @@ What to read: the good model `q1` costs $0.027$ nats of KL — little extra surp
 :::warning What is proved, and what is not
 Proved, over `Rat` with an abstract logarithm: $E$, variance, $H$, CE, KL satisfy the four expectation laws, the centered-variance identity, $\mathrm{CE} = H + \mathrm{KL}$, Gibbs $\mathrm{KL} \ge 0$, $H = 0$ on a point mass, zero variance of constants, and the bias–variance decomposition of the ensemble risk (pointwise and summed over inputs). **Not proved:** that the real logarithm satisfies `LawfulLog` **Not proved:** that the real logarithm satisfies `LawfulLog` (analysis, outside the course), that the `Float` programs satisfy anything (they round), and that the printed numbers repeat on other distributions beyond rounding. Between the theorem and the experiment sits an explicit, unclosed gap — that gap is the subject of numerical analysis, not of this course.
 :::
+
+## References
+
+- C. E. Shannon, *A Mathematical Theory of Communication*, Bell System Technical Journal 27 (1948) — entropy and the log unit this chapter's `Dist` model implements exactly over `Rat`.
+- T. M. Cover and J. A. Thomas, *Elements of Information Theory*, Wiley (2006) — Gibbs' inequality, the CE = H + KL identity and the conventions on zero-probability outcomes this chapter deliberately excludes from `Dist`.
+- V. Vapnik and A. Chervonenkis, *On the Uniform Convergence of Relative Frequencies of Events to Their Probabilities*, Dokl. Akad. Nauk 192 (1971) — the generalization theory whose one-layer bias/variance atom this chapter proves.
+- D. H. Wolpert, *The Supervised Learning No Free Lunch Theorems*, Neural Networks 9 (1996) — the general NFL theorem; this chapter's atom 3 is the binary no-information baseline, not that theorem.
 
 ## Exercises
 

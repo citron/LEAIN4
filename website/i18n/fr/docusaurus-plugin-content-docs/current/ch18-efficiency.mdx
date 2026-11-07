@@ -53,7 +53,13 @@ Le routeur donne à l'expert $i$ un poids $p_i \ge 0$ avec $\sum_i p_i = 1$. La 
 
 **L'effondrement paie $E$ fois le plancher** (`balance_collapse`) : le routeur effondré `oneAt0` — toute la masse sur l'expert 0 — est une vraie distribution (`vsum_oneAt0`, par induction sur `Fin (E + 1)`), et sa perte de collision vaut exactement $1 = E \cdot (1/E)$. Un routeur effondré coûte $E$ fois plus sur la perte d'équilibrage *et* laisse $E-1$ experts au chômage : le plancher est atteint à l'uniforme et la perte n'est pas bornée au-dessus dans le coin effondré. `balance_ge` ne manque d'aucune hypothèse : c'est toute l'histoire.
 
-**Le plancher survit à la matrice de routage complète** (`frac_sum`, `balancing_ge`). Les pertes réelles d’équilibrage ne sont pas calculées sur un seul vecteur de poids : elles le sont sur la *fraction de tokens* $f_i$ routée vers l’expert $i$ sur un batch, et la perte auxiliaire est $E\cdot\sum_i f_i^2$. Le plancher est un théorème sur toute la matrice de routage : si les poids de chaque token sont normalisés, alors $\sum_i f_i = 1$ — normalisation par token, `vsum_comm` pour échanger les deux sommes finies, et la somme double se télélescope en $rac1B\sum_k 1 = 1$ — donc `balance_ge` s’applique et la perte d’équilibrage est $\ge 1$ pour **tout** routeur, aussi dégénéré ou dépendant du token soit-il.
+**Le plancher survit à la matrice de routage complète** (`frac_sum`, `balancing_ge`). Les pertes réelles d’équilibrage ne sont pas calculées sur un seul vecteur de poids : elles le sont sur la *fraction de tokens* $f_i$ routée vers l’expert $i$ sur un batch, et la perte auxiliaire est $E\cdot\sum_i f_i^2$. Le plancher est un théorème sur toute la matrice de routage : si les poids de chaque token sont normalisés, alors $\sum_i f_i = 1$ — normalisation par token, `vsum_comm` pour échanger les deux sommes finies, et la somme double se télélescope en $\frac1B\sum_k 1 = 1$ — donc `balance_ge` s’applique et la perte d’équilibrage est $\ge 1$ pour **tout** routeur, aussi dégénéré ou dépendant du token soit-il.
+
+**Ce que c'est, précisément : une pénalité de concentration, pas la loss Switch.** $E\cdot\sum_i f_i^2$ est une pénalité quadratique sur les *fractions de routage* — probabilité de collision fois $E$ — minimale au partage uniforme. La perte auxiliaire standard de Switch Transformer (Fedus, Zoph & Shazeer, *Switch Transformers*, 2021, [arXiv:2101.03961](https://arxiv.org/abs/2101.03961)) est plutôt
+
+$$L_{\mathrm{aux}} = E \sum_{i=1}^{E} f_i\, P_i,$$
+
+où $f_i$ est la fraction *dure* des tokens expédiés à l'expert $i$ (routage top-1) et $P_i$ la probabilité *douce* moyenne du routeur pour l'expert $i$ sur le batch. C'est le produit d'un comptage dur et d'une probabilité douce qui fait circuler le gradient dans le routeur — $E\cdot\sum_i f_i^2$ seul ne transmet aucun gradient à travers une décision top-1 discrète. L'inégalité prouvée ici ($E\cdot\sum_i f_i^2 \ge 1$) borne donc une *mesure de concentration* du routage, minimale à l'équilibre ; ce n'est pas une preuve que $L_{\mathrm{aux}} \ge 1$, et ce cours ne formalise pas $f_i P_i$ (mélanger une fraction dure et une moyenne douce exige un objet combinant routage et probabilités). Les variantes top-$k$ normalisent les poids de porte sur les $k$ experts sélectionnés — une convention, pas un théorème.
 
 ```lean file=Ch18/Efficiency.lean#routing
 ```
@@ -98,6 +104,14 @@ Empiriquement (Kaplan et al., Chinchilla), la perte suit des lois de puissance e
 - **MoE**, $E = 8$ : plancher $1/E = 0.125$ ; uniforme `0.125` (l'atteint), biaisé `0.23`, effondré `1.0` — exactement $E$ fois le plancher, la ligne `balance_collapse` en chiffres.
 - **Distillation** : professeur $T = [0.7, 0.2, 0.08, 0.02]$, $H(T) = 0.85$ ; un élève uniforme vaut $\text{CE} = 1.39 = 0.85 + 0.53$, un élève pointu $1.47 = 0.85 + 0.61$, la copie $0.85 = 0.85 + 0$. L'identité $\text{CE} = H + \text{KL}$ tient au chiffre imprimé sur chaque ligne. Puis 200 pas SGD : l'élève converge vers $T$, KL vers $0$, perte vers $H(T)$ — et jamais en dessous, `true` à chaque pas.
 - **Scaling**, $L(N) = 0.10 + 16/N$ : de $N = 100 \to 800$, l'excès tombe de $0.16$ à $0.02$ ; chaque doublement le divise par deux, `data_scale_double` en tableau.
+
+## Références
+
+- B. Jacob, S. Ligorio, V. Delaviz, et al., *Quantizing Neural Networks for Efficient Inference: A Fully Compiled Case*, ICMS 2017, arXiv:1712.05877 — la quantification uniforme avec grille d'écrêtage que ce chapitre borne exactement sur des scalaires.
+- N. Shazeer et al., *Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer*, ICLR 2017, arXiv:1701.06538 — la lignée d'équilibrage de charge des MoE.
+- W. Fedus, B. Zoph et N. Shazeer, *Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity*, JMLR 23 (2022), arXiv:2101.03961 — la loss auxiliaire $E\sum_i f_i P_i$ dont la pénalité de concentration du chapitre est distinguée.
+- G. Hinton, O. Vinyals et J. Dean, *Distilling the Knowledge in a Neural Network*, arXiv:1503.02531 (2015) — la distillation, dont le chapitre réutilise l'identité CE = H + KL.
+- J. Kaplan, S. McCandlish, T. Henighan, et al., *Scaling Laws for Neural Language Models*, arXiv:2001.08361 (2020) — la littérature empirique sur les scaling laws ; le modèle $L(N)=L_\infty+C/N$ du chapitre est posé à titre illustratif, pas ajusté.
 
 ## Exercices
 

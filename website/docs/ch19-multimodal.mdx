@@ -63,6 +63,11 @@ Three theorems, three diagnostics:
 2. **Shape** `symm_matched`: the loss is a mean of softplus gaps, so it is smooth and convex in each gap — the long flat tail is the *weak* direction hitting its floor (the orange curve above: capped at 0.13). Fixing one modality without the other plateaus at exactly half a softplus.
 3. **Floor** `symm_le_log_two`: below $\log 2$ (for 2×2) both directions are already separated; the loss cannot certify more. Push the gaps, not the loss.
 
+## References
+
+- A. Radford, J. W. Kim, C. Killian, et al., *Learning Transferable Visual Models From Natural Language Supervision (CLIP)*, ICML 2021, arXiv:2103.00020 — the symmetric InfoNCE loss this chapter proves bounded and symmetric.
+- T.-Y. Lin, Y. G. et al., *On the Versatility of the Symmetric InfoNCE Loss*, arXiv:2312.15129 (2023) — the symmetric-loss analysis this chapter's floor result connects to.
+
 ## Exercises
 
 1. Prove the one-direction closed form: `infoNce 1 (pairSample x1 y1 (fun _ => y2)) = log (1 + exp (x1*y2 - x1*y1))` — combine `row_is_matched` with Ch17's `matched_loss`.

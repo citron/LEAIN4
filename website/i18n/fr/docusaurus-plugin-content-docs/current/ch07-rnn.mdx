@@ -133,6 +133,12 @@ La *tâche de mémoire* : l'étiquette est le **premier** bit d'une suite aléat
 
 Pour $T\le 20$, le réseau apprend la règle. Pour $T\ge 60$ il s'ajuste aux 32 séquences d'entraînement (il les *mémorise*) mais est au niveau du hasard sur les nouvelles : le gradient venant de l'étiquette n'a jamais atteint la première entrée, il n'a donc pas pu découvrir la règle. C'est une seule graine et une seule configuration : le seuil exact n'a pas de sens, mais la *forme* du résultat en a un. (Adam et 8 unités suffisent à repousser l'échec bien au-delà de ce qu'obtient la descente de gradient simple.)
 
+## Références
+
+- M. I. Jordan, *Serial Order: A General Parallel Network Model*, Tech. Report BL-86-118, Bell Systems Technical Journal (1986) — réseaux récurrents à état.
+- J. L. Elman, *Finding Structure in Time*, Cognitive Science 14 (1990) — la cellule récurrente simple que ce chapitre formalise.
+- Y. Bengio, P. Simard et P. Frasconi, *Learning Long-Term Dependencies with Gradient Descent Fails*, IEEE Trans. Neural Networks 5 (1994) — la disparition/l'explosion du gradient que ce chapitre prouve comme produit de jacobiens.
+
 ## Exercices
 
 1. Dans `jacRec_sq_le`, que se passe-t-il si un facteur $g_s$ peut dépasser 1 ? Trouvez le plus petit contre-exemple.

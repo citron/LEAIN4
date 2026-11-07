@@ -134,6 +134,12 @@ Ce que disent les chiffres :
 Prouvé : l'effondrement est un minimiseur global de la perte simple ; la mise à jour EMA est une contraction géométrique ; la pénalité de variance exclut l'effondrement comme minimiseur ; et (chapitre 4) les gradients de toutes les pertes. Non prouvé : que l'EMA empêche l'effondrement (la littérature n'a que des analyses partielles dans des modèles linéaires), que l'optimum régularisé soit informatif, ou que ces résultats se reproduisent avec d'autres graines. Les données sont un jouet : une variété de dimension deux avec deux perturbations évidentes.
 :::
 
+## Références
+
+- Y. LeCun, *A Path Towards Autonomous Machine Intelligence*, OpenReview (2022) — l'article de position JEPA et sa motivation d'évitement de l'effondrement.
+- X.-Z. Bardes, J. Garrido, J. Siméon, et al., *VL-JEPA: The Open-World Quest for Real-Time Visual Understanding*, arXiv:2404.08471 (2024) — la perte JEPA dont le théorème sur le jouet de ce chapitre traite.
+- T. Chen, S. Kornblith, K. Swersky, et al., *BYOL: Bootstrap Your Own Latent*, NeurIPS 2020, arXiv:2006.07791 — le réglage EMA-target dont ce chapitre formalise la contraction.
+
 ## Exercices
 
 1. Prouvez qu'avec un plongement *vectoriel* la perte est encore positive et que l'encodeur constant avec le prédicteur identité atteint encore $0$ (indice : sommez les énoncés scalaires sur les coordonnées).

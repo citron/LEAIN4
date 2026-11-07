@@ -187,6 +187,11 @@ Sur la **tâche mémoire** (l'étiquette est le premier bit d'une séquence alé
 
 **Le GRU résout la tâche à chaque palier avec deux portes de moins** — il égale le LSTM avec environ un quart de paramètres en moins par unité. Sans curriculum (entraînement simple à $T$ fixe) le GRU reste près du hasard à $T \ge 20$, exactement comme le LSTM et le RNN : sur cette tâche, c'est le curriculum, pas le nombre de portes, qui fait la différence. Tout ceci est un jouet : 8 unités, une graine, de petits budgets.
 
+## Références
+
+- S. Hochreiter et J. Schmidhuber, *Long Short-Term Memory*, Neural Computation 9 (1997) — la cellule, les portes et le « constant error carousel » que la preuve par la mémoire de ce chapitre précisent.
+- K. Cho, B. van Merriënboer, C. Gulcehre, et al., *Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation*, EMNLP 2014 — l'unité récurrente à portes (GRU) implémentée dans ce chapitre.
+
 ## Exercices
 
 1. Implémentez le GRU sur des tableaux et vérifiez son gradient par différences finies. (Fait : il est dans `lean/LeanDL/Ch08/Gru.lean`.)

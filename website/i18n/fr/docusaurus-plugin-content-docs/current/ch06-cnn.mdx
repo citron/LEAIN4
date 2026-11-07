@@ -123,6 +123,11 @@ epoch 3: test accuracy = 0.970600
 
 La vérification du gradient concorde à mieux que $10^{-6}$ (la valeur affichée s'arrondit à 0). Avec seulement **4 canaux et 3 passes de SGD simple**, le réseau atteint **97,1 %** sur les 10 000 images de test, en moins de trois minutes sur le processeur d'un portable. Le creux de l'époque 2 est du bruit ordinaire du SGD à taux d'apprentissage constant ; c'est une exécution avec une graine, pas un benchmark. À comparer aux 96,4 % du réseau à une couche cachée du chapitre 5, qui a beaucoup plus de poids.
 
+## Références
+
+- Y. LeCun, B. Boser, J. S. Denker, et al., *Gradient-Based Learning Applied to Document Recognition*, Proceedings of the IEEE 86 (1998) — convolution, pooling et l'architecture LeNet que ce chapitre implémente en miniature.
+- K. Fukushima, *Neocognitron: A Self-Organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Translation Deformation*, Biological Cybernetics 36 (1980) — l'ancêtre à champs réceptifs de l'alternance convolution/pooling.
+
 ## Exercices
 
 1. Démontrez que `conv1d` avec le noyau canonique $(0,\dots,0,1,0,\dots,0)$ est une copie décalée de l'entrée.

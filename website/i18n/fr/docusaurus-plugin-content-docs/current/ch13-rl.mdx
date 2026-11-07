@@ -49,6 +49,10 @@ flowchart LR
 <Figure src="arch_rl.svg"
 caption="Actor-critic : politique et valeur dans la boucle de l'environnement"
  />
+:::info[Prérequis]
+Les retours sont des espérances de récompenses actualisées : revoir **Espérance et variance** du [Chapitre 16](ch16-tools) d'abord, et le bloc 6 de la [carte des prérequis](prerequisites) (état, action, récompense, Bellman). Ce chapitre prouve une borne TD à cible fixe ; la convergence stochastique de Q-learning est hors périmètre.
+:::
+
 ## Par les valeurs : Q-learning
 
 La **valeur d'action** $Q(s,a)$ est le retour espéré après avoir pris $a$ en $s$ puis agi au mieux. Elle satisfait l'**équation de Bellman** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Le Q-learning en fait une mise à jour vers une **cible** $r+\gamma\max_{a'}Q(s',a')$.
@@ -119,6 +123,11 @@ Le couloir est volontairement facile : l'état est entièrement observé, la mei
 :::warning Ce qui est prouvé ici
 Prouvé : la convergence géométrique de la mise à jour de Bellman (un état), le facteur d'erreur TD, l'identité REINFORCE pour le bandit à deux bras et l'invariance par ligne de base, et (chapitre 4) les gradients corrects de la perte. Non prouvé : la convergence du Q-learning ou de REINFORCE dans des MDP généraux, ou le fait que ces expériences se reproduisent avec d'autres graines.
 :::
+
+## Références
+
+- R. S. Sutton et A. G. Barto, *Reinforcement Learning: An Introduction*, MIT Press (1998) — l'apprentissage TD et le REINFORCE bandit que ce chapitre implémente.
+- C. J. Watkins, *Learning from Delayed Rewards*, thèse, Cambridge (1989) — Q-learning ; sa convergence stochastique est explicitement hors du périmètre de ce chapitre (seule la borne à cible fixe est prouvée).
 
 ## Exercices
 

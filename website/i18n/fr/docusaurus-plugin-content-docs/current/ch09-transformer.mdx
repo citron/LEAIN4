@@ -200,6 +200,11 @@ Le texte a les bons mots, espaces et ponctuation, et des formes de phrases du co
 - Les quatre théorèmes portent sur les *abstractions* (un softmax sur des scores, l'attention sur un ensemble, un masque, la normalisation de couche) ; le code tableau du modèle est vérifié par différences finies, pas démontré.
 - L'attention multi-têtes est implémentée (disposition formelle dans `Ch09/Attention.lean`, bloc exécutable dans `Demos/MHead.lean`) ; les encodages de position sinusoïdaux et l'empilement de blocs sont décrits mais pas implémentés.
 
+## Références
+
+- A. Vaswani, N. Shazeer, N. Parmar, et al., *Attention Is All You Need*, NeurIPS 2017, arXiv:1706.03762 — l'attention à produit scalaire normalisé, l'attention multi-têtes et le masque causal que ce chapitre assemble et prouve sans fuite.
+- *The Annotated Transformer* — https://nlp.seas.harvard.edu/annotated-transformer/ (l'implémentation de référence dont le bloc Lean suit l'agencement).
+
 ## Exercices
 
 1. Démontrez que les poids de `weights_sum` sont positifs lorsque `exp` est positif (ajoutez une hypothèse `0 < exp x`).

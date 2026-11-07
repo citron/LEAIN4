@@ -49,6 +49,10 @@ flowchart LR
 <Figure src="arch_rl.svg"
 caption="Actor-critic: policy and value networks in the environment loop"
  />
+:::info[Prerequisites]
+Returns are expectations of discounted rewards: review **Expectation and variance** in [Chapter 16](ch16-tools) first, and the [prerequisite map](prerequisites) block 6 (state, action, reward, Bellman). This chapter proves a fixed-target TD bound; stochastic Q-learning convergence is out of scope.
+:::
+
 ## Value-based: Q-learning
 
 The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterwards. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.
@@ -119,6 +123,11 @@ The corridor is deliberately easy: the state is fully observed, the best policy 
 :::warning What is proved here
 Proved: geometric convergence of the Bellman update (one state), the TD error factor, the REINFORCE identity for the two-armed bandit and baseline invariance, and (Chapter 4) the correct gradients of the loss. Not proved: convergence of Q-learning or REINFORCE in general MDPs, or that the experiments above would repeat on other seeds.
 :::
+
+## References
+
+- R. S. Sutton and A. G. Barto, *Reinforcement Learning: An Introduction*, MIT Press (1998) — TD learning, eligibility-free updates and the bandit REINFORCE this chapter implements.
+- G. J. Ponschmake, R. S. Sutton — TD algorithm lineage: C. J. Watkins, *Learning from Delayed Rewards*, PhD thesis, Cambridge (1989) — Q-learning; its stochastic convergence is explicitly out of this chapter's scope (fixed-target bound only).
 
 ## Exercises
 

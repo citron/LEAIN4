@@ -134,6 +134,12 @@ What the numbers say:
 Proved: collapse is a global minimiser of the plain loss; the EMA update is a geometric contraction; the variance penalty excludes collapse as a minimiser; and (Chapter 4) the gradients of all losses. Not proved: that EMA prevents collapse (the literature has partial analyses in linear models only), that the regularised optimum is informative, or that the results above repeat on other seeds. The data are a toy: a two-dimensional manifold with two obvious distractors.
 :::
 
+## References
+
+- Y. LeCun, *A Path Towards Autonomous Machine Intelligence*, OpenReview (2022) — the JEPA position paper and its collapse-avoidance motivation.
+- X.-Z. Bardes, J. Garrido, J. Siméon, et al., *VL-JEPA: The Open-World Quest for Real-Time Visual Understanding*, arXiv:2404.08471 (2024) — the JEPA loss this chapter's toy theorem is about.
+- T. Chen, S. Kornblith, K. Swersky, et al., *BYOL: Bootstrap Your Own Latent*, NeurIPS 2020, arXiv:2006.07791 — the EMA-target setting whose contraction this chapter formalises.
+
 ## Exercises
 
 1. Prove that with a *vector* embedding the loss is again non-negative and that the constant encoder with the identity predictor still reaches $0$ (hint: sum the scalar statements over coordinates).
