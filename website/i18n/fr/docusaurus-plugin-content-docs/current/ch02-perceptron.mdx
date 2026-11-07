@@ -21,11 +21,19 @@ title: "Chapitre 2 — Le perceptron, le XOR et le premier hiver de l'IA"
 :::
 
 
+<Creators fr slugs="rosenblatt" />
+
+
+<Figure src="arch_perceptron.svg"
+caption="Le perceptron : une seule unité à seuil qui trace une droite"
+ />
 ## L'histoire en un paragraphe
 
 En 1958, Frank Rosenblatt introduit le **perceptron** : un neurone à seuil accompagné d'une règle d'apprentissage. En 1969, Marvin Minsky et Seymour Papert publient *Perceptrons*, qui analyse exactement ce que les perceptrons à une couche peuvent et ne peuvent pas calculer. L'exemple le plus simple de ce qu'ils ne peuvent pas calculer est le **XOR** (ou exclusif). Ajouté aux résultats décevants d'autres programmes d'IA (par exemple le rapport Lighthill de 1973 au Royaume-Uni), cela a contribué à l'effondrement des financements du milieu des années 1970, appelé **premier hiver de l'IA**. Les historiens s'accordent sur le fait que les causes furent multiples ; le fait mathématique ci-dessous est le cœur technique de la partie « réseaux de neurones » de cette histoire.
 
 <Figure src="xor.svg" alt="Les quatre points du XOR dans le plan" caption="Aucune droite ne sépare les deux points bleus des deux points rouges." />
+
+<Figure src="xor_points.svg" alt="Quatre points du XOR : +1 en (0,0) et (1,1), -1 en (0,1) et (1,0), aucune droite ne separe les couleurs" caption="L'image du theoreme 1 : un neurone trace une droite, et les points du XOR ne se laissent decouper par aucune droite - les deux coins positifs sont de part et d'autre de toute droite qui separe les deux negatifs. Une couche cachee n'est pas un luxe, c'est le minimum." />
 
 ## Théorème 1 — aucun neurone ne calcule le XOR
 
@@ -76,6 +84,8 @@ AND: mistakes per epoch = [2, 3, 3, 2, 2, 3, 2, 1, 0]
 OR: mistakes per epoch = [3, 1, 2, 2, 1, 0]
 XOR: mistakes per epoch = [4, 4, 4, 4, 4, ...]
 ```
+
+<Figure src="perceptron_bound.svg" alt="La borne d'erreurs R^2/gamma^2 selon la marge : explosion hyperbolique quand gamma fond" caption="La borne de Novikoff, tracee : avec R = 1, un separateur a la marge gamma coute au plus 1/gamma^2 erreurs. Une marge epaisse (gamma = 1) apprend en une mise a jour ; une marge fine comme rasoir (gamma = 0,1) en demande cent. Le perceptron n'apprend jamais plus vite que la geometrie des donnees ne le permet." />
 
 ## Théorème 2 — le théorème de convergence de Novikoff
 

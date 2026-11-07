@@ -39,6 +39,16 @@ flowchart LR
 
 *La boucle de l’apprentissage par renforcement : l’agent agit, l’environnement répond par un nouvel état et une récompense.*
 
+<Figure src="td_bootstrap.svg" alt="Valeurs TD(0) 0.5^i le long d'une chaine de dix pas vers la vraie valeur 1 : les estimations amorcees partent pessimistes et grimpent geometriquement" caption="Le marche de TD, dessine : l'agent n'a pas encore atteint la recompense, donc V(s_i) = 0.5^i sous-estime le vrai 1 - la valeur de chaque etat vaut la moitie de celle du suivant (l'equation de Bellman). La correction formelle (tdIter_error) montre l'erreur retrecir geometriquement a chaque iteration ; l'image est le meme fait, un point par etat." />
+
+<Figure src="vi_contractions.svg" alt="L'erreur vers la valeur optimale retombe geometriquement par balayage, plus vite pour gamma = 0,5" caption="L'iteration de valeur est une contraction : chaque balayage multiplie l'ecart au point fixe V* par gamma au plus (le theoreme du chapitre). gamma = 0,5 l'atteint en quelques balayages ; gamma = 0,9 met dix fois plus de temps - le prix a payer pour se soucier de l'avenir lointain." />
+
+<Creators fr slugs="sutton" />
+
+
+<Figure src="arch_rl.svg"
+caption="Actor-critic : politique et valeur dans la boucle de l'environnement"
+ />
 ## Par les valeurs : Q-learning
 
 La **valeur d'action** $Q(s,a)$ est le retour espéré après avoir pris $a$ en $s$ puis agi au mieux. Elle satisfait l'**équation de Bellman** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Le Q-learning en fait une mise à jour vers une **cible** $r+\gamma\max_{a'}Q(s',a')$.
@@ -54,6 +64,13 @@ Deux faits exacts, prouvés pour tout anneau commutatif :
 - `valueIter_error` : appliquer répétitivement la mise à jour de Bellman $v\leftarrow r+\gamma v$ réduit l'erreur d'exactement $\gamma$ à chaque balayage ; après $k$ balayages elle vaut $\gamma^k$ fois l'erreur initiale. C'est le cœur de la convergence de l'itération de valeur (ici le cas d'un seul état ; le théorème général dit que l'opérateur de Bellman est une $\gamma$-contraction).
 - `bellman_fixed` : le point fixe est $r/(1-\gamma)$.
 - `tdUpdate_error` : une mise à jour $Q\leftarrow Q+\eta(\text{cible}-Q)$ multiplie la distance à la cible par $1-\eta$. Pour $0<\eta\le1$, elle se rapproche de la cible sans la dépasser.
+
+Composée $k$ fois contre une cible fixe, la mise à jour TD multiplie l’erreur par $(1-\eta)^k$ — exactement :
+
+```lean file=Ch13/Rl.lean#td_iter
+```
+
+`tdIter_error` est la composition de `tdUpdate_error` par récurrence : pour $0\le\eta\le 1$, l’estimation converge **géométriquement** vers la cible. C’est l’arithmétique exacte de la boucle interne du Q-learning. (Le théorème complet de convergence stochastique — cibles mouvantes, exploration, pas de Robbins–Monro — demande un modèle de bruit et vit hors du périmètre algébrique du cours.)
 
 ## Par la politique : REINFORCE
 

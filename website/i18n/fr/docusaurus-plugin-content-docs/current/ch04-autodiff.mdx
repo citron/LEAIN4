@@ -24,6 +24,8 @@ title: "Chapitre 4 — Réseaux profonds et différentiation automatique"
 
 Au chapitre 3, nous avons calculé à la main le gradient d'un réseau à 2 couches. Pour dix couches, ou un Transformer, personne ne le fait : l'ordinateur applique mécaniquement la règle de dérivation en chaîne. C'est la **différentiation automatique** (autodiff), le moteur de tous les frameworks de deep learning. Dans ce chapitre nous en construisons un en Lean, **et nous démontrons qu'il est correct**.
 
+<Creators fr slugs="werbos,rumelhart" />
+
 ## Expressions
 
 Nous décrivons un calcul comme un arbre d'expression sur $n$ variables d'entrée (les paramètres).
@@ -47,6 +49,8 @@ flowchart LR
 :::tip[Coin Lean : types inductifs et récursion structurelle]
 `Expr` est un type `inductive` : une valeur est construite par l'un des constructeurs. Une fonction définie par filtrage sur chaque constructeur, qui ne s'appelle que sur des sous-expressions (comme `eval`), est *structurellement récursive* : Lean vérifie qu'elle termine, et les preuves à son sujet se font par `induction`.
 :::
+
+<Figure src="fd_drift.svg" alt="Erreur log2 de la difference centrale de sin selon l'exposant k : courbe en U en Float" caption="Pourquoi la derivee exacte, pas les differences finies en Float : la difference centrale de sin en x = 1, pas h = 2^-k - l'erreur de troncature O(h^2) fait tomber l'erreur (echelle log2) pendant la cancellation Float la fait remonter, dessinant un U au plancher vers 2^-52 : l'epsilon machine. Aucun choix de h n'echappe au mur ; la derivee symbolique du chapitre n'a pas ce plancher." />
 
 ## Qu'est-ce que « la dérivée » ?
 
@@ -112,6 +116,10 @@ Avec cette machinerie, la règle delta du chapitre 3 devient un corollaire : la 
 
 ```lean file=Ch04/Network.lean#delta_rule
 ```
+
+<Figure src="chain_stack.svg" alt="Le gradient à travers une pile de couches sigmoïdes décroît linéairement en L : (1/4)^L au pire, (0.5)^L en général" caption="Pourquoi la profondeur est une multiplication : chaque couche sigmoïde est un facteur au plus 1/4, donc le gradient de bout en bout décroît en ligne droite sur l'axe logarithmique. C'est le théorème de disparition du gradient en une image - et la raison pour laquelle ReLU (pente locale 1) a pris le relais." />
+
+<Figure src="relu_dead.svg" alt="Deux courbes : la ReLU vivante y = max(0,x) qui monte depuis l'origine, et la ReLU morte plate a zero sur tout l'axe" caption="La ReLU morte, dessinee : une unite dont les poids ont pousse l'entree toujours en negatif sort exactement 0 partout - le gradient de la ReLU vaut 0 sur toute cette demi-droite, donc aucun gradient de perte ne circule et l'unite ne se remet jamais (relu_grad, Ch04). L'initialisation n'est pas cosmetique : elle decide combien d'unites restent vivantes." />
 
 ## Des réseaux de profondeur quelconque
 

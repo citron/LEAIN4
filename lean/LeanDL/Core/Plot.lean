@@ -5,6 +5,10 @@ Used by the demos to produce the figures of the book.
 -/
 
 namespace LeanDL.Plot
+/-- XML-escape a string before it is placed inside SVG text elements. -/
+def esc (s : String) : String :=
+  ((s.replace "&" "&amp;").replace "<" "&lt;").replace ">" "&gt;"
+
 
 /-- A scatter plot of several named point sets on a square `[lo, hi]²` canvas. -/
 def scatterSvg (size : Nat) (lo hi : Float) (title : String)
@@ -18,10 +22,10 @@ def scatterSvg (size : Nat) (lo hi : Float) (title : String)
   for (_, color, pts) in series do
     for (x, y) in pts do
       out := out ++ s!"<circle cx=\"{sx x}\" cy=\"{sy y}\" r=\"2.2\" fill=\"{color}\" fill-opacity=\"0.65\"/>\n"
-  out := out ++ s!"<text x=\"6\" y=\"{size + 20}\">{title}</text>\n"
+  out := out ++ s!"<text x=\"6\" y=\"{size + 20}\">{esc title}</text>\n"
   let mut lx := 0.0
   for (name, color, _) in series do
-    out := out ++ s!"<circle cx=\"{s - 150 + lx}\" cy=\"{s + 16}\" r=\"4\" fill=\"{color}\"/><text x=\"{s - 142 + lx}\" y=\"{s + 20}\">{name}</text>\n"
+    out := out ++ s!"<circle cx=\"{s - 150 + lx}\" cy=\"{s + 16}\" r=\"4\" fill=\"{color}\"/><text x=\"{s - 142 + lx}\" y=\"{s + 20}\">{esc name}</text>\n"
     lx := lx + 75.0
   return out ++ "</svg>\n"
 
@@ -49,10 +53,10 @@ def histSvg (w h : Nat) (lo hi : Float) (bins : Nat) (title : String)
       out := out ++ s!"<rect x=\"{i.toFloat * bw + 1.0}\" y=\"{hf - bh}\" width=\"{bw - 2.0}\" height=\"{bh}\" fill=\"{color}\" fill-opacity=\"0.5\"/>\n"
   out := out ++ s!"<line x1=\"0\" y1=\"{hf}\" x2=\"{w}\" y2=\"{hf}\" stroke=\"#555\"/>\n"
   out := out ++ s!"<text x=\"4\" y=\"{h + 20}\">{lo}</text><text x=\"{w - 28}\" y=\"{h + 20}\">{hi}</text>\n"
-  out := out ++ s!"<text x=\"{w / 2 - 80}\" y=\"{h + 20}\">{title}</text>\n"
+  out := out ++ s!"<text x=\"{w / 2 - 80}\" y=\"{h + 20}\">{esc title}</text>\n"
   let mut lx := 0.0
   for (name, color, _) in series do
-    out := out ++ s!"<rect x=\"{wf - 150.0 + lx}\" y=\"6\" width=\"10\" height=\"10\" fill=\"{color}\"/><text x=\"{wf - 136.0 + lx}\" y=\"16\">{name}</text>\n"
+    out := out ++ s!"<rect x=\"{wf - 150.0 + lx}\" y=\"6\" width=\"10\" height=\"10\" fill=\"{color}\"/><text x=\"{wf - 136.0 + lx}\" y=\"16\">{esc name}</text>\n"
     lx := lx + 70.0
   return out ++ "</svg>\n"
 
@@ -90,11 +94,11 @@ def lineSvg (w h : Nat) (xlo xhi ylo yhi : Float) (title xlabel ylabel : String)
     out := out ++ s!"<polyline clip-path=\"url(#c)\" fill=\"none\" stroke=\"{color}\" stroke-width=\"2\" points=\"{path}\"/>\n"
   let mut row := 0.0
   for (name, color, _) in series do
-    out := out ++ s!"<rect x=\"{ml + pw - 150.0}\" y=\"{mt + 8.0 + row}\" width=\"12\" height=\"4\" fill=\"{color}\"/><text x=\"{ml + pw - 132.0}\" y=\"{mt + 14.0 + row}\">{name}</text>\n"
+    out := out ++ s!"<rect x=\"{ml + pw - 150.0}\" y=\"{mt + 8.0 + row}\" width=\"12\" height=\"4\" fill=\"{color}\"/><text x=\"{ml + pw - 132.0}\" y=\"{mt + 14.0 + row}\">{esc name}</text>\n"
     row := row + 16.0
-  out := out ++ s!"<text x=\"{ml}\" y=\"16\" font-weight=\"bold\">{title}</text>\n"
-  out := out ++ s!"<text x=\"{ml + pw / 2.0}\" y=\"{h.toFloat - 6.0}\" text-anchor=\"middle\">{xlabel}</text>\n"
-  out := out ++ s!"<text transform=\"translate(14,{mt + ph / 2.0}) rotate(-90)\" text-anchor=\"middle\">{ylabel}</text>\n"
+  out := out ++ s!"<text x=\"{ml}\" y=\"16\" font-weight=\"bold\">{esc title}</text>\n"
+  out := out ++ s!"<text x=\"{ml + pw / 2.0}\" y=\"{h.toFloat - 6.0}\" text-anchor=\"middle\">{esc xlabel}</text>\n"
+  out := out ++ s!"<text transform=\"translate(14,{mt + ph / 2.0}) rotate(-90)\" text-anchor=\"middle\">{esc ylabel}</text>\n"
   return out ++ "</svg>\n"
 
 /-- A heat map of a matrix with entries in `[0, 1]`; the numbers are written in the cells. -/
@@ -106,7 +110,7 @@ def heatSvg (cell : Nat) (title rowLabel colLabel : String) (m : Array (Array Fl
   let h := rows.toFloat * c + 70.0
   let mut out := s!"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {w} {h}\" font-family=\"sans-serif\" font-size=\"11\">\n"
   out := out ++ s!"<rect width=\"{w}\" height=\"{h}\" fill=\"white\"/>\n"
-  out := out ++ s!"<text x=\"50\" y=\"16\" font-weight=\"bold\">{title}</text>\n"
+  out := out ++ s!"<text x=\"50\" y=\"16\" font-weight=\"bold\">{esc title}</text>\n"
   for i in [0:rows] do
     out := out ++ s!"<text x=\"44\" y=\"{30.0 + i.toFloat * c + c / 2.0 + 4.0}\" text-anchor=\"end\">{i}</text>\n"
     for j in [0:cols] do
@@ -117,8 +121,8 @@ def heatSvg (cell : Nat) (title rowLabel colLabel : String) (m : Array (Array Fl
     out := out ++ "\n"
   for j in [0:cols] do
     out := out ++ s!"<text x=\"{50.0 + j.toFloat * c + c / 2.0}\" y=\"{44.0 + rows.toFloat * c}\" text-anchor=\"middle\">{j}</text>"
-  out := out ++ s!"\n<text x=\"{50.0 + cols.toFloat * c / 2.0}\" y=\"{h - 6.0}\" text-anchor=\"middle\">{colLabel}</text>\n"
-  out := out ++ s!"<text transform=\"translate(10,{30.0 + rows.toFloat * c / 2.0}) rotate(-90)\" text-anchor=\"middle\">{rowLabel}</text>\n"
+  out := out ++ s!"\n<text x=\"{50.0 + cols.toFloat * c / 2.0}\" y=\"{h - 6.0}\" text-anchor=\"middle\">{esc colLabel}</text>\n"
+  out := out ++ s!"<text transform=\"translate(10,{30.0 + rows.toFloat * c / 2.0}) rotate(-90)\" text-anchor=\"middle\">{esc rowLabel}</text>\n"
   return out ++ "</svg>\n"
 
 end LeanDL.Plot

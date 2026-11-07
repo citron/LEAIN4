@@ -1,0 +1,211 @@
+---
+sidebar_position: 19
+title: "Chapter 18 — Efficiency: quantization, MoE, distillation, scaling"
+---
+
+
+# Chapter 18 — Efficiency: what the deployed models do, proved
+
+:::tip[TL;DR]
+**In short.** The last mile of a modern model is not architecture, it is *efficiency*: pack the weights into 8 bits, route tokens to a few experts of a huge layer, teach a small student from a big teacher, and budget data and parameters by scaling laws. Each of these has one load-bearing inequality, and this chapter proves all four on exact `Rat`: quantization errs by less than one grid step (round-to-nearest: by at most half a step); the router collision loss $\sum_i p_i^2$ is bounded below by $1/E$ and a collapsed router pays $E$ times the floor; distillation's cross-entropy is the teacher's entropy **plus** a nonnegative KL; and the data scaling law $C/N$ is strictly decreasing, doubling the budget halving the excess.
+**New words, in simple terms:**
+
+- **Quantization**: Replace each weight by the nearest point of a coarse grid — 256 levels instead of 32-bit floats. The grid step $s$ is the price, and the theorem says what it buys.
+- **Mixture of experts (MoE)**: Each token is routed to a weighted few of $E$ experts. The load-balance loss $\sum_i p_i^2$ punishes a router that favors some experts.
+- **Distillation**: Train the student on the teacher's *soft* output; the loss is $\text{CE}(\text{teacher}, \text{student})$, and the theorem pins its floor at the teacher's entropy.
+- **Scaling law**: Loss as a function of the budget: $L(N) = L_{\inf} + C/N$. The theorem is its shape — decreasing, with a halving rule — not its coefficients.
+:::
+
+Chapters 0–17 build models that *learn*. A model that ships must also be small, fast, and affordable — and every deployment trick in the industry stands on one inequality. This chapter proves the four that matter: they are all elementary on `Rat` (no analysis, no measure theory), and their statements are exactly the folklore of production machine learning.
+
+
+<Figure src="arch_moe.svg"
+caption="Mixture of experts: the router keeps k of E experts per token"
+ />
+## Quantization: the grid and its error
+
+```lean file=Ch18/Efficiency.lean#quant
+```
+
+`quant s x` snaps $x$ to the grid $s\mathbb{Z}$ by flooring, `roundq s x` to the *nearest* point. Three theorems:
+
+**The floor error is exactly one cell** (`quant_le`, `quant_lt`, `quant_err_lt`): $\text{quant}\;s\;x \le x < \text{quant}\;s\;x + s$, so $|x - \text{quant}\;s\;x| < s$. The proof is `Rat.floor_le` and `Rat.lt_floor_add_one` multiplied by the positive step — the whole content of the INT8 datasheet, in nine lines.
+
+**Round-to-nearest pays half** (`roundq_err_le`): $|x - \text{roundq}\;s\;x| \le s/2$. The nearest point is at most half a cell away: rounding buys a factor 2 over flooring, for free, and the bound is attained (a point midway between grid points pays exactly $s/2$). The proof sandwiches the error between $-s/2$ and $s/2$ using `Rat.floor_le` on $x/s + 1/2$.
+
+<Figure src="quant_grid.svg" alt="Sawtooth of the rounding error x - roundq(x) on a grid of step 1, oscillating between the drawn bounds -1/2 and +1/2" caption="roundq_err_le, drawn: round-to-nearest on a grid of step s leaves a sawtooth error that never escapes [-s/2, +s/2] - the bound is attained exactly at the grid midpoints. Every weight in a quantized model pays at most s/2, which is why the step size (not the bit count alone) is what the error bound speaks about." />
+
+**Quantizing is idempotent** (`quant_quant`): $\text{quant}\;s\;(\text{quant}\;s\;x) = \text{quant}\;s\;x$. Grid points are fixed: a second quantization pass changes nothing, which is why a quantized model can be re-saved losslessly. The proof cancels $s$ against $s^{-1}$ (`Rat.inv_mul_cancel`) so the floor of an integer is itself.
+
+The honest limits: this is the *scalar* theory. Real INT8 quantization also clips outliers (a range-fitting problem, not a floor problem), quantizes activations (which move, so their statistics need calibration), and the network's output error is the *composition* of many quantized layers — bounded by the drift machinery of Chapter 5, not by one grid. What is proved here is the atom every one of those arguments starts from.
+
+<Figure src="quantization.svg" alt="Sawtooth quantization error of the floor grid (in [0, s)) and the round grid (in (-s/2, s/2])" caption="The two error profiles of the proved bounds: the floor grid pays a full cell, the round grid pays half." />
+
+## Mixture of experts: the collision floor
+
+```lean file=Ch18/Efficiency.lean#balance
+```
+
+The router gives expert $i$ a weight $p_i \ge 0$ with $\sum_i p_i = 1$. The load-balance loss is $\sum_i p_i^2$ — the probability that two independent routings pick the *same* expert, which is exactly why it punishes favoritism.
+
+**The floor is $1/E$** (`balance_ge`): for any routing, $\sum_i p_i^2 \ge 1/E$, with equality at the uniform router. The proof is one line of algebra dressed as a sum of squares: expand $\sum_i (p_i - 1/E)^2 \ge 0$ using `vsum_add`, `vsum_smul`, `vsum_const` from `Core/Sum`, and the cross term collapses against $\sum_i p_i = 1$. This is the Cauchy–Schwarz / Jensen fact every MoE paper quotes, proved from the field axioms.
+
+**Collapse pays $E$ times the floor** (`balance_collapse`): the collapsed router `oneAt0` — all mass on expert 0 — is a genuine distribution (`vsum_oneAt0`, by induction over `Fin (E + 1)`), and its collision loss is exactly $1 = E \cdot (1/E)$. A collapsed router is $E$ times more expensive on the balance loss *and* leaves $E-1$ experts idle: the floor is attained at uniform and the loss is unbounded above in the collapsed corner. No hypothesis is missing from `balance_ge`: it is the whole story.
+
+**The floor survives the full router matrix** (`frac_sum`, `balancing_ge`). Real load-balancing losses are not computed on a single weight vector: they are computed on the *fraction of tokens* $f_i$ routed to expert $i$ over a batch, and the auxiliary loss is $E\cdot\sum_i f_i^2$. The floor is a theorem about the whole routing matrix: if every token's weights are normalised, then $\sum_i f_i = 1$ — per-token normalisation, `vsum_comm` to exchange the two finite sums, and the double sum telescopes to $rac1B\sum_k 1 = 1$ — so `balance_ge` applies and the balancing loss is $\ge 1$ for **any** router, however degenerate or token-dependent.
+
+```lean file=Ch18/Efficiency.lean#routing
+```
+
+The demo makes the curve visible: $E = 8$ experts, floor $0.125$; uniform scores $0.125$, a skewed router $0.23$, a collapsed router $1.0$.
+
+<Figure src="moe_balance.svg" alt="Collision probability E times sum p squared versus router skew, starting at the floor 1 for the uniform router" caption="Skew buys specialization and pays in collisions: E * sum p^2 rises from the proved floor 1 as the router gets uneven." />
+
+<Figure src="scaling_shape.svg" alt="Training loss curve L(N) = Linf + c^N (L0 - Linf) falling geometrically from 4 toward the flat floor Linf = 1.5" caption="The train_decay theorem in one line: with c = 0.9 the loss falls geometrically toward the irreducible floor Linf - each decade of scale buys a fixed multiplicative dent in (L - Linf), never a reach of the floor. The shape the scaling laws measure is exactly this geometric approach, and the floor is what extra data cannot fix." />
+
+## Distillation: the floor is the teacher's entropy
+
+```lean file=Ch18/Efficiency.lean#distill
+```
+
+The student $s$ is trained on the teacher's soft distribution $t$ by minimizing $\text{CE}(t, s)$. Chapter 16 already proved the identity `Dist.crossEntropy_eq_entropy_add_kl`: $\text{CE}(t, s) = H(t) + \text{KL}(t \,\|\, s)$, and `Dist.kl_nonneg` gives $\text{KL} \ge 0$. Two theorems fall out in one line each:
+
+**The distillation loss is at least the teacher's entropy** (`distill_ge_entropy`): $H(t) \le \text{CE}(t, s)$, for every student. The floor is $H(t)$: a 4-class teacher with entropy $0.85$ bits nats cannot be distilled below $0.85$ — a student at loss $1.39$ is not "close", it is at chance. The gap *is* the KL: read a distillation curve as $H(t) + \text{KL}$, never as a raw number.
+
+**The teacher distills to its own entropy** (`distill_teacher`): $\text{CE}(t, t) = H(t)$, because $\text{KL}(t \,\|\, t) = 0$. The floor is attained, so the inequality is tight, and exercise 3 (Chapter 16) already showed a student can *match* the teacher's entropy.
+
+The demo distills for real: a 200-step SGD loop on the soft cross-entropy, whose gradient is $S - T$ (Chapter 5's softmax cross-entropy, verbatim), drives the student from uniform to the teacher, KL to $0$, loss to exactly $H(t)$.
+
+## Scaling laws: the shape, proved
+
+```lean file=Ch18/Efficiency.lean#scaling
+```
+
+Empirically (Kaplan et al., Chinchilla), loss follows power laws in the budget: $L(N) = L_{\inf} + C/N$ in data, similar laws in parameters and compute. Proving the coefficients is impossible — they are measured. Proving the *shape* is easy and is what the law is *for*:
+
+**More data is strictly better** (`data_scale`, via `inv_antitone`): $N < N'$ implies $C/N' < C/N$ for $C > 0$: the loss curve never rises. The proof is $N < N' \Rightarrow 1/N' < 1/N$ (invert, multiply by $a b > 0$), then multiply by $C$.
+
+**Doubling halves the excess** (`data_scale_double`): $C/(2N) = \tfrac12 \cdot C/N$, an identity. The "doubling the dataset halves the excess loss" rule of thumb is arithmetic, not folklore.
+
+**Optimization decay is exponential** (`train_decay`): after $t$ steps with contraction $0 \le c \le 1$, the excess loss is $c^t (L_0 - L_{\inf})$, between $0$ and $L_0 - L_{\inf}$ — `Ch05.powN_le_one` read as a scaling curve. This is why *steps* buy exponential improvement and *data* buys only power-law improvement: the two curves on the same plot have opposite curvature, and the theorem explains the industry rule "if the curve is flat, buy data, not steps".
+
+## Experiments
+
+`lake exe ch18` prints the numeric face of the four theorems, on `Float`:
+
+- **Quantization**, grid $s = 2.4/255 \approx 0.009$ (an INT8 range of $\pm 1.2$): worst floor-quantization error `0.007 < s`, worst round-to-nearest error `0.005 = s/2`. Both bounds respected — the measured errors sit *under* the theorems, as they must.
+- **MoE**, $E = 8$: floor $1/E = 0.125$; uniform `0.125` (attains it), skewed `0.23`, collapsed `1.0` — exactly $E$ times the floor, the `balance_collapse` line in numbers.
+- **Distillation**: teacher $T = [0.7, 0.2, 0.08, 0.02]$, $H(T) = 0.85$; a uniform student scores $\text{CE} = 1.39 = 0.85 + 0.53$, a peaked student $1.47 = 0.85 + 0.61$, the copy $0.85 = 0.85 + 0$. The identity $\text{CE} = H + \text{KL}$ holds to the printed digit on every row. Then 200 SGD steps: the student converges to $T$, KL to $0$, loss to $H(T)$ — and never below, `true` at every step.
+- **Scaling**, $L(N) = 0.10 + 16/N$: $N = 100 \to 800$ drives the excess $0.16 \to 0.02$; every doubling halves it, `data_scale_double` in a table.
+
+## Exercises
+
+1. Prove **quantization is monotone**: $x \le y$ implies $\text{quant}\;s\;x \le \text{quant}\;s\;y$ — a larger weight never quantizes to a smaller grid point.
+2. Prove **translation by a grid step translates the code by one**: $\text{quant}\;s\;(x + s) = \text{quant}\;s\;x + s$ — the grid is perfectly translation-invariant.
+3. Prove **the uniform router attains the floor exactly**: with $p_i = 1/E$, the collision loss is exactly $1/E$ — `balance_ge` is tight, not slack.
+
+4. Prove **the power law multiplies**: $	ext{powN}\;b\;(t+u) = 	ext{powN}\;b\;t \cdot 	ext{powN}\;b\;u$ — the algebra behind every scaling law: sums of exponents become products of factors, so doubling a duration multiplies the remaining-error factor by a constant.
+5. Prove **the distillation gap is exactly the KL**: $	ext{CE}(t, s) - H(t) = \mathrm{KL}(t \| s)$ — the entropy floor of `distill_ge_entropy` is one half of a two-sided identity, and the price of a wrong student is measured in exact nats.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch18/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch18/Exercises.lean#ex1
+```
+
+```lean file=Ch18/Exercises.lean#ex2
+```
+
+```lean file=Ch18/Exercises.lean#ex3
+```
+
+```lean file=Ch18/Exercises.lean#ex4
+```
+
+```lean file=Ch18/Exercises.lean#ex5
+```
+
+<details>
+<summary>Hint 1</summary>
+
+Rewrite the divisions as multiplications by the inverse (`Rat.div_def`), transport the inequality through $s^{-1} > 0$ (`Rat.inv_pos`, `Rat.mul_le_mul_of_nonneg_right`), apply `Rat.floor_monotone`, cast the integer inequality to `Rat` (`exact_mod_cast`), multiply back by $s \ge 0$.
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch18/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Show $(x + s)/s = x/s + 1$ (`Rat.add_mul`, `Rat.mul_inv_cancel`), then `Rat.floor_add_one` moves the $+1$ out of the floor, and the cast $(n+1) \cdot s = n \cdot s + s$ is `push_cast` plus `Rat.add_mul`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch18/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+The summand is the *constant* $(1/E) \cdot (1/E)$: `vsum_const` gives $E \cdot ((1/E) \cdot (1/E))$, and cancelling one $E$ against one inverse finishes.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch18/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Hint 4</summary>
+
+Induct on `u`. The base is `powN b 0 = 1` (reduce with `rw [powN]`, then `grind`). The step unfolds both `powN (· + 1)` (`rw [powN]`) and the induction hypothesis, then reassociates with `grind [Rat.mul_assoc]`.
+
+</details>
+
+<details>
+<summary>Hint 5</summary>
+
+Add `variable [LawfulLog]` (entropy and KL are stated over a lawful logarithm). The Core identity `Dist.crossEntropy_eq_entropy_add_kl t s` says `CE = H + KL`; subtracting `H` is one `grind`.
+
+</details>
+
+<details>
+<summary>Solution 4</summary>
+
+```lean file=Ch18/Solutions.lean#sol4
+```
+
+</details>
+
+<details>
+<summary>Solution 5</summary>
+
+```lean file=Ch18/Solutions.lean#sol5
+```
+
+</details>
+
+## What is and is not covered
+
+- **Scalar quantization only.** One number, one grid. Clip fitting, activation statistics, per-channel scales and the composed output error of a quantized network are quantization *engineering*; the atom they all assume — the grid error — is what is proved.
+- **The router is a vector, not a network.** `balance_ge` bounds any weight vector with $\sum p_i = 1$, so it covers every router's output on every token. It says nothing about *learning* $p$; the load-balance loss's gradient is $2p$ and the rest is Chapter 5's machinery.
+- **Distillation over finite distributions.** The identity $H(t) + \text{KL}$ is exact here; token-level distillation (sums over vocabularies and sequences) is the same identity summed, exactly as Chapter 17's per-sample InfoNCE sums to a batch.
+- **Shape, not coefficients.** $L(N) = L_{\inf} + C/N$ is the *model*; the theorems prove its monotonicity and the halving rule. The empirical constants, the joint compute law, and the Chinchilla parameter/data split are measurement, not theorem.
+
+## Next
+
+Chapter 16 built entropy, KL and cross-entropy; Chapter 17 spent them on learning. This chapter spent them on *deployment*: distillation's floor, the router's floor, the quantization cell, the scaling shape. Read the four statements as the industry's folklore with its receipts attached — that is the point of the whole course: the mathematics is the specification, Lean 4 is the proof.

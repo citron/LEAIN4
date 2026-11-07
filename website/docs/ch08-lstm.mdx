@@ -22,6 +22,14 @@ title: "Chapter 8 — LSTM and gated memory"
 
 Chapter 7 ended with a diagnosis: in a plain RNN the gradient is a product of $T$ factors $(1-h_s^2)\,w$, each of which is typically smaller than 1. The **Long Short-Term Memory** network (Hochreiter and Schmidhuber, 1997) changes the architecture so that the gradient has a path whose factors the network itself can set close to $1$.
 
+<Figure src="cell_hold.svg" alt="Cell state written 1 at t = 0: f = 1 carries it flat, f = 0.95 fades slowly, f = 0.5 collapses" caption="The cell state is the highway: a value written at t = 0 with factor f survives t steps as f^t. f = 1 (the gates open) carries it forever - the exact gradient path of the highway theorem; f = 0.95 fades in 40 steps; f = 0.5 is the plain-RNN collapse of Chapter 7 in one line. The LSTM learns f close to 1 for the steps it must remember." />
+
+<Creators slugs="hochreiter,schmidhuber" />
+
+
+<Figure src="arch_gru.svg"
+caption="GRU cell: the update gate z mixes, the reset gate r reads"
+ />
 ## The LSTM
 
 Besides the hidden state $h_t$ the LSTM carries a **cell state** $c_t$. Four small neural layers (the *gates*) read $h_{t-1}$ and $x_t$:
@@ -59,6 +67,8 @@ The line that matters is $c_t = f_t\odot c_{t-1} + i_t\odot g_t$: the memory is 
 
 ```lean file=Ch08/Lstm.lean#forward
 ```
+
+<Figure src="lstm_gates.svg" alt="The four building blocks of the LSTM cell: f and i are sigmoids in (0,1), the candidate tanh in (-1,1), f times the candidate is the gated update" caption="Every LSTM gate is one of these four curves. f = sigmoid decides the keep-ratio (0 keeps the memory, 1 rewrites it - the highway the gradient theorem uses), i = sigmoid the write-ratio, the tanh keeps the candidate bounded, and f * c~ is the multiply-add the whole update is made of." />
 
 ## The gradient has a highway
 
@@ -124,13 +134,89 @@ The same task as in Chapter 7: the label is the first bit of a random bit sequen
 
 What should we conclude? That better gradient flow is **not the only obstacle** in this task: finding the rule from scratch in a noisy long sequence is a hard optimisation problem even when the gradient reaches the first step, and a small curriculum solves it for both architectures. Everything here is a toy: 8 units, one seed, small budgets. The LSTM's advantage on real tasks (language, speech, long-range dependencies with structure) is well documented in the literature, but this tutorial's experiment does not demonstrate it, and we prefer to say so.
 
-## The GRU, briefly
+## The GRU, implemented
 
-The **gated recurrent unit** (Cho et al., 2014) merges the cell and hidden state and uses one gate $z_t$: $h_t = (1-z_t)\odot h_{t-1} + z_t\odot\tilde h_t$. The direct path from $h_{t-1}$ to $h_t$ has factor $1-z_t$, so the theorem above applies with $f_t = 1-z_t$.
+The **gated recurrent unit** (Cho et al., 2014) merges the cell and the hidden state: there is
+no separate memory line, the state itself is updated as a *convex mix* of the old state and a
+new candidate, gated by an update gate $z_t$ and a reset gate $r_t$ on the candidate:
+
+$$
+\begin{aligned}
+r_t &= \sigma(W_r[h_{t-1},x_t]+b_r) & &\text{reset gate}\\
+z_t &= \sigma(W_z[h_{t-1},x_t]+b_z) & &\text{update gate}
+\end{aligned}
+\qquad
+\begin{aligned}
+n_t &= \tanh(b_n + r_t \odot W_n h_{t-1} + W_x x_t) & &\text{candidate}\\
+h_t &= (1-z_t)\odot n_t + z_t \odot h_{t-1} & &\text{state}
+\end{aligned}
+$$
+
+Two gates per unit instead of four, about a quarter fewer parameters than the LSTM for the
+same width — and the same trick. The direct path from $h_{t-1}$ to $h_t$ has factor $z_t$:
+the state update is *exactly* the additive recurrence $c_{t+1} = f_t c_t + u_t$ of the theorem,
+with $f_t := z_t$ and $u_t := (1-z_t)\,n_t$. The highway is a **product of update gates**:
+
+```lean file=Ch08/CellPath.lean#gru
+```
+
+The implementation follows the equations on flat arrays, like the LSTM's, and the backward
+pass is hand-written gate by gate; `lake exe gru` checks all of its partial derivatives
+against central finite differences (maximum error printed as 0.000000 over
+`nParams nh` = 329 parameters at `nh = 8`):
+
+```lean file=Ch08/Gru.lean#forward
+```
+
+```lean file=Ch08/Gru.lean#bptt
+```
+
+The update-gate bias starts at $0.5$ (the analogue of the LSTM's forget bias $=1$): the
+state path starts mostly open.
+
+### The gate is a theorem
+
+The GRU's defining equation is a **convex combination**: $h_t = z_t\,h_{t-1} + (1-z_t)\,n_t$
+with $z_t \in [0,1]$ — a weighted average of the old state and the candidate. That is not
+a detail, it is a guarantee, and it is proved over exact $\mathbb{Q}$:
+
+```lean file=Ch08/Gru.lean#gru_bound
+```
+
+If the old state and the candidate live in $[-M, M]$, the new state stays in $[-M, M]$ —
+and by induction, **every hidden state of every sequence** carries the bound. The
+hypotheses are exactly what the cell computes: $\tanh$ is bounded by 1, the sigmoid is a
+probability. This is the exact-mathematics certificate behind the demo observation that
+hidden activations never blow up — and combined with `drift_bound_seq` (Core), a `Float`
+GRU run, where every update carries a rounding perturbation, tracks the exact dynamics
+within $T\varepsilon$ after $T$ steps.
+
+### What it measures
+
+`lake exe gru` first checks every partial derivative of the 329-parameter BPTT against
+central finite differences: **maximum error $2\cdot 10^{-8}$** (printed as 0.000000) — the
+hand-written backward pass is right. Then, on the gradient sizes (30 steps, random weights),
+`‖∂L/∂h_t‖` decays slowly along the state path instead of collapsing like the plain RNN of
+Chapter 7 — the carousel at work.
+
+On the **memory task** (the label is the first bit of a random sequence), the same curriculum
+protocol as the LSTM (`lake exe gru exp`: 8 units, Adam, learning rate $0.005$, 1500 steps
+per stage, fresh batches of 32, stages $T = 10, 20, 30, 40$, 300 test sequences):
+
+| $T$ | 10 | 20 | 30 | 40 |
+|-----|----|----|----|----|
+| GRU (curriculum) | 100 % | 100 % | 100 % | 100 % |
+| LSTM (curriculum, `lake exe lstm curr`) | 100 % | 100 % | 100 % | 100 % |
+
+**The GRU solves the task at every stage with half the gates** — matching the LSTM, at
+about a quarter fewer parameters per unit. Without the curriculum (plain training at a
+fixed $T$) the GRU stays near chance at $T \ge 20$, exactly like the LSTM and the RNN:
+on this task the curriculum, not the gate count, is what makes the difference. Everything
+is a toy: 8 units, one seed, small budgets.
 
 ## Exercises
 
-1. Implement the GRU on arrays and check its gradient with finite differences.
+1. Implement the GRU on arrays and check its gradient with finite differences. (Done: it is in `lean/LeanDL/Ch08/Gru.lean`.)
 2. Prove `prodF_ge` and `prodF_le_one` for an arbitrary ordered field instead of `Rat` (hint: the proof only uses a few order lemmas).
 3. Make the LSTM's forget-gate bias initial value a parameter. For $T=60$ with plain training, does $b_f = 2$ or $b_f = 0$ change the outcome?
 4. Combine the cell-path theorem with the gate dependence: write the full $\partial c_T/\partial c_0$ for a 2-step LSTM and identify the extra terms.
@@ -141,6 +227,9 @@ The **gated recurrent unit** (Cho et al., 2014) merges the cell and hidden state
 ```
 
 ```lean file=Ch08/Exercises.lean#ex2
+```
+
+```lean file=Ch08/Exercises.lean#ex3
 ```
 
 <details>
@@ -169,6 +258,21 @@ Recursion on `t`: the base case is `0 ≤ 1`; the step is `Rat.mul_nonneg` appli
 <summary>Solution 2</summary>
 
 ```lean file=Ch08/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Recursion on `t`: at `0` both sides are `1`; at `t+1` both sides are `w * (… t)`, so rewrite with the induction hypothesis.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch08/Solutions.lean#sol3
 ```
 
 </details>

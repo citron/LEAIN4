@@ -35,6 +35,12 @@ flowchart LR
 
 *Ligne du haut : le processus direct détruit les données. Ligne du bas : le réseau entraîné le défait pas à pas pour générer de nouvelles données.*
 
+<Figure src="snr_decay.svg" alt="alpha_bar_t en 0.92^t et le rapport signal/bruit alpha_bar/(1-alpha_bar) qui s'effondre plus vite" caption="Ce que l'echeancier direct detruit vraiment : le rapport signal/bruit alpha_bar_t / (1 - alpha_bar_t). alpha_bar decroit geometriquement (0.92^t) et le SNR s'effondre encore plus vite - a t = 20, x_t est du bruit pur. C'est la decroissance exacte que precise le theoreme de monotonie du chapitre." />
+
+
+<Figure src="arch_diffusion.svg"
+caption="Diffusion : bruit vers l'avant, un pas de débruitage vers l'arrière"
+ />
 ## Le processus direct et sa forme fermée
 
 Un pas de bruitage est
@@ -60,6 +66,15 @@ Pour entraîner à un instant aléatoire $t$, on ne simule donc pas $t$ pas. Nou
 - `noiseVar_from_clean` : des données propres ($v=0$) finissent avec une variance de bruit $1-\bar a^2$, qui tend vers $1$ quand $\bar a\to0$ : les données sont détruites.
 
 (Nous prouvons l'*algèbre des coefficients*. Le fait qu'une somme de gaussiennes indépendantes soit une gaussienne, qui transforme ces coefficients en énoncé sur des lois, n'est pas formalisé.)
+
+## Le processus direct est monotone, prouvé
+
+Un planning de diffusion est *conçu* pour que le bruit s’accumule : $lpha_t$ décroît avec $t$, donc $arlpha_t$ décroît, donc la variance de bruit $1-arlpha_t^2$ croît. Ce choix de conception est d’habitude un axiome du planning. C’est en fait un théorème de l’algèbre des pas : ajouter un pas de préservation de variance $(a,s)$ avec $0\le a\le 1$ à n’importe quelle chaîne de pas ne peut jamais diminuer la variance de bruit des données propres.
+
+```lean file=Ch12/Diffusion.lean#monotone
+```
+
+`noise_monotone` se lit ainsi : le coefficient de signal de tout le processus est `cumA l` ; le nouveau pas le multiplie par $a\in[0,1]$, donc le signal au carré diminue ($a^2\le 1$ sur le facteur positif `cumA l * cumA l`, via `cumA_nonneg`), et $1-arlpha^2$ croît. Aucune théorie de la mesure gaussienne n’est nécessaire — la comptabilité de `noiseVar_closed` plus l’arithmétique monotone sur `Rat` suffisent. Ce qui n’est *pas* prouvé : que la composition de gaussiennes indépendantes soit gaussienne (cela vit dans la théorie de la mesure, hors du périmètre algébrique du cours — même frontière d’honnêteté qu’au chapitre 16 pour son modèle fini).
 
 ## Apprendre à débruiter
 

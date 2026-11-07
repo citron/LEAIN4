@@ -13,11 +13,8 @@ open Lean.Grind LeanDL.Ch01
 
 /-! ## Algebra of the dot product over `Rat` -/
 
-theorem sq_nonneg (x : Rat) : 0 ≤ x * x := by
-  rcases Rat.le_total (a := 0) (b := x) with h | h
-  · exact Rat.mul_nonneg h h
-  · have := Rat.mul_nonneg (a := -x) (b := -x) (by grind) (by grind)
-    grind
+/-- Moved to `LeanDL.sq_nonneg` (Core); kept as the chapter's name. -/
+theorem sq_nonneg (x : Rat) : 0 ≤ x * x := LeanDL.sq_nonneg x
 
 theorem dot_self_nonneg : ∀ {n : Nat} (x : Vec Rat n), 0 ≤ Vec.dot x x
   | 0, x => by simp only [Vec.dot]; grind

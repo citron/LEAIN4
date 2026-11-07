@@ -25,6 +25,12 @@ title: "Chapter 3 — The multi-layer perceptron"
 
 Chapter 2 ended with a wall: one neuron cannot compute XOR. The way around it is to **stack** neurons into layers.
 
+<Creators slugs="werbos,rumelhart,hinton,lecun" />
+
+
+<Figure src="arch_mlp.svg"
+caption="MLP: stacked dense layers, ReLU between, softmax on top"
+ />
 ## Layers and shapes
 
 A layer with `nin` inputs and `nout` neurons holds one weight row and one bias per neuron. Its weights are a matrix `Mat α nout nin`; the shapes appear in the type, so a layer cannot be fed a vector of the wrong size.
@@ -45,6 +51,34 @@ The last theorem says a layer is nothing new: it is `nout` neurons of Chapter 1 
 :::tip[Lean Corner: indexed inductive types]
 `MLP α n m` is a family of types indexed by the input size `n` and the output size `m`. The constructor `cons` only accepts a layer `n → h` followed by a network `h → m`, so the sizes of consecutive layers *must* match. A network with mismatched layers is not a runtime error: it is a program that does not type-check.
 :::
+
+## From checked shapes to flat tensors
+
+Every network above is indexed by its sizes — `Mat α m n` knows `m` and `n`. Production
+code does not: it flattens everything into one buffer (`28*28*3` floats for an image,
+`B*T*d` for a batch) and the layout — row-major strides — is a comment. `Core/Tensor.lean`
+is the missing middle: a tensor whose **shape lives in the type** but which is **stored
+flat**, exactly like the real thing, with a proved dictionary between the two worlds.
+
+```lean file=Core/Tensor.lean#tensor
+```
+
+The index arithmetic is the classical `i / n` and `i % n` of row-major strides, and the
+two round trips are theorems: flattening a matrix and reading it back with `row`/`col`
+gives the same entry (`toMat_fromMat`, `fromMat_toMat` — the second one is Euclidean
+division with remainder, `Nat.div_add_mod`, doing its job).
+
+The payoff is the bridge to the layer we actually run:
+
+```lean file=Core/Tensor.lean#matvec
+```
+
+`flatMulVec` is the loop an untyped fully-connected layer runs over a flat buffer.
+`flatMulVec_eq` proves it **is** the formal `Mat.mulVec` of chapter 3 — entry for entry,
+no product added, no product dropped. The shape-checked network and the flattened
+deployment code are the same computation.
+
+<Figure src="mlp_stairs.svg" alt="The sine curve and a piecewise-linear ReLU network bending it into straight segments" caption="What hidden ReLU units buy: each unit kinks one straight segment, and a handful of them bend any curve into staircase segments that converge on it (blue sin, orange a 4-unit fit - the exact decomposition the universal approximation proof builds). The MLP is the half-plane of Chapter 1 made piecewise-linear by bending at learned knots." />
 
 ## XOR, solved
 
@@ -68,6 +102,8 @@ flowchart LR
 ```
 
 Compare with Chapter 2: the same neurons and the same step activation, but two layers instead of one.
+
+<Figure src="depth_signal.svg" alt="log10 of the first-layer gradient against depth L: the typical 0.5^L line and the worst 0.25^L line both fall straight down" caption="Why depth is a double-edged sword: the gradient of the first layer is a product of L factors, so on the log scale it falls as a straight line (chain_stack, Ch04). The same product that composes features also eats the signal - the theme every later chapter answers (skip connections, LSTMs, residual blocks)." />
 
 ## Theorem — every Boolean function is a one-hidden-layer network
 

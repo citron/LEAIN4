@@ -25,6 +25,12 @@ title: "Chapitre 3 — Le perceptron multicouche"
 
 Le chapitre 2 s'est terminé sur un mur : un neurone seul ne peut pas calculer le XOR. Pour le contourner, on **empile** les neurones en couches.
 
+<Creators fr slugs="werbos,rumelhart,hinton,lecun" />
+
+
+<Figure src="arch_mlp.svg"
+caption="MLP : couches denses empilées, ReLU entre les couches, softmax en sortie"
+ />
 ## Couches et formes
 
 Une couche à `nin` entrées et `nout` neurones contient une ligne de poids et un biais par neurone. Ses poids forment une matrice `Mat α nout nin` ; les formes apparaissent dans le type, donc on ne peut pas donner à une couche un vecteur de mauvaise taille.
@@ -45,6 +51,35 @@ Le dernier théorème dit qu'une couche n'a rien de nouveau : ce sont `nout` neu
 :::tip[Coin Lean : types inductifs indexés]
 `MLP α n m` est une famille de types indexée par la taille d'entrée `n` et la taille de sortie `m`. Le constructeur `cons` n'accepte qu'une couche `n → h` suivie d'un réseau `h → m` : les tailles de couches consécutives *doivent* donc coïncider. Un réseau aux couches incompatibles n'est pas une erreur d'exécution : c'est un programme qui ne passe pas le typage.
 :::
+
+## Des formes vérifiées aux tenseurs à plat
+
+Tous les réseaux ci-dessus sont indexés par leurs tailles — `Mat α m n` connaît `m` et
+`n`. Le code de production, lui, ne connaît rien : il aplatit tout dans un seul tampon
+(`28*28*3` flottants pour une image, `B*T*d` pour un batch) et la disposition — les pas
+en ordre ligne par ligne — est un commentaire. `Core/Tensor.lean` est la pièce manquante :
+un tenseur dont la **forme vit dans le type** mais qui est **stocké à plat**, exactement
+comme le vrai, avec un dictionnaire prouvé entre les deux mondes.
+
+```lean file=Core/Tensor.lean#tensor
+```
+
+L'arithmétique des indices est le classique `i / n` et `i % n` des pas en ordre ligne par
+ligne, et les deux allers-retours sont des théorèmes : aplatir une matrice puis la relire
+avec `row`/`col` redonne la même entrée (`toMat_fromMat`, `fromMat_toMat` — le second
+n'est que la division euclidienne avec reste, `Nat.div_add_mod`).
+
+Tout l'intérêt est le pont vers la couche réellement exécutée :
+
+```lean file=Core/Tensor.lean#matvec
+```
+
+`flatMulVec` est la boucle qu'une couche entièrement connectée non typée fait sur le
+tampon à plat. `flatMulVec_eq` prouve que c'est **exactement** le `Mat.mulVec` formel du
+chapitre 3 — entrée par entrée, sans un produit ajouté ni perdu. Le réseau à formes
+vérifiées et le code aplatifié de déploiement sont le même calcul.
+
+<Figure src="mlp_stairs.svg" alt="La sinusoidale et un reseau ReLU par morceaux qui la plie en segments droits" caption="Ce qu'achetent unites ReLU cachees : chaque unite coude un segment droit, et quelques-unes plient n'importe quelle courbe en segments d'escalier qui convergent vers elle (bleu sin, orange une ajustement a 4 unites - la decomposition exacte que la preuve d'approximation universelle construit). Le MLP est le demi-plan du Ch1 rendu lineaire par morceaux par des noeuds d'ajustement appris." />
 
 ## Le XOR, résolu
 
@@ -68,6 +103,8 @@ flowchart LR
 ```
 
 Comparez avec le chapitre 2 : mêmes neurones et même activation échelon, mais deux couches au lieu d'une.
+
+<Figure src="depth_signal.svg" alt="log10 du gradient de la premiere couche en fonction de la profondeur L : les droites typique 0.5^L et pire cas 0.25^L plongent toutes les deux" caption="Pourquoi la profondeur est a double tranchant : le gradient de la premiere couche est un produit de L facteurs, donc sur l'echelle logarithmique il chute en ligne droite (chain_stack, Ch04). Le meme produit qui compose les features mange aussi le signal - le theme que chaque chapitre suivant adresse (connexions residuelles, LSTM, blocs residuels)." />
 
 ## Théorème — toute fonction booléenne est un réseau à une couche cachée
 

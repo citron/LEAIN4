@@ -1,0 +1,99 @@
+---
+sidebar_position: 20
+title: "Chapter 19 — Multimodal learning: two encoders, one loss"
+---
+
+# Chapter 19 — Multimodal learning: CLIP's symmetric loss, proved
+
+:::tip[TL;DR]
+**In short.** CLIP trains **two encoders** — an image tower and a text tower — into one shared embedding space, scored by a single dot product. The training signal is the **symmetric InfoNCE loss**: in a batch of $B$ pairs, every image is a query against the $B$ texts (its own text positive, the rest negatives) **and** every text is a query against the $B$ images; the loss is the **average of the two directions**. Four theorems, all built from Chapter 17's machine: the symmetric loss is $\ge 0$; a **collapsed** model pays the SAME floor $\log (n+1)$ in each direction, so the averaged floor is that same constant; the row and column of the batch are *both* the matched pair of Chapter 17 — with transposed scores ("two encoders, one dot product", made formal); and the 2×2 loss has the closed form $\tfrac12[\log(1+e^{x_1 y_2 - S}) + \log(1+e^{y_1 x_2 - S})]$ — two softplus gaps over the **same** positive $S = x_1 y_1$.
+
+**New words, in simple terms:**
+
+- **Multimodal model**: Two (or more) encoders — pixels, text, audio — mapped into ONE shared space so that a picture and its caption land near each other.
+- **Symmetric loss**: The model is asked twice, "which text matches this image?" and "which image matches this text?", and pays the average of both answers.
+- **Shared positive**: Both questions grade the SAME pair score $S = x_1 \cdot y_1$ — one cell of the batch matrix feeds both directions.
+- **Transposition**: The text-to-image direction is the image-to-image machine run on the transposed score matrix — no second loss function exists.
+:::
+
+Chapters 15 and 17 explained one embedding and one direction. Real deployed models — CLIP, SigLIP, BLIP — align **two** towers, and every practitioner knows the loss "by heart" as folklore: *average over both directions, watch it start at* $\log B$. This chapter proves the folklore. The machine is Chapter 17's verbatim; the new part is what the two orientations do to each other.
+
+<Figure src="clip_grid.svg" alt="2x2 batch matrix: the positive cell S = x1.y1 in green shared by both directions, the row negative x1.y2 and the column negative y1.x2 in red, the corner x2.y2 dashed out of the loss" caption="The whole CLIP step in one picture: the batch matrix has FOUR cells and the loss uses THREE. The shared positive S (green) is graded in both directions; the row query rejects x1.y2, the column query rejects y1.x2; the bottom-right corner is not scored at all. symm_matched is the closed form of exactly this matrix." />
+
+<Figure src="clip_symm.svg" alt="Two decaying curves: the symmetric CLIP loss against a gap g applied to both directions falls from 0.69 to zero; with one gap fixed at 2 the loss flattens at a floor near 0.13" caption="symm_matched, drawn: when BOTH mismatches lose by gap g, the symmetric loss is softplus(-g) and falls to 0. Fix one gap at 2 and widen the other: the loss flattens near softplus(-2)/2 = 0.13. A model good in one direction only is capped — the average punishes the weak direction. This is why CLIP needs BOTH alignments to improve, every step." />
+
+<Figure src="clip_floor.svg" alt="log B curve rising slowly from 0 at B = 1 to about 2.8 at B = 16: the collapsed-model floor grows with the batch" caption="symm_collapse, drawn: a collapsed model loses exactly log (n + 1) = log B in EACH direction, so the averaged loss starts at the same log B. Bigger batches do not just add gradient signal — they raise the starting line. Read your CLIP curve against this exact staircase: 0.69 at B = 2, 1.39 at B = 4, 2.08 at B = 8." />
+
+
+<Figure src="arch_clip.svg"
+caption="CLIP: image tower and text tower, one n-by-n similarity matrix"
+ />
+## The symmetric loss
+
+```lean file=Ch19/Multimodal.lean#symm
+```
+
+Each direction is Chapter 17's `infoNce` applied to the batch rows (`pairSample` builds a `Samples` record from raw vectors — query, positive, negatives). The symmetric loss is their average. The first fact is inherited in one line:
+
+```lean file=Ch19/Multimodal.lean#collapse
+```
+
+`symm_collapse` is the CLIP training curve's starting point: embed everything to the same vector and **both** directions collapse to the Ch17 floor `log (n + 1)` — and the average of two identical floors is that floor, *not* twice it. The demo prints it exactly: flat 2×2 scores give `0.69 = log 2`, flat 8×8 give `2.08 = log 8`. Bigger batches raise the floor: the number your curve must beat is $\log B$, proved, not folklore.
+
+## Two encoders, one dot product
+
+The formal heart: what *is* the text-to-image direction? It is the **same machine on transposed scores**.
+
+The row of the batch — image $x_1$ querying texts — has scores $(x_1 y_1,\; x_1 y_2)$: exactly Chapter 17's `matched` pair at `(hi, lo) = (x_1 y_1, x_1 y_2)`. The column — text $y_1$ querying images — has scores $(x_1 y_1,\; y_1 x_2)$: the matched pair at $(x_1 y_1, y_1 x_2)$. One positive, two orientations:
+
+```lean file=Ch19/Multimodal.lean#matched
+```
+
+`symm_matched` closes the 2×2 batch in one identity: the loss is the mean of two softplus gaps over the **shared** positive $S$. Both gradients improve the *same* cell $S$ — one against $x_1 y_2$, one against $y_1 x_2$. That is why the symmetric loss makes the single positive dominate the whole matrix, and it is why CLIP's temperature (the scale of $S$) behaves like Ch17's $\tau$: it scales both gaps at once.
+
+The last theorem says what "good in both directions" costs — and what it does *not* buy:
+
+If the positive beats both mismatches, the symmetric loss is $\le \log 2$: each direction is under the one-negative collapse floor by `matched_mono`. But $\log 2 > 0$: a model that is *right* is only certified **below the floor** — the loss never reports "perfect", it reports "below chance-with-one-negative". The demo samples 5000 random separated batches: 0 violations of the bound, numerically.
+
+## Reading a CLIP curve
+
+Three theorems, three diagnostics:
+
+1. **Starting line** `symm_collapse`: the curve starts at $\log B$ (0.69 at $B=2$, 2.08 at $B=8$). A run that starts *below* $\log B$ on step 0 is misreported (usually: the loss was averaged wrongly — the Ch19 average is over $2B$ directions, not $B$, not $2$).
+2. **Shape** `symm_matched`: the loss is a mean of softplus gaps, so it is smooth and convex in each gap — the long flat tail is the *weak* direction hitting its floor (the orange curve above: capped at 0.13). Fixing one modality without the other plateaus at exactly half a softplus.
+3. **Floor** `symm_le_log_two`: below $\log 2$ (for 2×2) both directions are already separated; the loss cannot certify more. Push the gaps, not the loss.
+
+## Exercises
+
+1. Prove the one-direction closed form: `infoNce 1 (pairSample x1 y1 (fun _ => y2)) = log (1 + exp (x1*y2 - x1*y1))` — combine `row_is_matched` with Ch17's `matched_loss`.
+2. From `infoNce_collapse` alone, conclude the averaged collapse floor `symm_collapse` for the both-directions collapsed batch.
+3. On paper: show that if one gap $g_1 \to \infty$ and the other stays at $c$, the symmetric loss tends to $\tfrac12 \log(1+e^{-c})$ — the plateau in the figure above. What does this say about hard-negative mining in one modality only?
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch19/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch19/Exercises.lean#ex1
+```
+
+```lean file=Ch19/Exercises.lean#ex2
+```
+
+<details>
+<summary>Hint 1</summary>
+
+`infoNce_ext τ hτ (row_is_matched x1 y1 y2)` rewrites the batch row into `infoNce ... (matched (x1*y1) (x1*y2))`; then `matched_loss` closes the goal.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+The collapsed batch's score vector is the constant `e * e`; so is `collapseSample (c := e*e)`'s. Feed the equality to `infoNce_ext`, apply `infoNce_collapse`, and average the two identical results.
+
+</details>
+
+## What this chapter does not prove
+
+- **No encoders here.** The theorems quantify over *scores*; an image tower producing $x_1$ is deep learning from Chapters 6–9, not this loss. The loss is proven for any functions that emit scores — that is the abstraction's strength.
+- **No SigLIP.** The sigmoid pairwise loss (replace softmax over negatives by independent sigmoids) is a different machine; Ch17's matched pair already IS its 2×2 special case, but the $B > 2$ closed form is left as an exercise for the reader.
+- **No temperature learning.** $\tau$ (here scaled into the scores, `τ = 1`) is a fixed parameter; its optimal value is a scaling-law question (Ch18), not a loss identity.
+- **Float gap.** The demo evaluates the same expressions in `Float`; the agreement (`log 8 = 2.08` exact to print precision) is rounding, not proof — same rule as every chapter.

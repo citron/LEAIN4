@@ -30,6 +30,10 @@ A **neuron** takes $n$ numbers $x_1,\dots,x_n$, computes a weighted sum plus a b
 
 $$ y = \varphi\Big(\sum_{i=1}^{n} w_i x_i + b\Big) = \varphi(w \cdot x + b). $$
 
+
+<Figure src="arch_neuron.svg"
+caption="A neuron: a weighted sum, then one nonlinearity"
+ />
 ## Vectors whose length is in the type
 
 We represent a vector of length $n$ as a function `Fin n → α`. The length is part of the type, so adding a 2-vector to a 3-vector is a *type error*, not a runtime bug.
@@ -55,6 +59,8 @@ The dot product is defined by recursion on the length:
 ```
 
 They are written for any scalar type: the step uses `≤`, sigmoid and tanh use an exponential `HasExp.exp`. With `α := Float`, `HasExp.exp` is `Float.exp`.
+
+<Figure src="neuron_halfplane.svg" alt="A boundary line w.x = b in the plane, with the firing region above it" caption="A single neuron is a half-plane: the equation w.x = b draws a straight boundary (blue) and the neuron fires exactly on one side of it (orange). AND, OR and the logic gates of this chapter are just positions of that line; XOR fails because no single line realizes it - the geometry of Chapter 2 in one picture." />
 
 ## The neuron
 
@@ -101,6 +107,8 @@ Before the activation, a neuron without bias is a linear map. The proof uses the
 
 ```lean file=Ch01/Neuron.lean#linear
 ```
+
+<Figure src="sigmoid_deriv.svg" alt="Sigmoid rising from 0 to 1, and its derivative a bell peaking at 1/4 at zero" caption="The sigmoid derivative is a bell of peak 1/4: sigma' = sigma(1 - sigma), maximized at 0 where sigma = 1/2. This single curve is the vanishing gradient of Chapter 4 in embryo - a stack of sigmoid layers multiplies factors that are at most 1/4, which is exactly why ReLU took over." />
 
 ## A property of the sigmoid
 

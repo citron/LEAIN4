@@ -1,7 +1,9 @@
-import LeanDL.Core.Vec
+import LeanDL.Core.Sum
 
 /-!
 # Chapter 5, part 3 — Normalisation
+
+`vsum`/`cnt` live in `Core/Sum`; this chapter adds the mean and proves centring.
 
 Layer normalisation first *centres* its input. We prove that centring works: the entries of
 `x - mean x` sum to zero.
@@ -13,15 +15,7 @@ open Lean.Grind
 
 variable {α : Type}
 
-/-- The scalar `n`, built by counting (avoids any cast lemma). -/
-def cnt [Add α] [OfNat α 0] [OfNat α 1] : Nat → α
-  | 0 => 0
-  | n + 1 => cnt n + 1
-
-/-- Sum of the entries. -/
-def vsum [Add α] [OfNat α 0] : {n : Nat} → Vec α n → α
-  | 0, _ => 0
-  | _ + 1, x => x 0 + vsum (fun i => x i.succ)
+open LeanDL (cnt vsum)
 
 section Laws
 

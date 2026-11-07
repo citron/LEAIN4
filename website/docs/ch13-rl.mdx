@@ -39,6 +39,16 @@ flowchart LR
 
 *The reinforcement-learning loop: the agent acts, the environment answers with a new state and a reward.*
 
+<Figure src="td_bootstrap.svg" alt="TD(0) values 0.5^i along a ten-step chain approaching the true value 1: the bootstrapped estimates start pessimistic and climb geometrically" caption="TD's bargain drawn: the agent has not reached the reward yet, so V(s_i) = 0.5^i underestimates the true 1 - every state's value is the next state's value halved (the Bellman equation). The formal fix (tdIter_error) shows the error shrinking geometrically with each iteration; the picture is the same fact, one dot per state." />
+
+<Figure src="vi_contractions.svg" alt="The error to the optimal value shrinking geometrically per sweep, faster for gamma = 0.5" caption="Value iteration is a contraction: each sweep multiplies the gap to the fixed point V* by at most gamma (the theorem of this chapter). gamma = 0.5 reaches it in a few sweeps; gamma = 0.9 needs about ten times longer - the price of caring about the far future." />
+
+<Creators slugs="sutton" />
+
+
+<Figure src="arch_rl.svg"
+caption="Actor-critic: policy and value networks in the environment loop"
+ />
 ## Value-based: Q-learning
 
 The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterwards. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.
@@ -54,6 +64,13 @@ Two exact facts, proved for any commutative ring:
 - `valueIter_error`: repeatedly applying the Bellman update $v\leftarrow r+\gamma v$ shrinks the error by exactly $\gamma$ each sweep, so after $k$ sweeps it is $\gamma^k$ times the initial error. This is the heart of why value iteration converges (the one-state case here; the general theorem is that the Bellman operator is a $\gamma$-contraction).
 - `bellman_fixed`: the fixed point is $r/(1-\gamma)$.
 - `tdUpdate_error`: one update $Q\leftarrow Q+\eta(\text{target}-Q)$ multiplies the distance to the target by $1-\eta$. For $0<\eta\le1$ it moves towards the target without overshooting.
+
+Compound a TD update $k$ times against a fixed target and the error is multiplied by $(1-\eta)^k$ — exactly:
+
+```lean file=Ch13/Rl.lean#td_iter
+```
+
+`tdIter_error` is the compounding of `tdUpdate_error` by induction: with $0\le\eta\le 1$ the estimate converges **geometrically** to the target. This is the exact arithmetic of Q-learning's inner loop. (The full stochastic convergence theorem — moving targets, exploration, Robbins–Monro step sizes — needs a noise model and lives outside this course's algebraic scope.)
 
 ## Policy-based: REINFORCE
 

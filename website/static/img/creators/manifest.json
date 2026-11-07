@@ -1,0 +1,222 @@
+[
+  {
+    "slug": "mcculloch",
+    "name": "Warren McCulloch",
+    "role": "neuron math model (McCulloch-Pitts, 1943)",
+    "file": "creators/mcculloch.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Warren McCulloch exists on Wikimedia Commons (no files in his categories; article has no image). Group photos he appears in are not portraits."
+  },
+  {
+    "slug": "rosenblatt",
+    "name": "Frank Rosenblatt",
+    "role": "perceptron (1958)",
+    "file": "creators/rosenblatt.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Frank_Rosenblatt.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 79057,
+    "commons_file": "File:Frank Rosenblatt.jpg"
+  },
+  {
+    "slug": "hebb",
+    "name": "Donald O. Hebb",
+    "role": "Hebbian learning (1949)",
+    "file": "creators/hebb.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Donald O. Hebb on Wikimedia Commons (File:Hebb.jpg is an FA Community Shield trophy, not Hebb; the GIF used on en.wikipedia is a non-free local file, not on Commons)."
+  },
+  {
+    "slug": "lecun",
+    "name": "Yann LeCun",
+    "role": "backprop in nets, LeNet CNN (1989)",
+    "file": "creators/lecun.jpg",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Yann_LeCun_-_2018_%28cropped%29.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 69095,
+    "commons_file": "File:Yann LeCun - 2018 (cropped).jpg"
+  },
+  {
+    "slug": "werbos",
+    "name": "Paul Werbos",
+    "role": "backprop invention (1974)",
+    "file": "creators/werbos.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:PaulWerbos-IJCNNseattle1991-07-08.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 93821,
+    "commons_file": "File:PaulWerbos-IJCNNseattle1991-07-08.jpg"
+  },
+  {
+    "slug": "rumelhart",
+    "name": "David Rumelhart",
+    "role": "backprop popularization (1986)",
+    "file": "creators/rumelhart.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:DavidRumelhart-IJCNNseattle1991-07-08.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 84644,
+    "commons_file": "File:DavidRumelhart-IJCNNseattle1991-07-08.jpg"
+  },
+  {
+    "slug": "hinton",
+    "name": "Geoffrey Hinton",
+    "role": "backprop, Boltzmann machines, deep learning",
+    "file": "creators/hinton.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Geoffrey_E._Hinton%2C_2024_Nobel_Prize_Laureate_in_Physics_%28cropped%29.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 57858,
+    "commons_file": "File:Geoffrey E. Hinton, 2024 Nobel Prize Laureate in Physics (cropped).jpg"
+  },
+  {
+    "slug": "fukushima",
+    "name": "Kunihiko Fukushima",
+    "role": "Neocognitron (1980)",
+    "file": "creators/fukushima.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No portrait of Kunihiko Fukushima on Wikimedia Commons (name search returns only places in Fukushima prefecture; his Wikipedia articles have no image)."
+  },
+  {
+    "slug": "hochreiter",
+    "name": "Sepp Hochreiter",
+    "role": "LSTM (1997)",
+    "file": "creators/hochreiter.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sepp_Hochreiter_1.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 126268,
+    "commons_file": "File:Sepp Hochreiter 1.jpg"
+  },
+  {
+    "slug": "schmidhuber",
+    "name": "Jürgen Schmidhuber",
+    "role": "LSTM (1997)",
+    "file": "creators/schmidhuber.jpg",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:J%C3%BCrgen_Schmidhuber%2C_2017_%28cropped%29.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 58618,
+    "commons_file": "File:Jürgen Schmidhuber, 2017 (cropped).jpg"
+  },
+  {
+    "slug": "goodfellow",
+    "name": "Ian Goodfellow",
+    "role": "GANs (2014)",
+    "file": "creators/goodfellow.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ian_Goodfellow_%28cropped%29.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 57913,
+    "commons_file": "File:Ian Goodfellow (cropped).jpg"
+  },
+  {
+    "slug": "kingma",
+    "name": "Diederik Kingma",
+    "role": "VAE (2013)",
+    "file": "creators/kingma.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Diederik Kingma on Wikimedia Commons (name matches are buildings/streets only)."
+  },
+  {
+    "slug": "welling",
+    "name": "Max Welling",
+    "role": "VAE (2013)",
+    "file": "creators/welling.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Max Welling on Wikimedia Commons; his Wikipedia articles have no image."
+  },
+  {
+    "slug": "sutton",
+    "name": "Richard Sutton",
+    "role": "reinforcement learning",
+    "file": "creators/sutton.jpg",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:SD_2025_-_Richard_Sutton_01_%28cropped%29.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 67682,
+    "commons_file": "File:SD 2025 - Richard Sutton 01 (cropped).jpg"
+  },
+  {
+    "slug": "barto",
+    "name": "Andrew Barto",
+    "role": "reinforcement learning",
+    "file": "creators/barto.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Andrew Barto on Wikimedia Commons (name matches are other people/places)."
+  },
+  {
+    "slug": "sejnowski",
+    "name": "Terrence Sejnowski",
+    "role": "Boltzmann machine (1985)",
+    "file": "creators/sejnowski.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Terrence Sejnowski on Wikimedia Commons (only a model diagram bears his name)."
+  },
+  {
+    "slug": "smolensky",
+    "name": "Paul Smolensky",
+    "role": "RBM/SMDT (1983)",
+    "file": "creators/smolensky.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Paul Smolensky on Wikimedia Commons (name matches are Moscow streets/cathedrals)."
+  },
+  {
+    "slug": "vaswani",
+    "name": "Ashish Vaswani",
+    "role": "Transformer (2017)",
+    "file": "creators/vaswani.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No freely-licensed portrait of Ashish Vaswani on Wikimedia Commons; his Wikipedia article has no image."
+  },
+  {
+    "slug": "sohl-dickstein",
+    "name": "Jascha Sohl-Dickstein",
+    "role": "diffusion origins (2015)",
+    "file": "creators/sohl-dickstein.jpg",
+    "license": null,
+    "source": null,
+    "found": false,
+    "reason": "No files of Jascha Sohl-Dickstein on Wikimedia Commons; his Wikipedia article has no image."
+  },
+  {
+    "slug": "bengio",
+    "name": "Yoshua Bengio",
+    "role": "sequence-to-sequence, attention (2014)",
+    "file": "creators/bengio.jpg",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Yoshua_Bengio_2019_cropped.jpg",
+    "found": true,
+    "reason": null,
+    "bytes": 82238,
+    "commons_file": "File:Yoshua Bengio 2019 cropped.jpg"
+  }
+]

@@ -21,11 +21,19 @@ title: "Chapter 2 — The perceptron, XOR and the first AI winter"
 :::
 
 
+<Creators slugs="rosenblatt" />
+
+
+<Figure src="arch_perceptron.svg"
+caption="The perceptron: one threshold unit drawing a line"
+ />
 ## History in one paragraph
 
 In 1958 Frank Rosenblatt introduced the **perceptron**: a threshold neuron together with a learning rule. In 1969 Marvin Minsky and Seymour Papert published *Perceptrons*, which analysed exactly what single-layer perceptrons can and cannot compute. The simplest example of what they cannot compute is **XOR**. Together with the disappointing results of other AI programmes (for example the 1973 Lighthill report in the UK), this contributed to the funding collapse of the mid-1970s known as the **first AI winter**. Historians agree the causes were several; the mathematical fact below is the technical core of the neural-network part of the story.
 
 <Figure src="xor.svg" alt="The four XOR points in the plane" caption="No straight line separates the two blue points from the two red points." />
+
+<Figure src="xor_points.svg" alt="Four XOR points: +1 at (0,0) and (1,1), -1 at (0,1) and (1,0), no straight line separates the colors" caption="The picture of Theorem 1: a single neuron draws one line, and the XOR points cannot be split by any line - the two positive corners sit on opposite sides of every line that separates the two negative ones. One hidden layer is not a luxury, it is the minimum." />
 
 ## Theorem 1 — no neuron computes XOR
 
@@ -76,6 +84,8 @@ AND: mistakes per epoch = [2, 3, 3, 2, 2, 3, 2, 1, 0]
 OR: mistakes per epoch = [3, 1, 2, 2, 1, 0]
 XOR: mistakes per epoch = [4, 4, 4, 4, 4, ...]
 ```
+
+<Figure src="perceptron_bound.svg" alt="The mistake bound R^2/gamma^2 against the margin: a hyperbolic blow-up as gamma shrinks" caption="Novikoff's bound, drawn: with R = 1, a separator at margin gamma costs at most 1/gamma^2 mistakes. A fat margin (gamma = 1) learns in one update; a razor-thin margin (gamma = 0.1) needs a hundred. The perceptron never learns faster than the geometry of the data allows." />
 
 ## Theorem 2 — Novikoff's convergence theorem
 

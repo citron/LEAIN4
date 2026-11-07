@@ -27,6 +27,14 @@ A dense layer on a $28\times 28$ image has $784$ weights *per neuron*, and has n
 
 <Figure src="conv.svg" alt="A kernel of length 3 sliding along an input of length 7" caption="Each output is a dot product of the kernel with one window of the input." />
 
+<Figure src="rf_growth.svg" alt="Receptive field size against depth: stacked 3x3 layers grow 2L+1 linearly while one wide 5x5 stays flat" caption="Stacked convolutions grow a receptive field linearly: L layers of 3x3 see 2L + 1 pixels, while a single 5x5 stays stuck at 5 (the composition identity proved in this chapter is exactly the reason). Depth buys context, with far fewer parameters than a wide kernel - the trade that makes deep CNNs deep." />
+
+<Creators slugs="lecun" />
+
+
+<Figure src="arch_cnn.svg"
+caption="CNN: convolutions shrink the map and grow the channels"
+ />
 ## One-dimensional convolution, with the shapes in the type
 
 We start in one dimension, where the proofs are short. A kernel of length $k+1$ slides over an input of length $m+k$ and produces exactly $m$ outputs. In Lean this arithmetic is part of the type, so a kernel that does not fit simply does not type-check.
@@ -59,6 +67,8 @@ The index `x ⟨i + j, _⟩` needs a proof that `i + j < m + k`. We supply it wi
 
 So the backward pass of a convolution is again a convolution-like operation: you do not need a new idea to train it.
 
+<Figure src="conv_window.svg" alt="An 8x8 grayscale input with a bright square: the 3x3 convolution window slides over it, each position a dot product" caption="The convolution in one picture: the network reads the image through a 3x3 window that slides everywhere, each position computing the same dot product (the weight sharing Conv3x3 encodes). The bright square lights up the window exactly where it covers it - that is what a learned filter detects." />
+
 ## A CNN for MNIST
 
 Now two dimensions. Our network: a $3\times 3$ convolution with 4 channels ($26\times 26$ outputs), ReLU, $2\times 2$ **max-pooling** (keep the largest of every $2\times2$ block, giving $13\times 13$), a dense layer to 10 logits, softmax cross-entropy.
@@ -84,8 +94,17 @@ Backpropagation, by stages:
 ```lean file=Ch06/Cnn.lean#backward
 ```
 
+### The flat loop *is* the convolution
+
+The network above stores images and kernels in flat arrays: the kernel sits in `K[c*9 + a*3 + b]`, the image in `x[i*28 + j]`, and each conv cell is a hand-written double loop. Is that layout the mathematics of the first half of this chapter, or only shaped like it? It is, and the bridge is proved over exact $\mathbb{Q}$:
+
+```lean file=Ch06/Conv.lean#cnn_row
+```
+
+Feed the 28-wide image row to the 3-tap kernel row and `conv1d` produces exactly the 26 output columns — the type-checker enforces the shape ($28 - 3 + 1 = 26$), and `cnn_row` shows the cell at column `j` equals the net's loop term for term. Summing the three kernel rows, `cnn_cell_rows` identifies the net's full double loop with three formal `conv1d` applications. This is the same round-trip shape as Chapter 9's `concat_head`/`head_concat` for multi-head attention.
+
 :::warning What is proved here, and what is not
-Theorems 1–3 are about the one-dimensional layer. The two-dimensional code above is a direct generalisation but is *not* itself proved. We check it numerically instead: the demo compares the kernel gradient with a central finite difference of the loss.
+Theorems 1–3 and the row bridge above are about the one-dimensional layer. The two-dimensional code above is a direct generalisation: one conv cell is proved equal to the flat loop, the pooling and dense stages are *not* proved. We check them numerically instead: the demo compares the kernel gradient with a central finite difference of the loss.
 :::
 
 ## Run it

@@ -41,6 +41,14 @@ flowchart LR
 
 *Le jeu des GAN : les deux réseaux s’améliorent en s’affrontant.*
 
+<Figure src="disc_posterior.svg" alt="Le discriminateur optimal D*(x) = p/(p+q) pour deux gaussiennes, un S lisse de 1 a 0" caption="Le discriminateur optimal n'est pas une sortie de classifieur mais une probabilite a posteriori : D*(x) = p(x)/(p(x)+q(x)) - ici 1 la ou seul le reel vit, 1/2 la ou generateur et reel se recouvrent (x = 0), 0 en territoire pur faux. Le S est la formule exacte demontree au chapitre." />
+
+<Creators fr slugs="goodfellow" />
+
+
+<Figure src="arch_gan.svg"
+caption="GAN : générateur contre discriminateur, un minimax"
+ />
 ## Que dit le meilleur discriminateur ?
 
 Fixons un point $x$. Soit $a=p_{\text{data}}(x)$ la densité des données réelles en ce point et $b=p_G(x)$ celle des données générées. Le gain du discriminateur en $x$ est $a\log d + b\log(1-d)$ avec $d=D(x)$. Annuler la dérivée, $\frac ad-\frac b{1-d}=0$, donne
@@ -68,6 +76,22 @@ Remarquez ce que le théorème **ne dit pas** : il ne dit pas que $d^\star$ est 
 :::tip[Coin Lean : compléter le carré est une stratégie de preuve]
 Les preuves d'optimalité deviennent souvent faciles quand on *devine le minimiseur* et qu'on prouve une identité de la forme « perte = minimum + un carré ». L'identité est un calcul d'anneau que `grind` termine ; la positivité du carré fait le reste.
 :::
+
+<Figure src="mode_collapse.svg" alt="Deux courbes de recompense selon la masse a du generateur : couvrir les deux modes a/(a+0,5) est strictement au-dessus de l'effondrement a/(a+1)" caption="Theoreme de l'effondrement de modes, dessine : pour toute masse a, la courbe de couverture a/(a+0,5) est strictement au-dessus de la courbe d'effondrement a/(a+1) - repartir le generateur sur les deux modes paye toujours plus que de se concentrer sur un, exactement l'inegalite que mode_collapse_reward prouve pour tout a, b positifs." />
+
+## L’effondrement de modes, prouvé
+
+Les données vivent sur deux modes égaux, de masse $a$ chacun ; le générateur répartit sa masse $b$ dessus. L’analyse des moindres carrés ci-dessus (`lsLoss_value`) dit que le discriminateur optimal paie le générateur $a\,m\,(a+m)^{-1}$ sur un mode portant la masse générée $m$. Deux options :
+
+- **Effondrement** : tout $b$ sur un seul mode — récompense $\dfrac{a\,b}{a+b}$.
+- **Couverture** : $b/2$ sur chacun — récompense $\dfrac{a\,b}{a+b/2}$ (les deux appariements partiels se fusionnent en un seul produit, `cover_simplify`).
+
+Même numérateur, et $a + b/2 < a + b$, donc le dénominateur le plus petit gagne :
+
+```lean file=Ch11/Gan.lean#collapse
+```
+
+`mode_collapse_reward` est le mode de défaillance classique avec sa preuve attachée : dans ce jeu, couvrir bat strictement s’effondrer, pour tous $a, b > 0$ — l’antitonicité stricte de l’inverse (`Ch18.inv_antitone`) fait le travail. L’énoncé général (multi-modes, densités continues) demande l’appareil variationnel complet des GAN ; ce qui est prouvé ici est le squelette algébrique sur lequel repose tout argument d’effondrement.
 
 ## Deux réseaux, une seule différentiation automatique
 

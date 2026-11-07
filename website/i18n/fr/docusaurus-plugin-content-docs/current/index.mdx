@@ -32,13 +32,23 @@ flowchart LR
   c0["0 Lean"] --> c1["1 Neurone"] --> c2["2 Perceptron, XOR"] --> c3["3 MLP"] --> c4["4 Autodiff"] --> c5["5 Entraînement, MNIST"]
   c5 --> c6["6 CNN"]
   c5 --> c7["7 RNN"] --> c8["8 LSTM"] --> c9["9 Transformer"]
-  c5 --> c10["10 VAE"] --> c11["11 GAN"] --> c12["12 Diffusion"]
+  c5 --> c10["10 VAE"] --> c105["10.5 Boltzmann"] --> c11["11 GAN"] --> c12["12 Diffusion"]
   c5 --> c13["13 Apprentissage par renforcement"] --> c14["14 Modèles du monde"]
   c10 --> c15["15 JEPA"]
   c14 --> c15
+  c5 -.->|pertes| c16["16 Outils : entropie, KL"]
+  c16 -->|entropie croisée| c17["17 Contrastif : InfoNCE"]
+  c17 -.->|à lire avant| c15
+  c17 -->|perte symétrique| c19["19 Multimodal : CLIP"]
+  c5 -.-> c18["18 Efficacité"]
+  c20["20 Capstone : boucle prouvée"]
+  c19 --> c20
+  c18 --> c20
+  c10 -.-> c16
+  c13 -.-> c16
 ```
 
-*Le cours en un coup d’œil : un tronc commun (chapitres 0 à 5), puis trois branches (images et séquences, modèles génératifs, prise de décision) qui se rejoignent dans les derniers chapitres.*
+*Le cours en un coup d'œil : un tronc commun (chapitres 0 à 5), puis trois branches (images et séquences, modèles génératifs, prise de décision) qui se rejoignent dans les derniers chapitres. Le chapitre 16 rassemble et démontre les outils de probabilité et d'information que les pertes des chapitres 5, 10, 11 et 13 supposent ; le chapitre 17 les dépense sur l'apprentissage contrastif (InfoNCE) et est le compagnon naturel du chapitre 15 (JEPA) ; le chapitre 18 les dépense sur le déploiement : quantification, équilibrage MoE, distillation et lois d'échelle, démontrés.*
 
 ## Programme
 
@@ -55,10 +65,15 @@ flowchart LR
 | 8 | LSTM et mémoire à portes | bornes sur les produits, Rat | porte d'oubli, chemin additif, expériences honnêtes sur la mémoire |
 | 9 | L'attention et le Transformer | corps abstraits, listes et permutations | softmax, ensemble vs séquence, masque causal, normalisation de couche, mini-Transformer |
 | 10 | Autoencodeurs et VAE | l'astuce de reparamétrisation comme théorème | variables latentes, pénalité KL, échantillonnage |
+| 10.5 | Machines de Boltzmann | algèbre de Gibbs exacte sur `Rat` | modèles à base d'énergie, fonction de partition, invariance par balayage Gibbs, divergence contrastive |
 | 11 | GAN | optimalité par complétion du carré | jeu minimax, discriminateur optimal, instabilité |
 | 12 | Modèles de diffusion | récurrence sur les calendriers, identités de corps | processus direct en forme fermée, pas de débruitage exact |
 | 13 | Apprentissage par renforcement | récursion, identités d'anneau | mises à jour de Bellman, Q-learning, REINFORCE avec ligne de base |
 | 14 | Modèles du monde | récurrence avec hypothèses sur des fonctions, inégalité triangulaire | apprendre la dynamique, trajectoires imaginées, accumulation d'erreur, entraîner un contrôleur dans un rêve |
 | 15 | JEPA | raisonnement sur les minimiseurs, suites géométriques | prédire dans l'espace des représentations, effondrement, cibles EMA, régularisation de variance |
+| 16 | Outils mathématiques : probabilité, entropie, KL | récursion sur `Nat` pour les produits scalaires, classes de types abstraites (`LawfulLog`), inégalités sur `Rat` | espérance, variance, entropie, entropie croisée = entropie + KL, inégalité de Gibbs KL ≥ 0 |
+| 18 | Efficacité : quantification, MoE, distillation, lois d'échelle | bornes sur `Rat`, sommes de carrés, héritage en une ligne du chapitre 16 | erreur de quantification < un pas, équilibrage MoE `Somme p^2 >= 1/E`, distillation `CE = H + KL`, lois d'échelle démontrées |
+| 19 | Apprentissage multimodal : la perte symétrique de CLIP | composition de la machine du chapitre 17 dans les deux directions | InfoNCE symétrique, positif partagé, plancher d'effondrement `log B` dans chaque direction, forme close du batch 2x2 |
+| 20 | Capstone : toute la boucle d'entraînement, prouvée | composition du kit du chapitre 5 : décroissance + clipping + schedule en une recette | pas invisible dans la boîte, forme close `(1-lr(2+wd))^t w0`, perte jamais croissante à aucun itéré, budget de schedule fini, MNIST 90 % en 3 époques |
 
 Commencez par le [chapitre 0](ch00-setup).

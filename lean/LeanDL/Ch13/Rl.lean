@@ -47,6 +47,28 @@ theorem tdUpdate_error (q target eta : α) :
     tdUpdate q target eta - target = (1 - eta) * (q - target) := by
   simp only [tdUpdate]
   grind
+
+-- ANCHOR: td_iter
+/-- Iterated TD: applying the update `k` times towards a FIXED target. -/
+def tdIter (q target eta : Rat) : Nat → Rat
+  | 0 => q
+  | k + 1 => tdUpdate (tdIter q target eta k) target eta
+
+/-- **k TD updates multiply the error by `(1-η)ᵏ`, exactly** — the compounding of
+`tdUpdate_error`, by induction. With `0 ≤ η ≤ 1` the Q-estimate converges geometrically
+to the target: this is the exact arithmetic behind the convergence of Q-learning's
+inner loop (the full stochastic theorem needs the noise model, out of algebraic scope). -/
+theorem tdIter_error (q target eta : Rat) : ∀ k : Nat,
+    tdIter q target eta k - target = pw (1 - eta) k * (q - target) := by
+  intro k
+  induction k with
+  | zero => simp only [tdIter, pw]; grind
+  | succ k ih =>
+      simp only [tdIter, pw]
+      have h1 := tdUpdate_error (tdIter q target eta k) target eta
+      rw [h1, ih]
+      grind [Rat.mul_assoc]
+-- ANCHOR_END: td_iter
 end Value
 
 section Fixed

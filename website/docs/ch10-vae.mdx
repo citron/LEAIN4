@@ -23,6 +23,10 @@ title: "Chapter 10 — Autoencoders and the VAE"
 
 So far our networks *recognised* things. A **generative model** learns to *produce* new data that looks like the training data. This chapter starts with the simplest idea, the autoencoder, and then fixes its main weakness with the variational autoencoder (VAE).
 
+
+<Figure src="arch_ae.svg"
+caption="Autoencoder: compress to z, reconstruct x-hat"
+ />
 ## The autoencoder
 
 An **autoencoder** is two networks. The **encoder** compresses a data point $x$ into a short code $z$ (the *latent* variable); the **decoder** reconstructs $x$ from $z$. It is trained to minimise the reconstruction error $\|x - \mathrm{dec}(\mathrm{enc}(x))\|^2$. The space in which the codes live is called the **latent space** (*latent* means hidden: we never observe it, the network invents it). With a code of two numbers it is a plane, and every point of that plane decodes into one possible data point.
@@ -38,6 +42,9 @@ flowchart LR
 
 To *generate*, we would pick a code $z$ at random and run the decoder. The problem: nothing forces the codes of the training data to occupy a region we know how to sample from. Random codes can land where the decoder was never trained.
 
+<Figure src="arch_vae.svg"
+caption="VAE: the posterior sampled through z = mu + sigma * epsilon"
+ />
 ## The variational autoencoder
 
 The VAE (Kingma and Welling, 2013) makes the codes sampleable by design:
@@ -50,7 +57,27 @@ $$ \mathcal L \;=\; \underbrace{\mathbb E\,\|x-\hat x\|^2}_{\text{reconstruction
 
 After training, generating is simple: draw $z\sim\mathcal N(0,1)$ and decode.
 
-(The closed form of the KL term is a standard Gaussian integral; we take it as the definition and prove properties of it. Showing that the loss is a lower bound on the data log-likelihood needs integrals and is not formalised here.)
+(The closed form of the KL term is a standard Gaussian integral; we take it as the definition and prove properties of it. The *shape* of the loss — a lower bound on the data log-likelihood — does not need integrals: it is a finite-sum identity, and it is proved exactly over `Rat` in `Ch10/Elbo.lean`, below.)
+
+<Figure src="elbo_parts.svg" alt="Two curves against x: the reconstruction -log p(x) dips in the two data modes, the KL term rises quadratically away from the q mean" caption="The two halves the ELBO theorem stitches together: -log p(x) wants the code near a data mode (the twin dips), KL(q||p) wants it near the prior mean (the rising bowl). The exact identity proved in Lean (evidence_bound) says the loss is their sum - every VAE training curve is these two terms negotiating, per mini-batch." />
+
+## The ELBO, proved
+
+The VAE objective is not a heuristic: it is a **lower bound on the log-likelihood**, and the KL term is the price of the encoder's approximation. For a *finite* latent space, with a joint $P$ (weights $p(z_i,x)>0$, unnormalised), a likelihood factor $e_i$, evidence $m=\sum_i p(z_i,x)\,e_i = p(x)$, and any encoder $q$:
+
+$$\mathbb{E}_q[\log e] \;-\; \mathrm{KL}(q \,\|\, P) \;\le\; \log m .$$
+
+```lean file=Ch10/Elbo.lean#elbo
+```
+
+*Proof, in words.* Apply the tangent inequality $\log t \le t-1$ to the importance weights $t_i = p(z_i,x)e_i/(q_i m) > 0$; expand the log; take the $q$-expectation; use the exact cancellation $\sum_i q_i\cdot p(z_i,x)e_i/(q_i m) = 1$ (over `Rat`, $q_i\cdot q_i^{-1}=1$, no rounding). The expectation of the left side is $\le 1-1=0$. The only analytic input is the tangent inequality, carried by the `LawfulLog` class — the real logarithm obeys it, `Float` only approximately.
+
+The gap equals the KL from $q$ to the true posterior $p(z\mid x) = P_i e_i / m$, so it is $\ge 0$ and vanishes exactly when the encoder is exact:
+
+```lean file=Ch10/Elbo.lean#elbo_gap
+```
+
+The Gaussian version of this chapter is the continuous analogue of the same identity; the finite theorem above is what the loss *means*.
 
 ## The reparameterisation trick
 
@@ -84,6 +111,8 @@ Our data is a noisy **half circle** in the plane. The latent space has a single 
 :::tip[Lean Corner: one proof, many models]
 We never wrote a gradient for this model. `backprop_correct` (Chapter 4) is a theorem about *every* expression, so the gradient of this particular loss, including the sampling step and the KL term, is correct by that single theorem. The only unproved parts are Float rounding and the random-number generator.
 :::
+
+<Figure src="beta_vae.svg" alt="Two curves against beta: distortion 1/(1+beta) falling, rate beta/(1+beta) rising, crossing at beta = 1" caption="The VAE objective is a dial, made visible in the toy the chapter runs: pushing beta up buys rate (information squeezed into z, the KL term) and pays in distortion (the blurred reconstruction) - the curve pair the beta-VAE measures. The autoencoder (beta = 0) sits at pure distortion with no code at all, which is exactly why its latent space is unstructured." />
 
 ## Autoencoder against VAE
 

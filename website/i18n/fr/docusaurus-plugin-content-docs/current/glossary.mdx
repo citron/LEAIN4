@@ -1,5 +1,5 @@
 ---
-sidebar_position: 18
+sidebar_position: 23
 title: "Glossaire"
 ---
 
@@ -133,9 +133,21 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Espace latent**: L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
 - **Autoencodeur**: Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
 - **VAE**: Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
+- **ELBO (borne inférieure de l’évidence)**: L’objectif du VAE ; démontrée (Ch10, `Elbo.lean`) comme borne inférieure de la log-vraisemblance des données, le terme KL étant l’écart à la postérieure vraie.
 - **A priori**: La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
 - **Divergence KL**: Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
 - **Astuce de reparamétrisation**: Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
+
+## Chapitre 10.5 — Machines de Boltzmann
+
+- **Modèle à base d'énergie**: Un modèle qui note chaque configuration par une énergie ; basse énergie signifie probable. La distribution est le modèle - pas de réseau générateur.
+- **Machine de Boltzmann**: Un réseau d'unités binaires dont la distribution jointe est proportionnelle à exp(-E), E étant une somme de biais et de couplages (Ackley, Hinton, Sejnowski 1985).
+- **RBM (machine de Boltzmann restreinte)**: Une machine de Boltzmann bipartie : unités visibles et cachées, aucun lien dans une couche, donc conditionner sur une couche rend l'autre indépendante.
+- **Energie E**: Un nombre attaché à chaque configuration ; en physique l'énergie d'un système de spins, ici le moins la log-probabilité à une constante près.
+- **Fonction de partition Z**: La somme de exp(-E) sur toutes les configurations ; elle transforme les énergies en probabilités. La calculer demande 2^n termes - l'intraitabilité au coeur du modèle.
+- **Distribution de Gibbs**: La distribution de masse exp(-E(s)) / Z sur l'état s ; le module prouve qu'elle est normalisée exactement sur `Rat` (Ch105, `w_sum`).
+- **Balayage Gibbs**: Echantillonnage alterné : redessiner toutes les unités cachées étant donné les visibles, puis toutes les visibles étant donné les cachées. Le module prouve qu'un balayage complet laisse la mesure d'équilibre invariante (`sweep_invariance`).
+- **Divergence contrastive**: Entraîner en faisant quelques pas de balayage depuis les données au lieu de la thermalisation complète qu'exige le gradient exact (Hinton 2002) ; le moteur de l'ère RBM du deep learning.
 
 ## Chapitre 11 — GAN
 
@@ -188,3 +200,47 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 - **Arrêt du gradient (stop-gradient)**: Traiter une valeur comme une constante pendant la rétropropagation, pour qu’aucun apprentissage n’y entre.
 - **Régularisateur de variance**: Une pénalité qui punit des plongements trop semblables entre eux.
 - **Sonde linéaire**: Un modèle linéaire simple entraîné à lire une quantité dans un plongement, utilisé pour tester ce que le plongement contient.
+
+## Chapitre 16 — Outils mathématiques
+
+- **Distribution (finie)**: Une liste de poids positifs dont la somme vaut 1 : les chances de chacune d'un nombre fini d'issues.
+- **Espérance**: La moyenne pondérée d'une quantité sous une distribution : ce que l'on gagne en moyenne.
+- **Variance**: L'écart quadratique moyen à la moyenne : l'étalement d'une quantité. Une constante a une variance nulle.
+- **Entropie**: La surprise moyenne d'un tirage dans une distribution : nulle quand une issue est certaine, plus grande à mesure que la masse s'étale.
+- **Entropie croisée**: La surprise moyenne de la vraie distribution notée avec une distribution modèle : ce que l'entraînement minimise.
+- **Divergence KL**: La surprise supplémentaire due au code du modèle au lieu du vrai : toujours positive (Gibbs), nulle exactement quand les deux distributions coïncident.
+- **Inégalité de Gibbs**: KL(p‖q) ≥ 0 : aucun modèle ne prédit les données aussi bien que les données se prédisent elles-mêmes.
+- **Inégalité tangente**: log x ≤ x − 1, égalité seulement en x = 1 : le seul fait d'analyse dont découle Gibbs.
+- **Décomposition biais–variance**: risque d'un tirage = biais au carré de la moyenne d'ensemble + variance de la famille : moyenner des hypothèses tue la variance, jamais le biais.
+
+## Chapitre 17 — Apprentissage contrastif
+
+- **Apprentissage contrastif** : apprendre la similarité en comparant des paires : rapprocher la paire positive, éloigner les négatifs.
+- **InfoNCE** : la perte qui demande « lequel de ces n + 1 candidats est le positif ? » et paie le logarithme négatif de la probabilité sur la bonne réponse.
+- **Température** : le diviseur sur les scores qui règle la pointe du softmax : une petite température amplifie les petites différences.
+- **Plancher d'effondrement** : la perte d'un embedding plat — tous les candidats à égalité — vaut exactement log (n + 1) : le nombre que le hasard atteint aussi, et la référence que toute courbe contrastive doit franchir.
+- **Négatif dur** : un négatif qui a capturé une grande part de la masse du softmax : le gradient p − onehot le repousse le plus fort.
+
+## Chapitre 18 — Efficacité
+
+- **Grille de quantification** : remplacer chaque poids par un point d'une grille de pas s ; la passe plancher se trompe de moins d'une cellule, la passe arrondi au plus proche d'au plus une demi-cellule, et les nœuds de la grille sont fixes.
+- **Perte d'équilibrage** : somme des carrés des p_i sur les experts — probabilité que deux routages choisissent le même expert ; toujours ≥ 1/E, avec égalité au routeur uniforme.
+- **Routeur effondré** : toute la masse de routage sur un seul expert ; la perte d'équilibrage paie exactement 1 = E fois le plancher, et E−1 experts sont au chômage.
+- **Plancher de distillation** : le cross-entropy de l'élève contre le professeur vaut l'entropie du professeur plus un KL positif : la perte ne descend jamais sous H(professeur), et l'écart est exactement le KL.
+- **Forme du scaling** : la loi L(N) = Linf + C/N est strictement décroissante et doubler N divise l'excès C/N par deux ; les pas d'optimisation décroissent en exponentielle — les deux courbes ont des courbures opposées.
+
+## Chapitre 19 — Apprentissage multimodal
+
+- **Modèle multimodal** : deux encodeurs — pixels, texte — projetés dans un espace partagé pour qu'une photo et sa légende atterrissent près l'une de l'autre.
+- **Perte symétrique** : le modèle est interrogé deux fois, « quel texte correspond à cette image ? » et « quelle image correspond à ce texte ? », et paie la moyenne des deux réponses.
+- **Positif partagé** : les deux directions notent la MÊME score de paire S = x1 . y1 — une seule cellule de la matrice du batch alimente les deux questions.
+- **Transposition** : la direction texte-vers-image est la machine image-vers-texte appliquée à la matrice de scores transposée — il n'existe pas de seconde fonction de perte.
+- **Plancher moyenné** : un modèle CLIP effondré perd log (n + 1) dans CHAQUE direction ; la moyenne de deux planchers identiques est ce même log B — la ligne de départ de toute courbe CLIP.
+
+## Chapitre 20 — Capstone
+
+- **Recette d'entraînement** : décroître les poids, clipper le gradient, faire le pas, réduire le taux — l'ordre fixe que implémentent les cases de tout entraîneur, comme une seule définition sur `Rat`.
+- **Pas invisible** : dans la boîte de clipping la recette calcule bit pour bit le pas SGD L2 ordinaire (`recipe_step_eq`) ; la machinerie ne mord que sur les pics.
+- **Facteur de contraction** : `c = 1 - lr·(2 + wd)` ; chaque itéré est `cᵗ · w₀` — les époques deviennent un exposant.
+- **Borne d'itéré** : sous `0 ≤ lr·(2+wd) ≤ 2`, `w_t² ≤ w₀²` à chaque époque, exactement (`recipe_iter_sq_le`).
+- **Budget de schedule** : le total cumulé de pas du schedule exponentiel sature à `η₀/(1-γ)`, quel que soit le nombre d'époques.

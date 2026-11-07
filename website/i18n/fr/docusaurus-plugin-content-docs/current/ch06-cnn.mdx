@@ -27,6 +27,14 @@ Une couche dense sur une image de $28\times 28$ a $784$ poids *par neurone*, et 
 
 <Figure src="conv.svg" alt="Un noyau de longueur 3 glissant sur une entrée de longueur 7" caption="Chaque sortie est le produit scalaire du noyau avec une fenêtre de l'entrée." />
 
+<Figure src="rf_growth.svg" alt="Taille du champ receptif selon la profondeur : des couches 3x3 empilees croissent en 2L+1, un 5x5 large reste plat" caption="Les convolutions empilees font croitre le champ receptif lineairement : L couches de 3x3 voient 2L + 1 pixels, la ou un seul 5x5 reste coince a 5 (l'identite de composition demontree au chapitre en est exactement la raison). La profondeur achete du contexte, avec bien moins de parametres qu'un noyau large - le marche qui rend les CNN profonds profonds." />
+
+<Creators fr slugs="lecun" />
+
+
+<Figure src="arch_cnn.svg"
+caption="CNN : les convolutions rétrécissent la carte et élargissent les canaux"
+ />
 ## Convolution en dimension un, avec les formes dans le type
 
 Commençons en dimension un, où les preuves sont courtes. Un noyau de longueur $k+1$ glisse sur une entrée de longueur $m+k$ et produit exactement $m$ sorties. En Lean, cette arithmétique fait partie du type : un noyau qui ne rentre pas ne passe tout simplement pas le typage.
@@ -59,6 +67,8 @@ L'indice `x ⟨i + j, _⟩` demande une preuve que `i + j < m + k`. Nous la four
 
 La passe arrière d'une convolution est donc encore une opération de type convolution : pas besoin d'une nouvelle idée pour l'entraîner.
 
+<Figure src="conv_window.svg" alt="Une entree 8x8 en niveaux de gris avec un carre clair : la fenetre de convolution 3x3 glisse dessus, chaque position est un produit scalaire" caption="La convolution en une image : le reseau lit l'image par une fenetre 3x3 qui glisse partout, chaque position calculant le meme produit scalaire (le partage des poids encode par Conv3x3). Le carre clair illumine la fenetre exactement quand il la recouvre - c'est ce qu'un filtre appris detecte." />
+
 ## Un CNN pour MNIST
 
 Passons à deux dimensions. Notre réseau : une convolution $3\times 3$ à 4 canaux (sorties $26\times 26$), ReLU, un **max-pooling** $2\times 2$ (garder le plus grand de chaque bloc $2\times2$, d'où du $13\times 13$), une couche dense vers 10 logits, entropie croisée softmax.
@@ -84,8 +94,17 @@ La rétropropagation, par étapes :
 ```lean file=Ch06/Cnn.lean#backward
 ```
 
+### La boucle à plat *est* la convolution
+
+Le réseau ci-dessus range images et noyaux dans des tableaux plats : le noyau est dans `K[c*9 + a*3 + b]`, l'image dans `x[i*28 + j]`, et chaque cellule de convolution est une double boucle écrite à la main. Cette disposition est-elle les mathématiques de la première moitié du chapitre, ou seulement leur forme ? Elle les est, et le pont est prouvé sur $\mathbb{Q}$ exact :
+
+```lean file=Ch06/Conv.lean#cnn_row
+```
+
+Nourrissez la rangée d'image de largeur 28 avec la rangée de noyau à 3 taps et `conv1d` produit exactement les 26 colonnes de sortie — le type-vérificateur impose la forme ($28 - 3 + 1 = 26$), et `cnn_row` montre que la cellule de colonne `j` égale terme à terme le terme de la boucle du réseau. En sommant les trois rangées du noyau, `cnn_cell_rows` identifie la double boucle complète du réseau à trois applications formelles de `conv1d`. C'est la même forme d'aller-retour que `concat_head`/`head_concat` du chapitre 9 pour l'attention multi-têtes.
+
 :::warning Ce qui est démontré ici, et ce qui ne l'est pas
-Les théorèmes 1 à 3 portent sur la couche en dimension un. Le code en deux dimensions en est une généralisation directe mais n'est *pas* lui-même démontré. Nous le vérifions numériquement : la démo compare le gradient du noyau à une différence finie centrée de la perte.
+Les théorèmes 1 à 3 et le pont de rangée ci-dessus portent sur la couche en dimension un. Le code en deux dimensions en est une généralisation directe : une cellule de convolution est prouvée égale à la boucle à plat ; les étages de pooling et de couche dense ne sont *pas* démontrés. Nous les vérifions numériquement : la démo compare le gradient du noyau à une différence finie centrée de la perte.
 :::
 
 ## Exécution

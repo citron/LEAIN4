@@ -1,4 +1,5 @@
 import LeanDL.Ch05.Norm
+import LeanDL.Core.Sum
 
 /-!
 # Chapter 6 — Convolution
@@ -27,46 +28,6 @@ def conv1d [Add α] [Mul α] [OfNat α 0] {m k : Nat} (ker : Vec α (k + 1)) (x 
 section Laws
 
 variable [CommRing α]
-
-theorem vsum_add : ∀ {n : Nat} (f g : Fin n → α),
-    vsum (fun i => f i + g i) = vsum f + vsum g
-  | 0, f, g => by simp only [vsum]; grind
-  | n + 1, f, g => by
-    have ih := vsum_add (fun i : Fin n => f i.succ) (fun i => g i.succ)
-    simp only [vsum]
-    rw [ih]
-    grind
-
-theorem vsum_smul : ∀ {n : Nat} (c : α) (f : Fin n → α),
-    vsum (fun i => c * f i) = c * vsum f
-  | 0, c, f => by simp only [vsum]; grind
-  | n + 1, c, f => by
-    have ih := vsum_smul c (fun i : Fin n => f i.succ)
-    simp only [vsum]
-    rw [ih]
-    grind
-
-/-- Exchanging the order of a double sum. -/
-theorem vsum_zero : ∀ {n : Nat}, vsum (fun _ : Fin n => (0 : α)) = 0
-  | 0 => rfl
-  | n + 1 => by
-    have ih := vsum_zero (n := n)
-    simp only [vsum]
-    rw [ih]
-    grind
-
-theorem vsum_comm : ∀ {m n : Nat} (f : Fin m → Fin n → α),
-    vsum (fun i => vsum (f i)) = vsum (fun j => vsum (fun i => f i j))
-  | 0, n, f => by
-    simp only [vsum]
-    exact vsum_zero.symm
-  | m + 1, n, f => by
-    have ih := vsum_comm (fun (i : Fin m) => f i.succ)
-    have h : (fun j : Fin n => vsum (fun i : Fin (m + 1) => f i j)) =
-        fun j => f 0 j + vsum (fun i : Fin m => f i.succ j) := rfl
-    rw [h, vsum_add]
-    simp only [vsum]
-    rw [ih]
 
 -- ANCHOR: conv_linear
 /-- Convolution is linear in the input… -/
@@ -140,6 +101,48 @@ theorem conv1d_adjoint {m k : Nat} (ker : Vec α (k + 1)) (s : Vec α m) (x : Ve
   funext i
   grind
 -- ANCHOR_END: corr
+
+-- ANCHOR: cnn_row
+/-- One row of the 3-row top band of the 28-wide flat image: the strip a
+3×3 kernel slides over. -/
+def imgRow (x : Vec Rat (3 * 28)) (a : Fin 3) : Vec Rat 28 :=
+  fun b => x ⟨a.val * 28 + b.val, by omega⟩
+
+/-- Row `a` of the 9-tap flat kernel, in the `c*9 + a*3 + b` layout of the
+network. -/
+def kwin (K : Vec Rat 9) (a : Fin 3) : Vec Rat 3 :=
+  fun b => K ⟨a.val * 3 + b.val, by omega⟩
+
+theorem xEq2 {n : Nat} (v : Vec Rat n) {e1 e2 : Nat} (h1 : e1 < n) (h2 : e2 < n)
+    (he : e1 = e2) : v ⟨e1, h1⟩ = v ⟨e2, h2⟩ := congrArg v (Fin.ext he)
+
+/-- **A row of the CNN conv layer is a formal `conv1d`.** The demo net
+(`Ch06/Cnn.lean`) computes each pre-activation with a flat double loop
+`Σ a b, K[c*9 + a*3 + b] * x[(i+a)*28 + (j+b)]`. Kernel row `a` over
+image row `a` is exactly `conv1d (kwin K a) (imgRow x a)` — a length-28
+input with a length-3 kernel, giving exactly the 26 output columns —
+and the cell at column `j` matches the net's loop termwise. -/
+theorem cnn_row (K : Vec Rat 9) (x : Vec Rat (3 * 28)) (a : Fin 3) (j : Fin 26) :
+    Ch06.conv1d (kwin K a) (imgRow x a) j =
+      vsum (fun b : Fin 3 => K ⟨a.val * 3 + b.val, by omega⟩ *
+        x ⟨a.val * 28 + j.val + b.val, by omega⟩) := by
+  simp only [conv1d, imgRow, kwin]
+  congr 1
+  funext b
+  have hb1 : a.val * 28 + (j.val + b.val) < 3 * 28 := by omega
+  have hb2 : a.val * 28 + j.val + b.val < 3 * 28 := by omega
+  congr 1
+  exact xEq2 x hb1 hb2 ((Nat.add_assoc _ _ _).symm)
+
+/-- The net's double loop over the kernel equals the sum of the three
+formal `conv1d` rows: the flat layout and the type-checked convolution
+agree, cell by cell, at every column of the conv layer. -/
+theorem cnn_cell_rows (K : Vec Rat 9) (x : Vec Rat (3 * 28)) (j : Fin 26) :
+    vsum (fun a : Fin 3 => conv1d (kwin K a) (imgRow x a) j) =
+      vsum (fun a : Fin 3 => vsum (fun b : Fin 3 =>
+        K ⟨a.val * 3 + b.val, by omega⟩ * x ⟨a.val * 28 + j.val + b.val, by omega⟩)) := by
+  congr 1
+-- ANCHOR_END: cnn_row
 
 end Laws
 

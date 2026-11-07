@@ -53,7 +53,17 @@ flowchart LR
 
 *The JEPA: the loss compares embeddings, never raw inputs. The target encoder is a slow copy of the context encoder and receives no gradient.*
 
+<Creators slugs="lecun" />
+
+
+<Figure src="arch_jepa.svg"
+caption="JEPA: predict one view's representation from the other"
+ />
 ## The catch: collapse
+
+:::info[Read Chapter 17 first]
+Collapse has an arithmetic counterpart this chapter cannot prove on its own: for the **contrastive** loss (InfoNCE), a flat embedding does not score $0$ — it scores exactly $\log (n + 1)$, the collapse floor proved in [Chapter 17](ch17-contrastive). JEPA sidesteps that floor by predicting distances instead of classifying candidates, and that is exactly why the floor *is* zero here: the sum of squares has no log to pay. The two chapters describe the same enemy from two sides — Ch17 proves what collapse costs, Ch15 proves why a plain predictor is happy to pay it.
+:::
 
 There is an obvious way to make this loss zero: let both encoders output the **same constant**. Then predicting the target embedding is trivial, and the representation carries no information.
 
@@ -70,6 +80,10 @@ If the target encoder is not trained by the loss but is an **exponential moving 
 ```
 
 `ema_error` and `emaIter_error` are the same geometric argument as the TD update of Chapter 13: each update multiplies the distance by $m$, so after $k$ updates by $m^k$. In practice $m\approx0.99$ to $0.999$, a *slow* target. We do **not** prove that EMA prevents collapse: that is an empirical fact, which the experiment below tests.
+
+<Figure src="spread_collapse.svg" alt="Spread penalty 2*d^2 against the embedding distance d, hitting exactly zero at the collapsed point d = 0" caption="The spread penalty is a parabola: a 2-point batch at embedding distance d has spread 2 d^2 (the pairwise-square identity the chapter proves), and the collapsed batch - every embedding equal - scores exactly zero (spread_const). The penalty does not merely discourage collapse: it is minimal precisely there, so weighting it up truly removes collapse from the optima." />
+
+<Figure src="var_hinge.svg" alt="The hinge penalty max(0, delta - spread): falling from delta to zero at spread = delta, then flat" caption="The variance regularizer is a hinge: the batch is only penalised while its spread is under delta, and the penalty is exactly zero once the embeddings are spread enough - which is why it stops embedding collapse at the threshold of this chapter's proposition and never fights a healthy representation." />
 
 ## Remedy 2: explicitly keep the embeddings spread out
 

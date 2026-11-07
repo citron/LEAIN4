@@ -41,6 +41,14 @@ flowchart LR
 
 *The GAN game: the two networks improve by competing.*
 
+<Figure src="disc_posterior.svg" alt="The optimal discriminator D*(x) = p/(p+q) for two Gaussians, a smooth S falling from 1 to 0" caption="The optimal discriminator is not a classifier output but a posterior: D*(x) = p(x)/(p(x)+q(x)) - here 1 where only the data lives, 1/2 where generator and data overlap (x = 0), 0 in pure fake territory. The S-shape is the exact formula proved in this chapter." />
+
+<Creators slugs="goodfellow" />
+
+
+<Figure src="arch_gan.svg"
+caption="GAN: generator against discriminator, one minimax"
+ />
 ## What does the best discriminator say?
 
 Fix a point $x$. Let $a=p_{\text{data}}(x)$ be the density of real data there and $b=p_G(x)$ the density of generated data. The discriminator's payoff at $x$ is $a\log d + b\log(1-d)$ with $d=D(x)$. Setting the derivative to zero, $\frac ad-\frac b{1-d}=0$, gives
@@ -68,6 +76,24 @@ Notice what the theorem does **not** say: it does not say $d^\star$ is a maximum
 :::tip[Lean Corner: completing the square is a proof strategy]
 Optimality proofs often become easy once you *guess the minimiser* and prove an identity of the form "loss = minimum + a square". The identity is a ring computation that `grind` finishes; positivity of the square does the rest.
 :::
+
+<Figure src="mode_collapse.svg" alt="Two reward curves against generator mass a: covering both modes a/(a+0.5) sits strictly above the collapsed a/(a+1)" caption="The mode-collapse theorem, drawn: for every mass a the cover curve a/(a+0.5) is strictly above the collapse curve a/(a+1) - spreading the generator over both modes always pays more than concentrating on one, exactly the inequality mode_collapse_reward proves for all positive a, b." />
+
+## Mode collapse, proved
+
+Mode collapse — the generator parking all its mass on one mode of the data — is usually a slogan. On the two-mode toy it is a theorem.
+
+The data sits on two equal modes, mass $a$ each; the generator spreads mass $b$ over them. The least-squares analysis above (`lsLoss_value`) says the optimal discriminator pays the generator $a\,m\,(a+m)^{-1}$ at a mode carrying generator mass $m$. Two options:
+
+- **Collapse**: all of $b$ on one mode — reward $\dfrac{a\,b}{a+b}$.
+- **Cover**: $b/2$ on each — reward $\dfrac{a\,b}{a+b/2}$ (the two partial matches merge into one product, `cover_simplify`).
+
+Same numerator, and $a + b/2 < a + b$, so the smaller denominator wins:
+
+```lean file=Ch11/Gan.lean#collapse
+```
+
+`mode_collapse_reward` is the classic failure mode with a proof attached: in this game, covering strictly beats collapsing, for every $a, b > 0$ — the inverse's strict antitonicity (`Ch18.inv_antitone`) doing the work. The general statement (multi-mode, continuous densities) needs the full GAN variational machinery; what is proved here is the algebraic skeleton every collapse argument rests on.
 
 ## Two networks, one autodiff
 

@@ -26,6 +26,12 @@ $$ h_t = \tanh(W_h\,h_{t-1} + W_x\,x_t + b), \qquad \hat y = \sigma(w_o\cdot h_T
 
 Les *mêmes* poids servent à chaque pas (l'analogue temporel du partage des poids du chapitre 6). Pour l'entraîner on le **déroule** : une récurrence de longueur $T$ est un réseau sans rebouclage de profondeur $T$ dont les couches partagent leurs poids. La rétropropagation sur le réseau déroulé s'appelle la **rétropropagation à travers le temps** (BPTT).
 
+<Creators fr slugs="werbos,rumelhart" />
+
+
+<Figure src="arch_rnn.svg"
+caption="RNN : un état h transmis le long de la séquence, mêmes poids à chaque pas"
+ />
 ## L'état d'un réseau récurrent est un produit
 
 Comprenons le gradient avec le réseau le plus simple possible : une unité, $h_{t+1} = \tanh(w\,h_t + c_t)$, l'entrée étant intégrée dans $c_t$. Nous construisons le réseau déroulé comme une `Expr` à une seule variable $h_0$ :
@@ -55,6 +61,8 @@ $$ \frac{\partial h_T}{\partial h_0} \;=\; \prod_{s=1}^{T} \bigl(1-h_s^2\bigr)\,
 
 La BPTT multiplie $T$ facteurs. Que le produit diminue, reste stable ou grandisse fait toute l'histoire de l'entraînement des RNN.
 
+<Figure src="rnn_chain.svg" alt="log10 du gradient a travers T etapes de temps denroules : 0.5^T typique et 0.25^T pire cas tombent en lignes droites" caption="Denrouler un RNN transforme la retropropagation en produit de profondeur du Ch03, le temps remplacant les couches : log10 chute lineairement, -0.3 par pas typique, -0.6 pire cas. Dix pas en arriere ne laissent plus qu'un milliemieme du signal - l'evanescence formelle que l'autoroute du LSTM (Ch08) est construite pour fuir." />
+
 ## Gradients qui s'évanouissent
 
 Chaque facteur $1 - h_s^2$ est compris entre $0$ et $1$ (car $|\tanh|\le 1$). Donc si $|w| < 1$ le produit vaut au plus $|w|^T$ : il **décroît exponentiellement avec la longueur de la séquence**. Le théorème ci-dessous l'énonce pour les carrés, ce qui évite les valeurs absolues ; il est démontré sur `Rat`, en arithmétique exacte.
@@ -77,6 +85,8 @@ Sans activation saturante, rien ne borne les facteurs. Pour la récurrence liné
 ```
 
 Avec $w=2$, le gradient est multiplié par un million en 20 pas ; avec $|w|<1$ il s'éteint. Entraîner un long RNN, c'est marcher sur un fil, et aucune valeur de $w$ n'est confortable. (Les praticiens écrêtent les gradients contre l'explosion ; l'évanouissement est le problème difficile, et motive le LSTM du chapitre suivant.)
+
+<Figure src="lag_copy.svg" alt="Deux impulsions sur un axe temporel, l'entree et la cible retardees de trois pas" caption="La tache de memoire du RNN : y_t = x_(t-3) - une impulsion d'entree en t = 3 doit ressortir en t = 6. La mise a jour d'etat doit porter l'impulsion exactement trois pas : pas trop peu (elle s'evanouit), pas trop (elle bave sur les sorties suivantes). Ce fil est la ou l'analyse des gradients evanescents du chapitre mord." />
 
 ## Un RNN à $n$ unités, en Lean
 

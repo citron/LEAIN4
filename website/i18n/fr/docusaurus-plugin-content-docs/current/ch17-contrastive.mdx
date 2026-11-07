@@ -1,0 +1,150 @@
+---
+sidebar_position: 18
+title: "Chapitre 17 — Apprentissage contrastif : InfoNCE, exactement"
+---
+
+# Chapitre 17 — Apprentissage contrastif : la perte InfoNCE, exactement
+
+:::tip[TL;DR]
+**En bref.** Les méthodes contrastives apprennent un embedding en *mettant en contraste* une paire positive avec des négatifs. La perte standard — InfoNCE — est le cross-entropy de la question « lequel de ces candidats est le positif ? », toute la machine cross-entropy du chapitre 5 et les outils de probabilité du chapitre 16 s'appliquent tels quels. Quatre théorèmes expliquent toute courbe d'entraînement contrastif : le softmax est une vraie distribution ; la perte est $\ge 0$ et ne s'annule qu'en confiance totale sur le positif ; un embedding **effondré** — tous les candidats au même score — perd exactement $\log (n + 1)$, et chaque négatif supplémentaire relève le plancher ; le gradient est $p - \text{onehot}$.
+
+**Mots nouveaux, en termes simples :**
+
+- **Apprentissage contrastif** : apprendre « semblable » et « différent » en comparant des paires : rapprocher la paire positive, éloigner les négatifs.
+- **InfoNCE** : la perte — classer lequel des $n+1$ candidats est le positif, et payer le logarithme négatif de la probabilité qu'on attribue à la bonne réponse.
+- **Température** $\tau$ : diviser les scores par $\tau$ règle la pointe du softmax : une petite $\tau$ amplifie les petites différences de score.
+- **Effondrement des représentations** : tous les embeddings deviennent (presque) identiques ; tous les candidats sont à égalité ; la perte vaut exactement $\log (n+1)$.
+:::
+
+Le chapitre 15 pénalise l'effondrement dans JEPA par un terme de variance, sans jamais prouver ce que la perte d'un modèle effondré *doit* valoir — parce que l'apprentissage contrastif n'était pas au programme. Ce chapitre comble ce trou : la perte elle-même, définie sur `Rat` exact, avec les quatre faits que tous les praticiens citent comme du folklore, élevés au rang de théorèmes.
+
+<Figure src="infonce_mass.svg" alt="Masse de probabilite sur le positif selon le nombre de negatifs n : la courbe aveugle 1/(n+1) et la courbe a ecart 2 e^2/(e^2+n) bien au-dessus" caption="Ce qu'achete un ecart de similarite : un plongement aveugle partage la masse softmax a parts egales, 1/(n+1) - a 32 negatifs, 3 %. Le couple apparie prouve avec ecart 2 maintient e^2/(e^2+n) pres de 19 % au meme n. L'ecart entre les deux courbes est la valeur de l'apprentissage contrastif, et il grandit avec n : plus de negatifs punit l'aveuglement." />
+
+<Figure src="nce_temp.svg" alt="InfoNCE -log(e^s/(e^s+3)) selon l'ecart positif s : de 1,39 vers presque zero" caption="Le paysage InfoNCE trace : avec trois negatifs, la perte vaut -log(e^s/(e^s+3)) - elle est a log 4 = 1,39 quand le positif est indiscernable (s = 0) et tend vers 0 quand le positif prend de l'avance. Le plancher demontre au chapitre est exactement la valeur en s = 0." />
+
+<Creators fr slugs="hinton" />
+
+
+<Figure src="arch_contrastive.svg"
+caption="Contraste : deux augmentations, encodeur partagé, paires appariées attirées"
+ />
+## La perte
+
+```lean file=Ch17/Contrastive.lean#infonce
+```
+
+Un échantillon est une requête, un positif et $n$ négatifs ; le score du candidat $i$ est le produit avec la requête (un cosinus en pratique — un produit simple garde tout exact). InfoNCE est le logarithme négatif de la masse du softmax à l'indice 0, le positif. Tout le fichier est en `Rat` et lois abstraites de `Ch16` (`LawfulLog`, `LawfulExp`) : les énoncés sont des théorèmes, pas des graphiques.
+
+Quatre choses que le bloc ci-dessus prouve :
+
+**Le softmax est une distribution** (`softmax_dist`) : chaque masse est *strictement* positive et les masses somment exactement à 1. La preuve a besoin de `vsum_pos` — la fonction de partition $Z = \sum_i e^{z_i}$ est strictement positive dès qu'il y a un score — donc la division est légale, aucune masse n'est nulle et $\log$ de chaque masse est défini. L'enregistrement `Dist` du chapitre 16 accepte le softmax en entrée : cross-entropy, entropie et KL s'appliquent à lui.
+
+**La perte est positive** (`infoNce_ge_zero`) : le numérateur du positif $e^{z_0}$ est au plus le $Z$ entier (les autres termes sont positifs), donc la masse est $\le 1$, et la loi de la tangente $\log x \le x - 1$ donne $-\log p \ge 0$.
+
+**L'effondrement coûte exactement $\log (n+1)$** (`infoNce_collapse`) : donnez à chaque candidat le même score $c \ne 0$ et la perte vaut exactement $\log (n + 1)$ — la masse uniforme $1/(n+1)$, sans approximation. C'est le nombre à lire sur toute courbe d'entraînement : le *hasard* donne le même niveau, $\log(n+1)$, parce que la distribution uniforme est le classifieur qui ne sait rien. Plus de négatifs relèvent le plancher — l'exercice 1 calcule le coût marginal du négatif suivant, $\log\frac{n+2}{n+1}$.
+
+**Le gradient est $p - \text{onehot}$** (`infonce_grad`) : InfoNCE *est* la perte cross-entropy du chapitre 5 avec un label one-hot à l'indice 0, donc son gradient est hérité de `ceLoss_grad` en une ligne : le gradient du logit du candidat $i$ est sa masse courante $p_i$, moins $1$ pour le positif. Chaque candidat est poussé avec exactement la masse de probabilité qu'il doit céder : un négatif qui a capturé $60\,\%$ de la masse est repoussé le plus fort ; un négatif déjà à $0{,}01\,\%$ est à peine touché. Cette identité explique toute la dynamique de l'entraînement contrastif — et pourquoi les négatifs durs (masse $=$ grande) dominent le signal.
+
+## Le couple apparié, en forme fermée
+
+```lean file=Ch17/Contrastive.lean#matched
+```
+
+Réduisez le batch à une requête, un positif (score `hi`) et une négative (score `lo`) : InfoNCE cesse d'être un agrégat et se replie en une seule fonction élémentaire de l'**écart de similarité** `hi - lo`. Le bloc ci-dessus prouve ce repli, exactement :
+
+**La masse du positif est une sigmoïde** (`matched_mass`) : `1 / (1 + exp(lo - hi))`. L'étape clé est `matched_key` — `(1 + exp(lo-hi)) · exp(hi) = exp(hi) + exp(lo)`, une application de `exp_add`. La masse vaut `1` quand le positif domine, exactement `1/2` quand le modèle est aveugle (`hi = lo`), et tend vers `0` quand le couple est scoré à l'envers. Toute courbe d'« accuracy » des papiers contrastifs est cette fonction.
+
+**La perte est une softplus** (`matched_loss`) : `log (1 + exp(lo - hi))`. La perte ne dépend *que de l'écart* — les scores individuels ne comptent pas, seule leur différence compte. C'est pour cela que la température et l'échelle des scores se battent dans chaque entraînement réel : c'est le même bouton.
+
+**L'aveuglement coûte exactement `log 2`** (`matched_equal`) : avec `hi = lo` la perte vaut `log 2` et la masse `1/2`, pas approximativement. Pour `n` négatives, le même énoncé est `infoNce_collapse` ci-dessus ; ici, son ombre à deux candidats.
+
+**La perte décroît quand l'écart croît** (`matched_mono`) — et ce théorème est honnête sur son hypothèse : la monotonie de `exp` est une propriété *analytique* de l'exponentielle réelle. Elle ne découle **pas** de `exp_add` et `exp_zero` à eux seuls — tout morphisme de groupes `(Q,+) → (Q\{0},·)` satisfait ces lois, et des morphismes sauvages rendent `exp` décroissante. Le théorème demande donc la classe `MonotoneExp` — une seule déclaration nommée dans `Core/Algebra.lean`, portant exactement un champ, `a ≤ b → exp a ≤ exp b`. L'exponentielle réelle la satisfait ; la couche algébrique seule ne peut pas la prouver. Déclarer la frontière analytique **une fois**, comme classe, au lieu de répéter une hypothèse locale à chaque usage, fait partie de la formalisation : tout théorème qui exige l'analyse pointe vers la même porte nommée.
+
+La preuve dérive aussi `log_mono` — le logarithme est croissant sur les positifs — de la borne tangente `log t ≤ t - 1` appliquée au rapport `x / y` (`log_div`). Aucun nouvel axiome : un théorème des quatre lois de `LawfulLog`.
+<Figure src="infonce_floor.svg" alt="Plafond InfoNCE à l'aveugle log(n+1) croissant avec le nombre de négatifs, la courbe du couple apparié log 2 à écart nul et log(1+exp(-2)) à écart 2 en dessous" caption="Le plancher que les théorèmes prédisent, tracé : un embedding aveugle paie exactement log(n+1) - un bit pour un couple apparié, 3,14 bits pour 32 négatifs (infoNce_collapse). Un couple apparié avec un vrai écart de similarité paie log(1 + exp(lo - hi)) - matched_loss - et la courbe d'écart 2 siège visiblement sous la ligne d'aveuglement : l'apprentissage contrastif est la lutte pour pousser la perte sous son propre plancher." />
+
+## Expériences
+
+`lake exe ch17` imprime la face numérique des quatre théorèmes. En `Float` :
+
+- un softmax de cinq logits somme à `1.000000` (le théorème dit *exactement* 1 ; `Float` le dit jusqu'au dernier bit qu'il peut garder) ;
+- un embedding plat de $n+1$ candidats vaut `1.39 / 2.08 / 2.77` pour $n = 3, 7, 15$ négatifs, contre $\log (n+1) = 1.39, 2.08, 2.77$ — écart `0.00` à chaque taille : le plancher n'est pas une métaphore, c'est de l'arithmétique ;
+- un embedding discriminant (score 4 sur le positif, 0 sur les quatre négatifs) perd `0.07` là où le plancher est `1.61` : la perte *peut* passer sous le plancher — c'est cela, apprendre ;
+- le gradient `[-0.77, 0.05, 0.01, 0.62, 0.08]` somme à 0, avec l'entrée du positif négative : poussée vers le haut, et le négatif le plus massif poussé vers le bas le plus fort.
+
+Puis une vraie campagne d'entraînement : cinq objets sur un cercle, requêtes fixes au rayon 1.5, embeddings sur la sphère unité, scores cosinus à température $\tau = 0.5$, SGD simple avec projection sur la sphère après chaque pas (un embedding non normalisé s'envole — l'explosion contrastive classique, saisie en flagrant délit). La campagne *démarre au plancher d'effondrement* : tous les scores valent 1.5, la perte est $\log 5 = 1.61$ exactement. Après 500 époques la perte moyenne est **0.24**, et elle reste à $0.23$–$0.25$ jusqu'à l'époque 2000 ; le cosinus moyen entre chaque embedding appris et son objet cible est **1.00**. L'embedding n'a pas seulement battu le plancher — il a retrouvé les objets.
+
+<Figure src="softmax_sharp.svg" alt="Masse softmax sur le positif selon la température : un escalier en tau = 0, presque plat en tau = 2, la sigmoïde qui passe par tau = 1" caption="La température est le bouton de netteté : scores 1 et 0, la masse sur le positif vaut exp(1/t)/(exp(1/t)+1). Froid (tau petit) : le gagnant rafle tout, les gradients saturent. Chaud (tau grand) : tout est pâteux et le signal contrastif s'évanouit. Autour de tau = 1 la courbe est la plus raide - c'est pourquoi la température est l'hyperparamètre le plus réglé de toute campagne contrastive." />
+
+## Exercices
+
+1. Prouver qu'**ajouter un négatif de plus relève le plancher effondré exactement de** $\log \frac{n+2}{n+1}$ : la perte effondrée est le log du nombre de candidats, donc le coût marginal d'un négatif est le log du rapport.
+2. Prouver que **une perte nulle signifie confiance totale sur le positif** : si la perte InfoNCE vaut $0$, la masse du softmax sur le positif vaut exactement $1$.
+3. Énoncer et prouver que le softmax de *tout* vecteur de scores `z : Vec Rat (n + 1)` somme à $1$ — la forme sans température de la seconde moitié de `softmax_dist`.
+
+**Exercices en Lean.** Le fichier `lean/LeanDL/Ch17/Exercises.lean` contient les énoncés ci-dessous, avec `sorry` à remplacer. Les solutions prouvées sont dans `Solutions.lean` à côté : essayer d'abord.
+
+```lean file=Ch17/Exercises.lean#ex1
+```
+
+```lean file=Ch17/Exercises.lean#ex2
+```
+
+```lean file=Ch17/Exercises.lean#ex3
+```
+
+<details>
+<summary>Indice 1</summary>
+
+Réécrire les deux pertes avec `infoNce_collapse` : le but devient de l'arithmétique pure de `log`, `log (n + 2) = log (n + 1) + log ((n + 2) / (n + 1))`. La loi de la division `log_div` est au chapitre 16, et `(n + 2) = (n + 1) * ((n + 2) / (n + 1))` — lire la division comme une multiplication par l'inverse.
+
+</details>
+
+<details>
+<summary>Corrigé 1</summary>
+
+```lean file=Ch17/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Indice 2</summary>
+
+`0 = -log p` signifie `log p = 0`. La loi de la tangente donne `log p ≤ p - 1`, donc `0 ≤ p - 1`, c'est-à-dire `1 ≤ p`. Et `p ≤ 1` est exactement l'inégalité que construit la preuve de `infoNce_ge_zero` (`softmax z 0 ≤ 1`).
+
+</details>
+
+<details>
+<summary>Corrigé 2</summary>
+
+```lean file=Ch17/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Indice 3</summary>
+
+`n + 1` est strictement positif pour tout `n` (`Nat.succ_pos`) ; le passer à `softmax_dist` et garder la seconde moitié de la conjonction.
+
+</details>
+
+<details>
+<summary>Corrigé 3</summary>
+
+```lean file=Ch17/Solutions.lean#sol3
+```
+
+</details>
+
+## Ce qui est couvert et ce qui ne l'est pas
+
+- **Un échantillon, pas un batch.** Les théorèmes portent sur une requête avec $n$ négatifs. Les campagnes réelles mutualisent les négatifs à travers le batch (disposition SupCon / SimCLR) ; la perte est alors une somme de pertes à $n+1$ candidats, et chaque théorème d'ici s'applique à chaque ligne.
+- **Les scores sont des produits, pas des cosinus.** Des cosinus exacts exigent des racines carrées et l'inégalité de Cauchy–Schwarz — proche de l'analyse. Le produit garde le modèle fini et rationnel ; la démo fait le cosinus en `Float`.
+- **Pas de borne Information-Maximising.** Le nom « InfoNCE » vient d'une borne sur l'information mutuelle ; la prouver exige l'entropie mesurée. Ce que ce chapitre prouve est le *squelette* de la perte : plancher, signe, gradient — les parties que toute courbe montre.
+- **La température est un paramètre, pas une théorie.** Les théorèmes valent pour tout $\tau > 0$ ; la littérature empirique sur la température (elle interagit avec le nombre de négatifs, le batch, la tête de projection) est de l'expérience, pas du théorème.
+
+## Suite
+
+Le chapitre 15 (JEPA) supposait tout ce que ce chapitre prouve. Le relire avec le plancher $\log (n+1)$ en main : le récit « le terme de variance empêche l'effondrement » a maintenant son pendant arithmétique — l'effondrement n'est pas une dégénérescence vague, c'est un nombre que l'on peut soustraire d'une courbe d'entraînement.

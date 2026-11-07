@@ -6,7 +6,7 @@ title: "Chapter 9 — Attention and the Transformer"
 # Chapter 9 — Attention and the Transformer
 
 :::tip[TL;DR]
-**In short.** Attention lets every position look directly at all the others. We prove four properties (softmax weights, blindness to order, the causal mask, layer-norm shift invariance) and train a tiny Transformer.
+**In short.** Attention lets every position look directly at all the others. We prove five properties (softmax weights, blindness to order, the causal mask, layer-norm shift invariance, bounded blends) and train a tiny Transformer.
 
 **New words, in simple terms:**
 
@@ -24,6 +24,14 @@ title: "Chapter 9 — Attention and the Transformer"
 
 Recurrent networks read a sequence one step at a time, so information from far back must survive many steps. The **Transformer** (Vaswani et al., 2017) drops the recurrence: every position can look directly at every other position, through **attention**.
 
+<Figure src="attn_sharp.svg" alt="Softmax weight of the top key over four keys against the logit gap beta, rising from 1/4 to 1, with the uniform 1/4 line" caption="Attention as a tunable spotlight: with three rival keys, a logit gap beta puts e^beta / (e^beta + 3) on the winner - 1/4 when blind, 98 % at gap 6 (the softmax facts proved in this chapter). Temperature is this dial: large beta selects hard, beta = 0 degenerates to the uniform average." />
+
+<Creators slugs="bengio" />
+
+
+<Figure src="arch_transformer.svg"
+caption="Transformer: encoder and decoder stacks of attention blocks"
+ />
 ## Scaled dot-product attention
 
 Each position $t$ has a *query* $q_t$, a *key* $k_t$ and a *value* $v_t$ (three linear maps of its representation $x_t$). Position $t$ compares its query with all keys, turns the scores into weights with a softmax, and takes the weighted average of the values:
@@ -50,7 +58,9 @@ $$
 
 A Transformer block adds this to its input (a **residual connection**) and then applies a small MLP, again with a residual connection. Real models stack many blocks, use several attention "heads" in parallel, and normalise activations with layer norm.
 
-## Four facts, proved
+<Figure src="attention_causal.svg" alt="A 6x6 causal attention matrix with uniform scores: row t spreads 1/(t+1) over its own past and zero over the future" caption="The causal mask, drawn: scores uniform, so each row shares its mass equally over the positions it is allowed to see. Row 0 sees only itself (mass 1), row 5 averages over six. Everything above the diagonal is exactly zero - that is the no-leak property the chapter proves (causal_no_leak), visible as the white triangle." />
+
+## Five facts, proved
 
 ### 1. The weights are a distribution, and the softmax is shift-invariant
 
@@ -87,6 +97,15 @@ Layer norm centres its input, divides by the standard deviation, and then applie
 
 (The centring identity $\sum_i (x_i - \bar x) = 0$ is the Chapter 5 theorem `centered_sum_zero`.)
 
+### 5. A blend of bounded values stays bounded
+
+The softmax weights of fact 1 are nonnegative and sum to 1, so attention is a *weighted average* of the value vectors. Weighted averages cannot create magnitude: if every value coordinate lies in $[-M, M]$, every output coordinate does too — proved over exact $\mathbb{Q}$ in Chapter 17, where the softmax lives:
+
+```lean file=Ch17/Contrastive.lean#softmax_blend
+```
+
+The same lemma is the kernel of the GRU story in Chapter 8 (the update gate is a convex mix) and of the ensemble average in Chapter 16. It is also a stability statement with teeth: a network whose value vectors stay bounded cannot have its attention output blow up, no matter how the scores move.
+
 ## A small causal Transformer in Lean
 
 Our network is one block: token and position embeddings, causal self-attention with one head and a residual connection, a ReLU MLP with a residual connection, a linear read-out and a softmax. Layer norm is proved above but left out of the running code, since at this size the model trains without it.
@@ -113,9 +132,43 @@ The backward pass is written by hand. Its stages mirror the forward pass in reve
 ```lean file=Ch09/Gpt.lean#backward
 ```
 
+## Multi-head attention
+
+One attention map produces one weighted average per position — one routing decision. Real Transformers run $h$ attention maps **in parallel**, each on its own subspace of the model, and concatenate the results: head $k$ sees the $k$-th block of `dh` coordinates of the projections, and the read-out consumes the concatenation. The layout is the whole idea, and it is exactly what the types make precise:
+
+```lean file=Ch09/Attention.lean#multihead
+```
+
+`headVec` slices a flat projection of width `dh * h` into its heads; `concatVec` glues the head outputs back into one vector. The two theorems say the glue and the slicing are inverse: reading the flat index `k * dh + j` of the concatenation returns the output of head `k` at coordinate `j` (`concat_head`), and slicing the concatenation recovers every head intact (`head_concat`). A layout bug — an off-by-one in the index arithmetic, a stride swapped for a width — is exactly the class of silent numerical error a proof removes: the division and modulo that implement the layout are pinned down by the lemmas `Nat.add_div`, `Nat.mul_div_left`, `Nat.add_mul_mod_self_right`, not by a test on one example.
+
+The running code (`lean/Demos/MHead.lean`, `lake exe mhead`) is one block of exactly this shape: $h = 4$ causal heads of width `dh = 4` (Q/K/V projections, scores scaled by $1/\sqrt{dh}$, causal softmax, concatenation), a linear read-out and a softmax, trained on the delay task with hand-written backward.
+
+
+## The block, assembled and proved
+
+The pieces above are the parts; a real Transformer is the **block** that assembles them — layer norm, causal multi-head attention, feed-forward network, and the two residual connections, in the pre-norm wiring every implementation uses:
+
+```
+y = layerNorm (x + Attention(layerNorm x))     -- attention sub-layer
+z = layerNorm (y + FFN(y))                     -- feed-forward sub-layer
+```
+
+`Ch09/Transformer.lean` assembles exactly this over a sequence of rows (`Mat α T d`: `T` positions of `d` features — the shapes are in the type) and proves the two properties the architecture exists to guarantee, **for the whole block**, not just its parts:
+
+```lean file=Ch09/Transformer.lean#transformer_props
+```
+
+**`blockOut_no_leak` — the block never sees the future.** If two input sequences agree on the rows at positions `j ≤ t`, the block outputs the same vector at position `t`, whatever the hidden rows contain. The proof is a congruence climb: row-wise layer norm is congruent, each head's output is fixed by the mask lemma `causal_no_leak`, the concatenation and output projection are congruent, the residual and the feed-forward network are congruent — so the whole block is. This is the theorem that licenses training on whole sequences in parallel: position `t` provably cannot cheat by reading `t+1`.
+
+**`blockOut_shift` — the block ignores absolute offsets.** Adding one constant to every feature of every row leaves every output unchanged. Layer norm kills the offset in the normalised inputs (`layerNorm_shift`), the attention is built from normalised rows only, and the residual `x + attn` picks the constant up exactly once, where the second layer norm removes it. A model built from these blocks represents *relative* structure, not absolute levels — one reason normalisation is not an optimisation trick but a change of what the network can express.
+
+The GPT executable (`lake exe gpt`) computes exactly this structure in `Float`, with ReLU for `σ` — the theorems are over an exact field, the demo runs in floating point, and both are the same block.
+
 ## Experiments
 
 `lake exe gpt` first checks the gradient of all 171 parameters of a tiny model against central finite differences (maximum error below $10^{-6}$, printed as 0.000000).
+
+`lake exe mhead` does the same for the four-head block: the hand-written backward of the multi-head Transformer (918 parameters plus 128 embedding entries) matches central finite differences to 0.000000 on every coordinate — the head slicing and concatenation of the section above are implemented at exactly the layout the theorems pin down.
 
 ### Can attention find a token at a given distance?
 
@@ -127,6 +180,10 @@ The *delay task*: random tokens from an alphabet of 8, and the target at positio
 | without position embeddings | 36.2 % |
 
 Chance is $12.5\%$. With positions the attention learns to look exactly two steps back. Without them the model cannot do it reliably, which agrees with theorem 2. But it is *better than chance*, and the reason is instructive: theorem 2 is about attention over a set, whereas a **causal** model sees different prefixes at different positions, so the *number* of visible tokens leaks some information about position (for instance, the very first positions can be told apart). Causal models can partly recover position without being told; the delay task shows it is not enough. One seed, one configuration.
+
+### The four-head block
+
+`lake exe mhead exp 1500 20` trains the multi-head block of this chapter — $h = 4$ causal heads of width 8, 12-token sequences from an alphabet of 8, target at lag 3 — on the same recipe: Adam, batch of 16 fresh sequences per step, test on 200 fresh sequences. Learning rate $0.02$: test accuracy **100 %** from the first report (step 300) to the last. Learning rate $0.05$: 100 % as well. The layout theorems say the concatenation is wired correctly; the finite-difference check says the backward is; the training run says the block learns.
 
 ### A tiny language model
 
@@ -141,14 +198,14 @@ The text has the right words, spaces and punctuation, and sentence shapes from t
 ## What is and is not covered
 
 - The four theorems are about the *abstractions* (a softmax over scores, attention over a set, a mask, layer norm); the array code of the model is checked by finite differences, not proved.
-- Multi-head attention (several parallel attention maps whose outputs are concatenated), sinusoidal position encodings and stacked blocks are described but not implemented.
+- Multi-head attention is implemented (formal layout in `Ch09/Attention.lean`, running block in `Demos/MHead.lean`); sinusoidal position encodings and stacked blocks are described but not implemented.
 
 ## Exercises
 
 1. Prove that the weights of `weights_sum` are non-negative when the `exp` is positive (add a hypothesis `0 < exp x`).
 2. Show that `attendM (causal t)` with all scores equal is the *average* of the visible values.
 3. Add layer norm to the code (forward and backward) and compare training speed on the delay task.
-4. Implement a second attention head and concatenate the two outputs. Does it help on a task that needs two different lags?
+4. Implement a second attention head and concatenate the two outputs. Does it help on a task that needs two different lags? (`lean/Demos/MHead.lean` is a worked version of exactly this exercise, at $h = 4$.)
 
 **Exercises in Lean.** The file `lean/LeanDL/Ch09/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
 
@@ -156,6 +213,9 @@ The text has the right words, spaces and punctuation, and sentence shapes from t
 ```
 
 ```lean file=Ch09/Exercises.lean#ex2
+```
+
+```lean file=Ch09/Exercises.lean#ex3
 ```
 
 <details>
@@ -184,6 +244,21 @@ Unfold `causal`. The condition `j.val ≤ t` contradicts `t < j.val`; `omega` pr
 <summary>Solution 2</summary>
 
 ```lean file=Ch09/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Both sides are functions `Fin dh → α`; prove them pointwise with `funext j`, then the goal is the coordinate identity of `concat_head` applied at `j`.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch09/Solutions.lean#sol3
 ```
 
 </details>

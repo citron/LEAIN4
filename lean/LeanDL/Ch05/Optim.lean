@@ -57,6 +57,147 @@ theorem sgdQuad_closed (η a : α) : ∀ (t : Nat) (w : α), sgdQuad η a w t = 
     grind
 -- ANCHOR_END: sgd_quadratic
 
+-- ANCHOR: sgd_spec
+/-- `b² ≤ 1` when `-1 ≤ b ≤ 1`. The one algebraic fact behind every
+convergence proof below: a factor in `[-1, 1]` never amplifies. -/
+theorem sq_le_one (c : Rat) (lo : -1 ≤ c) (hi : c ≤ 1) : c * c ≤ 1 := by
+  rcases Rat.le_total (a := 0) (b := c) with hpos | hneg
+  · have h := Rat.mul_le_mul_of_nonneg_left hi hpos
+    grind
+  · have hneg1 : -c ≤ 1 := by
+      have := Rat.neg_le_neg lo
+      grind
+    have h0 : 0 ≤ -c := by grind
+    have h := Rat.mul_le_mul_of_nonneg_left hneg1 h0
+    have : c * c = (-c) * (-c) := by grind
+    grind
+
+/-- Powers of a number in `[0, 1]` stay in `[0, 1]`. -/
+theorem powN_le_one (b : Rat) (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    ∀ t, powN b t ≤ 1 ∧ 0 ≤ powN b t
+  | 0 => by simp only [powN]; grind
+  | t + 1 => by
+      obtain ⟨ih, ih0⟩ := powN_le_one b hb0 hb1 t
+      have hb : powN b (t + 1) = b * powN b t := rfl
+      have h1 : b * powN b t ≤ 1 * powN b t := Rat.mul_le_mul_of_nonneg_right hb1 ih0
+      have h2 : 0 ≤ b * powN b t := Rat.mul_nonneg hb0 ih0
+      grind
+
+/-- `powN (b·b) t = powN b t · powN b t`. -/
+theorem powN_sq (b : Rat) : ∀ t, powN (b * b) t = powN b t * powN b t
+  | 0 => by simp only [powN]; grind
+  | t + 1 => by
+      have hb1 : powN b (t + 1) = b * powN b t := rfl
+      have hbb : powN (b * b) (t + 1) = (b * b) * powN (b * b) t := rfl
+      rw [hbb, hb1, powN_sq b t]
+      show (b * b) * (powN b t * powN b t) = (b * powN b t) * (b * powN b t)
+      rw [← Rat.mul_assoc, Rat.mul_comm b (powN b t), Rat.mul_assoc, Rat.mul_assoc]
+      grind
+
+/-- **One SGD step never increases the loss.** On `f(w) = a w²/2` the loss
+is `w²` up to the constant `a/2`; whenever the step size obeys
+`0 < η a < 2` — the stability condition every practitioner learns — the
+squared iterate cannot grow. The proof is one factorisation:
+`w' = (1 − ηa)·w` with `1 − ηa ∈ [-1, 1]`. -/
+theorem sgd_step_contract (η a w : Rat) (ha : 0 < a) (hη : 0 < η) (hb : η * a < 2) :
+    (w - η * (a * w)) * (w - η * (a * w)) ≤ w * w := by
+  have hpos : 0 ≤ η * a := Rat.mul_nonneg (Rat.le_of_lt hη) (Rat.le_of_lt ha)
+  have hc : -1 ≤ 1 - η * a := by grind
+  have hc' : 1 - η * a ≤ 1 := (Rat.sub_right_le_iff_le_add (a := (1 : Rat))).mpr (by grind)
+  have hstep : w - η * (a * w) = (1 - η * a) * w := by
+    have hqa : η * a * w = η * (a * w) := by grind
+    grind
+  rw [hstep, Rat.mul_assoc]
+  have hc2 := sq_le_one (1 - η * a) hc hc'
+  have hw : 0 ≤ w * w := sq_nonneg w
+  have h := Rat.mul_le_mul_of_nonneg_right hc2 hw
+  have : 1 * (w * w) = w * w := by grind
+  grind
+
+/-- **SGD's stability specification**: under the same condition, *every*
+iterate of the run has loss at most the loss at the start. Training never
+diverges while the step is in the stable range. -/
+theorem sgd_loss_decreases (η a w : Rat) (ha : 0 < a) (hη : 0 < η) (hb : η * a < 2) :
+    ∀ t, sgdQuad η a w t * sgdQuad η a w t ≤ w * w := by
+  intro t
+  have hpos : 0 ≤ η * a := Rat.mul_nonneg (Rat.le_of_lt hη) (Rat.le_of_lt ha)
+  have hc : -1 ≤ 1 - η * a := by grind
+  have hc' : 1 - η * a ≤ 1 := (Rat.sub_right_le_iff_le_add (a := (1 : Rat))).mpr (by grind)
+  have key : ∀ (t : Nat) (v : Rat), sgdQuad η a v t = powN (1 - η * a) t * v := by
+    intro t
+    induction t with
+    | zero => intro v; simp only [sgdQuad, powN]; grind
+    | succ t ih =>
+      intro v
+      have hstepv : v - η * (a * v) = (1 - η * a) * v := by
+        have hqa : η * a * v = η * (a * v) := by grind
+        grind
+      rw [sgdQuad, ih (v - η * (a * v)), hstepv, powN, Rat.mul_assoc]
+      grind
+  rw [key t w, Rat.mul_assoc]
+  have hc2 : 0 ≤ (1 - η * a) * (1 - η * a) := sq_nonneg _
+  have hc2b : (1 - η * a) * (1 - η * a) ≤ 1 := sq_le_one _ hc hc'
+  obtain ⟨hp, _⟩ := powN_le_one ((1 - η * a) * (1 - η * a)) hc2 hc2b t
+  have hw : 0 ≤ w * w := sq_nonneg w
+  have h1 : powN ((1 - η * a) * (1 - η * a)) t * (w * w) ≤ 1 * (w * w) :=
+    Rat.mul_le_mul_of_nonneg_right hp hw
+  rw [powN_sq (1 - η * a)] at h1
+  have : 1 * (w * w) = w * w := by grind
+  grind
+
+/-- **The critical step converges in one move.** At `η = 1/a` — the step
+the curvature suggests — `1 − ηa = 0` and the iterate lands on the
+minimiser `w = 0` exactly, on the first step. Too big a step (`ηa > 2`)
+diverges; this is the theorem that makes the demo's divergence curve a
+proven fact and not a curiosity. -/
+theorem sgd_critical_step (a w : Rat) (ha : a ≠ 0) :
+    sgdQuad a⁻¹ a w 1 = 0 := by
+  show w - a⁻¹ * (a * w) = 0
+  have h : a⁻¹ * a = 1 := Rat.inv_mul_cancel a ha
+  grind
+
+/-- **Rounding drift of SGD — the bridge to the `Float` demos.** Run the
+quadratic SGD iteration in any *perturbed* arithmetic: each step deviates
+from the exact update `w − η·(a·w)` by an error of size at most `ε`
+(what `Float` rounding does, among other perturbations). If the step
+size is in the stable range `0 < ηa < 2`, the perturbed run never drifts
+more than `t·ε` from the exact run after `t` steps. Exact maths bounds
+the floating-point run — linearly, never exponentially, while the exact
+dynamics are stable. -/
+theorem sgd_rounding_drift (η a w₀ ε : Rat) (ha : 0 < a) (hη : 0 < η) (hb : η * a < 2)
+    (hε : 0 ≤ ε)
+    (v : Nat → Rat) (e : Nat → Rat) (h0 : v 0 = w₀)
+    (hv : ∀ t, v (t + 1) = v t - η * (a * v t) + e t)
+    (he : ∀ t, Rat.abs (e t) ≤ ε) :
+    ∀ t, Rat.abs (v t - sgdQuad η a w₀ t) ≤ (t : Rat) * ε := by
+  intro t
+  have hpos : 0 ≤ η * a := Rat.mul_nonneg (Rat.le_of_lt hη) (Rat.le_of_lt ha)
+  have hc : Rat.abs (1 - η * a) ≤ 1 :=
+    abs_le_one_of_interval (1 - η * a) (by grind)
+      ((Rat.sub_right_le_iff_le_add (a := (1 : Rat))).mpr (by grind))
+  have hv' : ∀ t, v (t + 1) = (1 - η * a) * v t + e t := by
+    intro t
+    rw [hv]
+    have hstepv : v t - η * (a * v t) = (1 - η * a) * v t := by
+      have hqa : η * a * v t = η * (a * v t) := by grind
+      grind
+    grind
+  have hw' : ∀ t, powN (1 - η * a) (t + 1) * w₀ =
+      (1 - η * a) * (powN (1 - η * a) t * w₀) := by
+    intro t
+    show (1 - η * a) * powN (1 - η * a) t * w₀ = (1 - η * a) * (powN (1 - η * a) t * w₀)
+    rw [Rat.mul_assoc]
+  have h0' : v 0 = powN (1 - η * a) 0 * w₀ := by
+    rw [h0]
+    have : powN (1 - η * a) 0 = (1 : Rat) := rfl
+    rw [this]
+    grind
+  have h := drift_bound (1 - η * a) hc ε hε v (fun t => powN (1 - η * a) t * w₀) e
+    h0' hv' he hw' t
+  rw [sgdQuad_closed η a t w₀]
+  exact h
+-- ANCHOR_END: sgd_spec
+
 end Laws
 
 section Fields

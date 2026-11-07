@@ -24,6 +24,8 @@ title: "Chapter 4 — Deep networks and automatic differentiation"
 
 In Chapter 3 we derived the gradient of a 2-layer network by hand. For ten layers, or a Transformer, nobody does that: the computer applies the chain rule mechanically. This is **automatic differentiation** (autodiff), and it is the engine of every deep learning framework. In this chapter we build one in Lean, **and prove it correct**.
 
+<Creators slugs="werbos,rumelhart" />
+
 ## Expressions
 
 We describe a computation as an expression tree over $n$ input variables (the parameters).
@@ -47,6 +49,8 @@ flowchart LR
 :::tip[Lean Corner: inductive types and structural recursion]
 `Expr` is an `inductive` type: a value is built by one of the constructors. A function defined by pattern matching on every constructor, calling itself only on sub-expressions (like `eval`), is *structurally recursive*: Lean checks that it terminates, and proofs about it go by `induction`.
 :::
+
+<Figure src="fd_drift.svg" alt="Log2 error of the central difference of sin against the step exponent k: a U-shaped curve in Float" caption="Why the exact derivative, not finite differences in Float: the central difference of sin at x = 1, step h = 2^-k - the truncation error O(h^2) shrinks the error (log2 scale) while Float cancellation grows it, drawing a U with a floor near 2^-52: the machine epsilon. No choice of h escapes the wall; the symbolic derivative of this chapter has no such floor." />
 
 ## What is "the derivative"?
 
@@ -112,6 +116,10 @@ With the machinery in place, the delta rule of Chapter 3 is a corollary: backpro
 
 ```lean file=Ch04/Network.lean#delta_rule
 ```
+
+<Figure src="chain_stack.svg" alt="Log gradient through a stack of sigmoid layers falls linearly in L: (1/4)^L worst case, (0.5)^L typical" caption="Why depth is a multiplication: each sigmoid layer is a factor at most 1/4, so the end-to-end gradient falls in a straight line on the log axis. This is the vanishing-gradient theorem in one picture - and the reason ReLU (local slope 1) took over." />
+
+<Figure src="relu_dead.svg" alt="Two curves: the alive ReLU y = max(0,x) rising from the origin, and the dead ReLU flat at zero across the whole axis" caption="The dead ReLU, drawn: a unit whose weights pushed its input always negative outputs exactly 0 everywhere - the ReLU gradient is 0 on that whole half-line, so no loss gradient flows and the unit never recovers (relu_grad, Ch04). Initialization is not cosmetic: it decides how many units stay alive." />
 
 ## Networks of any depth
 

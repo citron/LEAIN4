@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="300" viewBox="0 0 520 300" font-family="system-ui, sans-serif">
+  <rect x="0" y="0" width="520" height="300" fill="white"/>
+  <text x="260" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a1a">The 2x2 batch: one shared positive, two directions</text>
+  <!-- column labels (texts) -->
+  <text x="240" y="60" text-anchor="middle" font-size="13" fill="#333">y1 (text)</text>
+  <text x="380" y="60" text-anchor="middle" font-size="13" fill="#333">y2 (text)</text>
+  <!-- row labels (images) -->
+  <text x="80" y="115" text-anchor="middle" font-size="13" fill="#333">x1 (image)</text>
+  <text x="80" y="205" text-anchor="middle" font-size="13" fill="#333">x2 (image)</text>
+  <!-- cells -->
+  <rect x="170" y="75" width="140" height="80" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+  <text x="240" y="110" text-anchor="middle" font-size="14" font-weight="bold" fill="#1b5e20">S = x1.y1</text>
+  <text x="240" y="132" text-anchor="middle" font-size="12" fill="#1b5e20">POSITIVE (both ways)</text>
+  <rect x="310" y="75" width="140" height="80" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
+  <text x="380" y="110" text-anchor="middle" font-size="13" fill="#b71c1c">x1.y2</text>
+  <text x="380" y="132" text-anchor="middle" font-size="11" fill="#b71c1c">row negative</text>
+  <rect x="170" y="155" width="140" height="80" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
+  <text x="240" y="190" text-anchor="middle" font-size="13" fill="#b71c1c">x2.y1 = y1.x2</text>
+  <text x="240" y="212" text-anchor="middle" font-size="11" fill="#b71c1c">column negative</text>
+  <rect x="310" y="155" width="140" height="80" fill="#eeeeee" stroke="#999" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="380" y="190" text-anchor="middle" font-size="12" fill="#666">x2.y2</text>
+  <text x="380" y="212" text-anchor="middle" font-size="11" fill="#666">not in the loss</text>
+  <!-- arrows for directions -->
+  <line x1="150" y1="115" x2="162" y2="115" stroke="#1565c0" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="150" y="100" text-anchor="end" font-size="12" fill="#1565c0">row: image x1 asks</text>
+  <text x="150" y="128" text-anchor="end" font-size="12" fill="#1565c0">"which text is mine?"</text>
+  <line x1="240" y1="70" x2="240" y2="72" stroke="#ef6c00" stroke-width="2"/>
+  <text x="383" y="252" font-size="12" fill="#ef6c00">column: text y1 asks</text>
+  <text x="383" y="268" font-size="12" fill="#ef6c00">"which image is mine?"</text>
+  <defs>
+    <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 z" fill="#1565c0"/>
+    </marker>
+  </defs>
+  <text x="260" y="288" text-anchor="middle" font-size="12" fill="#444">symm loss = [ softplus(neg - S) row + softplus(neg - S) col ] / 2   (theorem symm_matched)</text>
+</svg>

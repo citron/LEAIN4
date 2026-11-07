@@ -26,6 +26,12 @@ $$ h_t = \tanh(W_h\,h_{t-1} + W_x\,x_t + b), \qquad \hat y = \sigma(w_o\cdot h_T
 
 The *same* weights are used at every step (the temporal analogue of the weight sharing of Chapter 6). To train it we **unroll** it: a recurrence of length $T$ is a feed-forward network of depth $T$ whose layers share their weights. Backpropagation on the unrolled network is called **backpropagation through time** (BPTT).
 
+<Creators slugs="werbos,rumelhart" />
+
+
+<Figure src="arch_rnn.svg"
+caption="RNN: one state h handed along the sequence, same weights each step"
+ />
 ## The state of a recurrent network is a product
 
 Let us understand the gradient with the simplest possible network: one unit, $h_{t+1} = \tanh(w\,h_t + c_t)$, with the input folded into $c_t$. We build the unrolled network as an `Expr` in the single variable $h_0$:
@@ -55,6 +61,8 @@ $$ \frac{\partial h_T}{\partial h_0} \;=\; \prod_{s=1}^{T} \bigl(1-h_s^2\bigr)\,
 
 BPTT multiplies $T$ factors. Whether the product shrinks, stays or grows is the whole story of training RNNs.
 
+<Figure src="rnn_chain.svg" alt="log10 of the gradient through T unrolled time steps: 0.5^T typical and 0.25^T worst fall as straight lines" caption="Unrolling an RNN turns backprop into the Ch03 depth product, with time in place of layers: log10 falls linearly, -0.3 per step typical, -0.6 worst. Ten steps back is already a thousandth of the signal - the formal vanishing the LSTM highway (Ch08) is built to escape." />
+
 ## Vanishing gradients
 
 Each factor $1 - h_s^2$ lies between $0$ and $1$ (because $|\tanh|\le 1$). So if $|w| < 1$ the product is at most $|w|^T$: it **decays exponentially with the length of the sequence**. The theorem below states this for squares, which avoids absolute values; it is proved over `Rat`, with exact arithmetic.
@@ -77,6 +85,8 @@ Without a saturating activation there is nothing to cap the factors. For the lin
 ```
 
 With $w=2$ the gradient is multiplied by a million in 20 steps; with $|w|<1$ it dies. Training a long RNN is therefore walking a tightrope, and no value of $w$ is comfortable. (Practitioners clip gradients against the explosion; the vanishing is the harder problem, and motivates the LSTM of the next chapter.)
+
+<Figure src="lag_copy.svg" alt="Two pulses on a time axis, the input pulse and the target pulse delayed by three steps" caption="The memory task the RNN runs: y_t = x_(t-3) - an input pulse at t = 3 must re-emerge at t = 6. The state update has to carry the pulse exactly three steps: not too little (it vanishes), not too much (it smears into later outputs). That knife-edge is where the vanishing-gradient analysis of this chapter bites." />
 
 ## An RNN with $n$ units, in Lean
 

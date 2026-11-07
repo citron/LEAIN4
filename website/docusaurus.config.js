@@ -3,6 +3,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkLeanAnchor from './plugins/remark-lean-anchor.mjs';
+import searchLocal from '@easyops-cn/docusaurus-search-local';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -10,12 +11,20 @@ const config = {
   tagline: 'Learn Lean 4 and deep learning at the same time — Apprenez Lean 4 et le deep learning ensemble',
   favicon: 'img/favicon.svg',
   url: 'https://example.github.io',
-  baseUrl: '/LEAIN4/',
+  // /LEAIN4/ for GitHub Pages; local viewing: SITE_BASE_URL=/ npx docusaurus build && npx docusaurus serve
+  baseUrl: process.env.SITE_BASE_URL || '/LEAIN4/',
   organizationName: 'leandl',
   projectName: 'LEAIN4',
   onBrokenLinks: 'throw',
   markdown: {mermaid: true, hooks: {onBrokenMarkdownLinks: 'throw'}},
   themes: ['@docusaurus/theme-mermaid'],
+  plugins: [[searchLocal, {
+    hashed: true,
+    language: ['en', 'fr'],
+    docsRouteBasePath: '/',
+    indexBlog: false,
+    highlightSearchTermsOnTargetPage: true,
+  }]],
 
   i18n: {
     defaultLocale: 'en',

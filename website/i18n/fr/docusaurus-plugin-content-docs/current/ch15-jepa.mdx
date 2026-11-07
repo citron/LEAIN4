@@ -53,7 +53,17 @@ flowchart LR
 
 *Le JEPA : la perte compare des plongements, jamais des entrées brutes. L’encodeur cible est une copie lente de l’encodeur de contexte et ne reçoit aucun gradient.*
 
+<Creators fr slugs="lecun" />
+
+
+<Figure src="arch_jepa.svg"
+caption="JEPA : prédire la représentation d'une vue à partir de l'autre"
+ />
 ## Le piège : l'effondrement
+
+:::info[Lire le chapitre 17 d'abord]
+L'effondrement a un pendant arithmétique que ce chapitre ne peut pas prouver seul : pour la perte **contrastive** (InfoNCE), un embedding plat ne vaut pas $0$ — il vaut exactement $\log (n + 1)$, le plancher d'effondrement démontré au [chapitre 17](ch17-contrastive). JEPA contourne ce plancher en prédisant des distances plutôt qu'en classant des candidats, et c'est exactement pour cela qu'ici le plancher *est* zéro : une somme de carrés n'a pas de log à payer. Les deux chapitres décrivent le même ennemi de deux côtés — le chapitre 17 prouve ce que l'effondrement coûte, le chapitre 15 prouve pourquoi un prédicteur simple est heureux de le payer.
+:::
 
 Il y a une façon évidente d'annuler cette perte : faire en sorte que les deux encodeurs renvoient **la même constante**. Prédire le plongement cible devient trivial, et la représentation ne porte aucune information.
 
@@ -70,6 +80,10 @@ Si l'encodeur cible n'est pas entraîné par la perte mais est une **moyenne mob
 ```
 
 `ema_error` et `emaIter_error` sont le même argument géométrique que la mise à jour TD du chapitre 13 : chaque mise à jour multiplie la distance par $m$, donc après $k$ mises à jour par $m^k$. En pratique $m\approx0{,}99$ à $0{,}999$, une cible *lente*. Nous ne prouvons **pas** que l'EMA empêche l'effondrement : c'est un fait empirique, que l'expérience ci-dessous teste.
+
+<Figure src="spread_collapse.svg" alt="Penalite de dispersion 2*d^2 selon la distance d des plongements, annulee exactement au point effondre d = 0" caption="La penalite de dispersion est une parabole : un lot de 2 plongements a distance d a une dispersion de 2 d^2 (l'identite des paires au carre demontree au chapitre), et le lot effondre - tous les plongements egaux - vaut exactement zero (spread_const). La penalite ne decourage pas l'effondrement a la marge : elle est minimale exactement la, donc la ponderer retire reellement l'effondrement des optima." />
+
+<Figure src="var_hinge.svg" alt="La penalisation charniere max(0, delta - dispersion) : de delta a zero a la dispersion delta, puis plate" caption="La regularisation de variance est une charniere : le batch n'est penalise que tant que sa dispersion reste sous delta, et la penalisation est exactement nulle des que les plongements sont assez disperses - pourquoi elle arrete l'effondrement au seuil de la proposition du chapitre sans jamais combattre une representation saine." />
 
 ## Remède 2 : garder explicitement les plongements dispersés
 

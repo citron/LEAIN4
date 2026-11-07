@@ -20,4 +20,12 @@ theorem exercise_causal_future {n : Nat} (t : Nat) (j : Fin n) (h : t < j.val) :
   sorry
 -- ANCHOR_END: ex2
 
+-- ANCHOR: ex3
+/-- Exercise 3: the multi-head layout round-trips — slicing the concatenation
+`concatVec h dh o` with `headVec` returns head `k` intact. -/
+theorem exercise_head_concat (h dh : Nat) (o : Fin h → Vec α dh) (k : Fin h) :
+    headVec h dh (concatVec h dh o) k = o k := by
+  sorry
+-- ANCHOR_END: ex3
+
 end LeanDL.Ch09

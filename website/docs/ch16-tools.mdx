@@ -1,0 +1,316 @@
+---
+sidebar_position: 17
+title: "Chapter 16 — Mathematical tools: probability, entropy, KL"
+---
+
+# Chapter 16 — Mathematical tools: finite probability, entropy, KL
+
+:::tip[TL;DR]
+**In short.** The losses of this course are built from three quantities: expectation, entropy, KL divergence. We define them exactly (over the rationals), prove the facts everyone quotes — entropy of a certain event is $0$, cross-entropy $=$ entropy $+$ KL, and the **Gibbs inequality** $\mathrm{KL}(p\|q)\ge 0$ — and run the same formulas on `Float` to see where exactness ends.
+
+**New words, in simple terms:**
+
+- **Distribution**: A list of non-negative weights that add up to 1 — the odds of each outcome.
+- **Expectation**: The weighted average of a quantity under a distribution: "on average, what do I get?"
+- **Variance**: The average squared distance from the mean: how spread out a quantity is.
+- **Entropy**: The average surprise of a draw from a distribution. Certain outcomes surprise nobody: entropy 0.
+- **Cross-entropy**: The average surprise of the *true* distribution when scored with a *model* distribution. Training minimises it.
+- **KL divergence**: The extra surprise from using the model's code instead of the true one. Always $\ge 0$; $0$ exactly when the two agree.
+- **Gibbs inequality**: $\mathrm{KL}(p\|q) \ge 0$: no model ever predicts the data as well as the data predicts itself.
+:::
+
+
+Chapters 3, 6, 9 and beyond all minimise a **cross-entropy** loss, chapters 11 and 13 measure distances between distributions with **KL**, chapter 15 penalises collapsed embeddings with a **variance**. Each time we quoted a property — "cross-entropy is at least the entropy", "KL is non-negative" — without proving it. This chapter pays those debts: it is the toolbox the rest of the course silently assumes.
+
+The chapter is also a methodological turning point. From here, every scalar in a *theorem* is a **`Rat`** — an exact rational, the model in which this course proves (as Chapter 2's perceptron algebra already does). Distributions are finite, on `n` points: enough for every loss in the course, and small enough that "sum" needs no analysis — no limits, no integrals, no epsilon-delta. What the theorems say is exactly true *in this model*; the `Float` experiments satisfy it only up to rounding, and the demo prints the gap.
+
+## Distributions, exactly
+
+```lean file=Core/Prob.lean#dist
+```
+
+A `Dist n` is a weight vector `w : Vec Rat n` with two fields: every weight is positive (`pos`), and the weights sum to 1 (`sum1`, written as a dot product with the all-ones vector). The field `n` is a *type-level* number: a distribution on 4 outcomes is a different type from one on 5 — a size mismatch is a type error, not a runtime crash.
+
+The logarithm is the chapter's one piece of analysis, and we do not pretend to construct it: `LawfulLog` is an **abstract operation with named laws** (the same style as `LawfulExp` in the algebra core):
+
+```lean file=Core/Prob.lean#haslog
+```
+
+Four laws: multiplication becomes addition, inverses become negation, and the tangent inequality $\log x \le x - 1$, equality only at $1$. Every theorem in the chapter holds for *any* structure obeying these laws. The real logarithm obeys them — that is a theorem of analysis, outside this course — and `Float` obeys them only up to rounding, which is exactly why the statements are over `Rat`.
+
+## Expectation and variance
+
+```lean file=Core/Prob.lean#expect
+```
+
+Expectation is a dot product with the weights; variance is $E[f^2] - (Ef)^2$. Four laws come for free from the dot product — constant, additive, monotone, and $E[1] = 1$ (total probability is conserved):
+
+```lean file=Core/Prob.lean#expect_laws
+```
+
+and the name "variance" is justified by the centered form:
+
+```lean file=Core/Prob.lean#variance
+```
+
+`variance_eq_centered` proves the computational definition equals the meaning: the average squared deviation from the mean. A constant has variance $0$ (exercise 3): a non-random quantity has no spread.
+
+## Entropy, cross-entropy, KL
+
+Three quantities from one pattern (weighted sum of logs):
+
+- $H(p) = \sum_i -p_i \log p_i$ — entropy: average surprise of `p`.
+- $\mathrm{CE}(p, q) = \sum_i -p_i \log q_i$ — cross-entropy: surprise of the data `p` scored with the model `q`. **This is what training minimises.**
+- $\mathrm{KL}(p \| q) = \sum_i p_i \log (p_i / q_i)$ — the *extra* surprise of the model's code.
+
+The first identity ties them:
+
+```lean file=Core/Prob.lean#ce_decomp
+```
+
+**Cross-entropy = entropy + KL.** The entropy of the data does not depend on the model, so minimising cross-entropy is *exactly* minimising KL: fitting the model, not the data. This is why cross-entropy is the classification loss, not a decorative choice.
+
+<Figure src="entropy_coin.svg" alt="Binary entropy H(p) peaks at 1 bit for the fair coin and vanishes at the endpoints" caption="Entropy of a biased coin, the curve behind every information argument: maximum surprise (1 bit) at the fair coin, zero surprise at a deterministic source, and the curve is flat near the top - which is exactly why a slightly biased coin is almost as expensive to code as a fair one." />
+
+## Gibbs inequality: KL ≥ 0
+
+The theorem that makes training mean something:
+
+```lean file=Core/Prob.lean#gibbs
+```
+
+The proof is the textbook one, fully checked. The pointwise bound $\log q - \log p \le (q-p)/p$ is the tangent inequality $\log x \le x-1$ applied to $x = q/p$ and rewritten with `log_div`; summing against weights $p_i \ge 0$ preserves the inequality (`dot_mono`); the right side **telescopes** — $\sum_i p_i (q_i - p_i)/p_i = \sum_i q_i - \sum_i p_i = 1 - 1 = 0$ — using the exact cancellation $p \cdot p^{-1} = 1$ that holds over `Rat` and *fails* over `Float`; negating flips the sign. Four steps, each one line of Lean.
+
+**Consequences:** KL is $0$ exactly when $p = q$ (the tangent inequality is strict away from $1$); cross-entropy is bounded below by $H(p)$, so there is a floor no model can beat; and a model that puts near-zero probability on an event that *does* happen pays near-infinite loss — the "confidently wrong" row in the demo.
+
+<Figure src="kl_asymmetry.svg" alt="KL(p,q) and KL(q,p) as functions of q against a fixed p = 0.5: two different U-shaped curves, proving KL is not a distance" caption="KL is not a distance, visible: coding a source p = 0.5 with a code built for q costs KL(p, q), and the reverse order draws a different curve. Both hit zero exactly at q = p (Gibbs: KL ≥ 0, equality iff q = p), both blow up at the endpoints (the log of zero) - the two theorems of Section « Gibbs inequality » in one picture." />
+
+<Figure src="bias_var.svg" alt="Risk curves against ensemble size n: variance 1/n falls, ensemble risk 0.09 + 1/n falls to the flat bias^2 = 0.09 floor" caption="The ensemble decomposition drawn: the variance term 1/n dies as fast as you average, the ensemble risk 0.09 + 1/n follows it down - and stops at the flat bias^2 floor you can never average away. More models buy variance, never bias: exactly the content of ensemble_risk_decomp, a straight line and its asymptote." />
+
+<Figure src="capacity_u.svg" alt="Bias^2 = 1/n falling, variance = n/400 rising, their sum a U-shaped risk against capacity" caption="The U-curve of generalisation drawn from the exact decomposition of this chapter: bias^2 = 1/n falls with capacity, variance = n/400 rises with it, and the test risk is their sum - a U with its bottom where the two curves balance. An ensemble divides the variance term by n (the theorem), flattening the right arm." />
+
+## Generalization: bias, variance, and why ensembles work
+
+Why does a model that fits the training set perfectly sometimes fail on new data? The answer has an exact form — and here it is a theorem, not a plot. Draw a hypothesis from a family (the randomness of training: data order, seeds, minibatches), score each at every input against the target, average. The identity:
+
+$$\mathbb{E}_{k}\[(f_{k}(x)-t(x))^{2}\] = (\bar f(x)-t(x))^{2} + \mathbb{E}_{k}\[(f_{k}(x)-\bar f(x))^{2}\], \qquad \bar f(x) = \mathbb{E}_{k}\[f_{k}(x)\]$$
+
+**risk = squared bias of the average + variance of the family.** No probability theory beyond two weighted sums, no limits, no asymptotics — it is the algebra of averages, valid point by point:
+
+```lean file=Core/Prob.lean#generalization
+```
+
+The engine is one line of reasoning: expand $(f_k - t)^2 = (f_k - \bar f + \bar f - t)^2$, and the cross term $2(\bar f - t)\,\mathbb{E}[f_k - \bar f]$ dies because **the average deviation from the average is zero** (`wavg_dev_zero`). Summing the pointwise identity over the input distribution gives `ensemble_risk_decomp`.
+
+What it buys, exactly:
+
+- **Averaging hypotheses fights variance.** The risk of a single draw is the risk of the average *plus* the variance — the average is never worse. Dropout, bagging, model soups and checkpoints-averaging all cash this check; the theorem is why they work.
+- **Only the average can fight bias.** Averaging three underfitting models gives an underfitting average: bias is the gap $\bar f - t$, and no amount of averaging noise closes it. Underfitting is a capacity problem, not a luck problem.
+- **Variance is a property of the family, bias of the mean.** High-variance training (small data, deep overparameterized nets, aggressive learning rates) inflates the second term; regularizers mostly trade variance for bias — the decomposition is the ledger.
+
+The demo's last block runs the identity numerically: three noisy models around a line, and `risk − (bias² + variance)` prints `0.000000` — the exact identity surviving rounding.
+
+## Learning theory: the three atoms
+
+The bias-variance identity explains *how* a family generalizes. Three exact facts explain what *no* learner escapes. They live in `Core/Theory.lean`, proved with the same finite-weight algebra as everything above.
+
+**Atom 1 — the union bound.** With nonnegative weights, a weighted sum dominates any single term:
+
+```lean file=Core/Theory.lean#unionbound
+```
+
+Every "with probability ≥ 1 − M·δ, every hypothesis in the class is ε-good" statement is this inequality iterated over the class: the bad event is contained in the union of the per-hypothesis bad events, and the measure of a union is at most the sum of the measures. The class size M enters the bound *linearly* — which is why bounding the size (or the capacity) of a model class is bounding its risk.
+
+**Atom 2 — train = test for a fixed hypothesis.** Under the fair-coin law, expectation is the plain average:
+
+```lean file=Core/Theory.lean#symmetry
+```
+
+The number computed for "the training point" and for "the test point" is *the same number* — as long as the hypothesis was chosen independently of the point. The generalization gap is created entirely by fitting: the moment the hypothesis depends on the sample, the symmetry is broken, and measuring the break is what a held-out set does.
+
+**Atom 3 — No Free Lunch.** Under labels drawn uniformly, every prediction — deterministic *or randomized* — has expected 0-1 error exactly 1/2:
+
+```lean file=Core/Theory.lean#nfl
+```
+
+Averaged over all labelings of the data, no learner beats chance. Every advantage a learner shows on real data is *borrowed* from an assumption that the data is not adversarial: smoothness, low dimension, shared structure. The theorem is the formal statement of "there is no assumption-free learning" — inductive bias is not a design choice, it is the price of admission.
+
+The high-probability translations (Hoeffding, Chernoff) quantify the deviation of an empirical average from its expectation with exponential terms `exp(-2nε²)`; those are analytic facts about `exp` on the reals. On `Rat` we keep the atoms exact and say plainly where the exponential step is taken — we do not hide it.
+
+## Experiment
+
+`lake exe ch16` evaluates the same formulas on `Float` for four distributions — the data $p$ and three models — and prints the identity $\mathrm{CE} = H + \mathrm{KL}$ as numbers:
+
+```
+p  (data)   : [0.700000, 0.200000, 0.080000, 0.020000]
+q1 (good)   : [0.600000, 0.250000, 0.100000, 0.050000]
+q2 (uniform): [0.250000, 0.250000, 0.250000, 0.250000]
+q3 (wrong)  : [0.050000, 0.100000, 0.250000, 0.600000]
+
+H(p)          = 0.851859
+CE(p,q1)   = 0.878958   KL = 0.027099   H+KL = 0.878958   gap = 0.000000
+CE(p,q2)   = 1.386294   KL = 0.534436   H+KL = 1.386294   gap = 0.000000
+CE(p,q3)   = 2.678650   KL = 1.826791   H+KL = 2.678650   gap = -0.000000
+
+E[p ]·r = 0.740000   Var[p ]·r = 0.242400
+E[q1]·r = 0.625000   Var[q1]·r = 0.346875
+E[q2]·r = 0.000000   Var[q2]·r = 0.625000
+E[q3]·r = -0.625000   Var[q3]·r = 0.346875
+
+Ensemble of 3 models, uniform hypothesis weights:
+  total risk        = 0.017500
+  (bias of mean)^2  = 0.000278
+  variance          = 0.017222
+  bias^2 + variance = 0.017500   gap = -0.000000
+```
+
+What to read: the good model `q1` costs $0.027$ nats of KL — little extra surprise. The uniform model pays $\log 4 - H(p)$: knowing nothing costs you exactly the missing entropy. The confidently wrong `q3` pays $1.83$: near-infinite when the true event gets near-zero weight. The `gap` column is the honest part: the identity $\mathrm{CE} = H + \mathrm{KL}$ is a **theorem over `Rat`**; over `Float` it holds up to rounding, and the printed gap (here $\sim 10^{-7}$) is the size of that rounding. Expectations and variances of a reward vector show the same formulas doing RL's job (Chapter 13): the model you average over changes the variance of your estimates.
+
+:::warning What is proved, and what is not
+Proved, over `Rat` with an abstract logarithm: $E$, variance, $H$, CE, KL satisfy the four expectation laws, the centered-variance identity, $\mathrm{CE} = H + \mathrm{KL}$, Gibbs $\mathrm{KL} \ge 0$, $H = 0$ on a point mass, zero variance of constants, and the bias–variance decomposition of the ensemble risk (pointwise and summed over inputs). **Not proved:** that the real logarithm satisfies `LawfulLog` **Not proved:** that the real logarithm satisfies `LawfulLog` (analysis, outside the course), that the `Float` programs satisfy anything (they round), and that the printed numbers repeat on other distributions beyond rounding. Between the theorem and the experiment sits an explicit, unclosed gap — that gap is the subject of numerical analysis, not of this course.
+:::
+
+## Exercises
+
+1. Prove expectation distributes over subtraction: $\mathbb{E}[f-g] = \mathbb{E}f - \mathbb{E}g$.
+2. Prove that any two distributions on **one point** have $\mathrm{KL} = 0$.
+3. Prove a constant has variance $0$.
+4. Prove $H = 0$ on a one-point distribution.
+5. Prove an **ensemble of one** has zero variance term: with a single hypothesis of weight $1$, $\sum_k p_k (f_k(x) - \bar f(x))^2 = 0$.
+6. Prove the fair coin has mean label `1/2`: `coin.expect (fun i => (i.val : Rat)) = 1/2`.
+7. Prove **randomized No Free Lunch**: mixing the two predictions by any law `q : Dist 2` still gives expected 0-1 error `1/2` under the coin.
+
+**Exercises in Lean.** The file `lean/LeanDL/Ch16/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
+
+```lean file=Ch16/Exercises.lean#ex1
+```
+
+```lean file=Ch16/Exercises.lean#ex2
+```
+
+```lean file=Ch16/Exercises.lean#ex3
+```
+
+```lean file=Ch16/Exercises.lean#ex4
+```
+
+```lean file=Ch16/Exercises.lean#ex5
+```
+
+```lean file=Ch16/Exercises.lean#ex6
+```
+
+```lean file=Ch16/Exercises.lean#ex7
+```
+
+<details>
+<summary>Hint 1</summary>
+
+Unfold `expect` to a dot product: the dot product distributes over a difference (`dot_sub` is in the file).
+
+</details>
+
+<details>
+<summary>Solution 1</summary>
+
+```lean file=Ch16/Solutions.lean#sol1
+```
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Unfold `Vec.dot` at `n = 1`: `sum1` becomes `w 0 * 1 = 1`, so both weights are `1` and both logs are `log 1 = 0`.
+
+</details>
+
+<details>
+<summary>Solution 2</summary>
+
+```lean file=Ch16/Solutions.lean#sol2
+```
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Use `expect_const` twice, once at `c` and once at `c * c`.
+
+</details>
+
+<details>
+<summary>Solution 3</summary>
+
+```lean file=Ch16/Solutions.lean#sol3
+```
+
+</details>
+
+<details>
+<summary>Hint 4</summary>
+
+Same as exercise 2: the only weight is $1$, and $\log 1 = 0$.
+
+</details>
+
+<details>
+<summary>Solution 4</summary>
+
+```lean file=Ch16/Solutions.lean#sol4
+```
+
+</details>
+
+<details>
+<summary>Hint 5</summary>
+
+On `Fin 1`, `Vec.dot` is one multiplication: `p.w 0 * (·)`. `p.sum1` forces `p.w 0 = 1`, so the average `p.wavg f i` is just `f 0 i` — the deviation is `f 0 i - f 0 i = 0`.
+
+</details>
+
+<details>
+<summary>Solution 5</summary>
+
+```lean file=Ch16/Solutions.lean#sol5
+```
+
+</details>
+
+<details>
+<summary>Hint 6</summary>
+
+`Theory.coin_expect_avg` turns the expectation into `((0 : Rat) + 1) / 2`; `grind` finishes.
+
+</details>
+
+<details>
+<summary>Solution 6</summary>
+
+```lean file=Ch16/Solutions.lean#sol6
+```
+
+</details>
+
+<details>
+<summary>Hint 7</summary>
+
+`Theory.nfl_coin` says the inner expectation is `1/2` for *every* `y`. Rewrite the function `(fun y => coin.expect (err y))` to the constant `(fun _ => 1/2)` with `funext`, then apply `expect_const`.
+
+</details>
+
+<details>
+<summary>Solution 7</summary>
+
+```lean file=Ch16/Solutions.lean#sol7
+```
+
+</details>
+
+## Limits and variants
+
+- **Finite is a real restriction.** Continuous densities (the Gaussian KL of the VAE, Chapter 11; entropy of continuous policies) need integrals; nothing in this chapter extends to them without analysis. The formulas carry over by replacing sums with integrals — the proofs do not.
+- **The logarithm is assumed, not built.** `LawfulLog` isolates exactly which properties of $\log$ the chapter uses; constructing $\log$ (series, integrals) and proving the four laws is analysis.
+- **No base change.** Everything is "natural units" (nats): $\log$ base $e$. Bits (base 2) just rescale $H$ and KL by a constant; the proofs are base-free.
+- **`Float` is the wild west.** Every law used here fails for `Float` at the last bit: $(p \cdot q)/p \ne q$ in general. This is why the theorems are over `Rat` and the demo prints the gap instead of hiding it.

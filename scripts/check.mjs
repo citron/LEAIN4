@@ -5,6 +5,7 @@
 //  4. no `sorry` outside Exercises; no `axiom`, `admit`, `partial` or `native_decide` in the library
 //  5. every module of lean/LeanDL (except Exercises) is imported by lean/LeanDL.lean
 //  6. every generated SVG is well-formed
+//  7. every chapter page follows the pedagogical template (Lean anchors, Exercises)
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -68,7 +69,8 @@ for (const text of leanText.values()) {
   for (const m of text.matchAll(/^\s*\|\s*([a-z]\w*)/gm)) declared.add(m[1]);
   for (const m of text.matchAll(/^\s+([a-z]\w*)\s*:\s/gm)) declared.add(m[1]);
 }
-const allow = new Set(['grind', 'omega', 'decide', 'simp', 'rfl', 'induction', 'cases', 'lake', 'elan', 'sorry', 'by_cases']);
+const allow = new Set(JSON.parse(fs.readFileSync(new URL('./tactic-allowlist.json', import.meta.url), 'utf8')));
+// Lean tactics and vocabulary that need no LeanDL declaration (edit the JSON file, not this line).
 const nameLike = /^[a-z][A-Za-z0-9]*(_[A-Za-z0-9]+)+$|^[a-z]+[A-Z][A-Za-z0-9]*$/;
 for (const [dir, label] of [[enDir, 'en'], [frDir, 'fr']]) {
   for (const f of list(dir, '.mdx')) {
@@ -96,7 +98,7 @@ const rootImports = read(path.join(root, 'lean', 'LeanDL.lean'));
 for (const f of leanFiles) {
   if (f.endsWith('Exercises.lean')) continue;
   const mod = 'LeanDL.' + f.replace(/\.lean$/, '').replaceAll('\\', '.').replaceAll('/', '.');
-  if (!rootImports.includes(`import ${mod}\n`)) errors.push(`lean/LeanDL.lean does not import ${mod}`);
+  if (!rootImports.replace(/\r\n/g, '\n').includes(`import ${mod}\n`)) errors.push(`lean/LeanDL.lean does not import ${mod}`);
 }
 
 // 6. SVG well-formedness (balanced tags, one root, no NaN/inf)
@@ -111,6 +113,19 @@ for (const f of list(imgDir, '.svg')) {
   if (stack.length) errors.push(`${f}: unclosed <${stack.at(-1)}>`);
   if (!s.startsWith('<svg')) errors.push(`${f}: does not start with <svg`);
   if (/\b(NaN|nan|inf|-inf)\b/.test(s)) errors.push(`${f}: contains NaN or inf`);
+}
+
+// 7. pedagogical template: every chapter page must embed Lean code (>= 4 anchors)
+//    and end with an Exercises section (EN 'Exercises' / FR 'Exercices').
+for (const f of en.filter((x) => /^ch\d/.test(x))) {
+  const a = path.join(enDir, f);
+  const anchorsInPage = (read(a).match(/file=/g) ?? []).length;
+  if (anchorsInPage < 4) errors.push(`${f}: only ${anchorsInPage} embedded Lean anchors (template requires >= 4)`);
+  if (!/^## Exercises$/m.test(read(a))) errors.push(`${f}: missing '## Exercises' section`);
+}
+for (const f of fr.filter((x) => /^ch\d/.test(x))) {
+  const b = path.join(frDir, f);
+  if (!/^## Exercices$/m.test(read(b))) errors.push(`fr/${f}: missing '## Exercices' section`);
 }
 
 if (errors.length) {

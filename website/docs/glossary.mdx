@@ -1,5 +1,5 @@
 ---
-sidebar_position: 18
+sidebar_position: 23
 title: "Glossary"
 ---
 
@@ -133,9 +133,21 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Latent space**: The space of all possible codes. If a code has 2 numbers, the latent space is a plane, and every point of it decodes into a possible data point. Points that are close should decode into similar data. (Chapter 15 calls the same idea a representation or embedding space.)
 - **Autoencoder**: An encoder squeezes the data into a code, and a decoder rebuilds the data from the code.
 - **VAE**: An autoencoder whose codes are pushed to follow a known distribution, so we can sample new codes and decode them.
+- **ELBO (evidence lower bound)**: The VAE objective; proved (Ch10, `Elbo.lean`) to be a lower bound on the data log-likelihood, with the KL term as the gap to the true posterior.
 - **Prior**: The distribution we want the codes to follow, here a standard bell curve.
 - **KL divergence**: A number measuring how different one distribution is from another. It is zero when they are the same.
 - **Reparameterisation trick**: Draw the random noise first, then compute the sample from it with ordinary maths, so that gradients can flow.
+
+## Chapter 10.5 — Boltzmann machines
+
+- **Energy-based model**: A model that scores every configuration by an energy; low energy means likely. The distribution is the model - there is no generator network.
+- **Boltzmann machine**: A network of binary units whose joint distribution is proportional to exp(-E), where E is a sum of biases and couplings (Ackley, Hinton, Sejnowski 1985).
+- **RBM (restricted Boltzmann machine)**: A bipartite Boltzmann machine: visible units and hidden units, no links within a layer, so conditioning on one layer makes the other independent.
+- **Energy E**: A number attached to each configuration; in physics the energy of a spin system, here the negative log-probability up to a constant.
+- **Partition function Z**: The sum of exp(-E) over all configurations; it turns energies into probabilities. Computing it needs 2^(n) terms - the intractability at the heart of the model.
+- **Gibbs distribution**: The distribution with mass exp(-E(s)) / Z on state s; the module proves it is normalised exactly on `Rat` (Ch105, `w_sum`).
+- **Gibbs sweep**: Alternate sampling: redraw all hidden units given the visible, then all visible given the hidden. The module proves one full sweep leaves the equilibrium measure invariant (`sweep_invariance`).
+- **Contrastive divergence**: Train by running a few sweep steps from the data instead of the full thermalisation the exact gradient demands (Hinton 2002); the engine of the RBM era of deep learning.
 
 ## Chapter 11 — GANs
 
@@ -188,3 +200,46 @@ Every new word of the course, in the simplest terms we could find, listed in the
 - **Stop-gradient**: Treat a value as a constant during backpropagation, so no learning flows into it.
 - **Variance regulariser**: A penalty that punishes embeddings for being too similar to each other.
 - **Linear probe**: A simple linear model trained to read a quantity out of an embedding, used to test what the embedding contains.
+
+## Chapter 16 — Mathematical tools
+
+- **Distribution (finite)**: A list of positive weights that add up to 1: the odds of each of finitely many outcomes.
+- **Expectation**: The weighted average of a quantity under a distribution: what you get on average.
+- **Variance**: The average squared distance from the mean: how spread out a quantity is. A constant has variance zero.
+- **Entropy**: The average surprise of a draw from a distribution: zero when one outcome is certain, larger as the mass spreads out.
+- **Cross-entropy**: The average surprise of the true distribution when scored with a model distribution: what training minimises.
+- **KL divergence**: The extra surprise of coding with the model instead of the truth: always non-negative (Gibbs), zero exactly when the two distributions agree.
+- **Gibbs inequality**: KL(p‖q) ≥ 0: no model predicts the data as well as the data predicts itself.
+- **Tangent inequality**: log x ≤ x − 1, equality only at x = 1: the one analytic fact from which Gibbs follows.
+- **Bias–variance decomposition**: risk of a draw = squared bias of the ensemble mean + variance of the family: averaging hypotheses kills variance, never bias.
+
+## Chapter 17 — Contrastive learning
+
+- **Contrastive learning**: Learn similarity by comparing pairs: pull the positive pair together, push the negatives away.
+- **InfoNCE**: The loss that asks "which of these n + 1 candidates is the positive?" and pays the negative log of the probability on the right answer.
+- **Temperature**: The divisor on the scores that sets how peaked the softmax is: small temperature amplifies small differences.
+- **Collapse floor**: The loss of a flat embedding — every candidate tied — is exactly log (n + 1): the number chance also achieves, and the baseline every contrastive curve must cross.
+- **Hard negative**: A negative that grabbed a large share of the softmax mass: the gradient p − onehot pushes it away the hardest.
+
+## Chapter 18 — Efficiency
+
+- **Quantization grid**: Replace each weight by a point of a coarse grid of step s; the floor pass errs by less than one cell, the round-to-nearest pass by at most half a cell, and grid points are fixed.
+- **Load-balance loss**: Sum of p_i squared over experts — the probability two routings pick the same expert; it is always at least 1/E, with equality at the uniform router.
+- **Collapsed router**: All routing mass on one expert; the balance loss pays exactly 1 = E times the floor, and E−1 experts sit idle.
+- **Distillation floor**: The student's cross-entropy against the teacher is the teacher's entropy plus a nonnegative KL: the loss can never go under H(teacher), and the gap is exactly the KL.
+- **Scaling shape**: The law L(N) = Linf + C/N is strictly decreasing and doubling N halves the excess C/N; optimization steps decay exponentially instead — the two curves have opposite curvature.
+
+## Chapter 20 — Capstone
+
+- **Training recipe**: decay the weights, clip the gradient, step, shrink the rate — the fixed order every trainer's boxes implement, as one definition over `Rat`.
+- **Invisible step**: inside the clipping box the recipe computes bit-for-bit the plain L2-SGD step (`recipe_step_eq`); the machinery only bites on spikes.
+- **Contraction factor**: `c = 1 - lr·(2 + wd)`; every iterate is `cᵗ · w₀` — epochs become an exponent.
+- **Iterate bound**: under `0 ≤ lr·(2+wd) ≤ 2`, `w_t² ≤ w₀²` at every epoch, exactly (`recipe_iter_sq_le`).
+- **Schedule budget**: the exponential schedule's cumulative step total saturates at `η₀/(1-γ)`, no matter how many epochs.
+## Chapter 19 — Multimodal learning
+
+- **Multimodal model**: Two encoders — pixels, text — mapped into one shared space so a picture and its caption land near each other.
+- **Symmetric loss**: The model is asked twice, "which text matches this image?" and "which image matches this text?", and pays the average of both answers.
+- **Shared positive**: Both directions grade the SAME pair score S = x1 . y1 — one cell of the batch matrix feeds both questions.
+- **Transposition**: The text-to-image direction is the image-to-text machine run on the transposed score matrix — there is no second loss function.
+- **Averaged floor**: A collapsed CLIP model pays log (n + 1) in EACH direction; the average of two identical floors is that same log B — the starting line of every CLIP curve.

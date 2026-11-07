@@ -35,6 +35,12 @@ flowchart LR
 
 *Top row: the forward process destroys the data. Bottom row: the trained network undoes it, step by step, to generate new data.*
 
+<Figure src="snr_decay.svg" alt="alpha_bar_t falling as 0.92^t and the signal-to-noise ratio alpha_bar/(1-alpha_bar) collapsing faster" caption="What the forward schedule really destroys: the signal-to-noise ratio alpha_bar_t / (1 - alpha_bar_t). alpha_bar decays geometrically (0.92^t) and the SNR collapses even faster - by t = 20, x_t is pure noise. This is the exact decay the monotonicity theorem of this chapter makes precise." />
+
+
+<Figure src="arch_diffusion.svg"
+caption="Diffusion: noise in, one denoising step out, iterated"
+ />
 ## The forward process and its closed form
 
 One noising step is
@@ -60,6 +66,15 @@ So to train at a random time $t$ we do not simulate $t$ steps. We prove the coef
 - `noiseVar_from_clean`: clean data ($v=0$) ends with noise variance $1-\bar a^2$, which tends to $1$ as $\bar a\to0$: the data is destroyed.
 
 (We prove the *algebra of the coefficients*. That a sum of independent Gaussians is a Gaussian, which is what turns these coefficients into a statement about distributions, is not formalised.)
+
+## The forward process is monotone, proved
+
+A diffusion schedule is *designed* so that noise accumulates: $lpha_t$ decreases with $t$, so $arlpha_t$ decreases, so the noise variance $1-arlpha_t^2$ grows. That design choice is usually an axiom of the schedule. It is actually a theorem of the step algebra: appending one more variance-preserving step $(a,s)$ with $0\le a\le 1$ to any chain of steps can never decrease the noise variance of clean data.
+
+```lean file=Ch12/Diffusion.lean#monotone
+```
+
+`noise_monotone` reads: signal coefficient of the whole process is `cumA l`; the new step multiplies it by $a\in[0,1]$, so the squared signal shrinks ($a^2\le 1$ on the nonnegative factor `cumA l * cumA l`, via `cumA_nonneg`), and $1-arlpha^2$ grows. No Gaussian measure theory is needed — the bookkeeping of `noiseVar_closed` plus monotone arithmetic over `Rat` is enough. What is *not* proved: that the composition of independent Gaussians is Gaussian (that lives in measure theory, outside this course's algebraic scope — same honesty boundary as Chapter 16's finite model).
 
 ## Learning to denoise
 
