@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" font-family="sans-serif" font-size="12">
 <rect width="480" height="280" fill="white"/>
-<clipPath id="c"><rect x="56.000000" y="26.000000" width="412.000000" height="214.000000"/></clipPath>
-<line x1="56.000000" y1="26.000000" x2="56.000000" y2="240.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="240.000000" x2="468.000000" y2="240.000000" stroke="#e6e6e6"/><text x="56.000000" y="256.000000" text-anchor="middle">0</text><text x="50.000000" y="244.000000" text-anchor="end">0</text>
-<line x1="159.000000" y1="26.000000" x2="159.000000" y2="240.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="186.500000" x2="468.000000" y2="186.500000" stroke="#e6e6e6"/><text x="159.000000" y="256.000000" text-anchor="middle">5</text><text x="50.000000" y="190.500000" text-anchor="end">0.3</text>
-<line x1="262.000000" y1="26.000000" x2="262.000000" y2="240.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="133.000000" x2="468.000000" y2="133.000000" stroke="#e6e6e6"/><text x="262.000000" y="256.000000" text-anchor="middle">10</text><text x="50.000000" y="137.000000" text-anchor="end">0.6</text>
-<line x1="365.000000" y1="26.000000" x2="365.000000" y2="240.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="79.500000" x2="468.000000" y2="79.500000" stroke="#e6e6e6"/><text x="365.000000" y="256.000000" text-anchor="middle">15</text><text x="50.000000" y="83.500000" text-anchor="end">0.9</text>
-<line x1="468.000000" y1="26.000000" x2="468.000000" y2="240.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="26.000000" x2="468.000000" y2="26.000000" stroke="#e6e6e6"/><text x="468.000000" y="256.000000" text-anchor="middle">20</text><text x="50.000000" y="30.000000" text-anchor="end">1.2</text>
-<rect x="56.000000" y="26.000000" width="412.000000" height="214.000000" fill="none" stroke="#555"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56.000000,61.666667 76.600000,63.459007 97.200000,66.788941 117.800000,71.596163 138.400000,77.781142 159.000000,85.208329 179.600000,93.710987 200.200000,103.097439 220.800000,113.158388 241.400000,123.674926 262.000000,134.426794 282.600000,145.200447 303.200000,155.796468 323.800000,166.035983 344.400000,175.765731 365.000000,184.861620 385.600000,193.230636 406.200000,200.811145 426.800000,207.571682 447.400000,213.508457 468.000000,218.641836"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56.000000,240.000000 76.600000,214.779858 97.200000,197.565265 117.800000,181.323553 138.400000,165.920178 159.000000,151.443147 179.600000,138.008322 200.200000,125.717601 220.800000,114.644572 241.400000,104.828794 262.000000,96.274303 282.600000,88.950927 303.200000,82.797764 323.800000,77.728308 344.400000,73.636733 365.000000,70.404785 385.600000,67.908732 406.200000,66.025831 426.800000,64.639851 447.400000,63.645312 468.000000,62.950271"/>
-<rect x="318.000000" y="34.000000" width="12" height="4" fill="#2e5aa8"/><text x="336.000000" y="40.000000">signal factor</text>
-<rect x="318.000000" y="50.000000" width="12" height="4" fill="#c4561a"/><text x="336.000000" y="56.000000">noise level</text>
-<text x="56.000000" y="16" font-weight="bold">The forward process</text>
-<text x="262.000000" y="274.000000" text-anchor="middle">noising step t</text>
-<text transform="translate(14,133.000000) rotate(-90)" text-anchor="middle">level</text>
+<clipPath id="c"><rect x="56" y="26" width="412" height="214"/></clipPath>
+<line x1="56" y1="26" x2="56" y2="240" stroke="#e6e6e6"/><line x1="56" y1="240" x2="468" y2="240" stroke="#e6e6e6"/><text x="56" y="256" text-anchor="middle">0</text><text x="50" y="244" text-anchor="end">0</text>
+<line x1="159" y1="26" x2="159" y2="240" stroke="#e6e6e6"/><line x1="56" y1="186.5" x2="468" y2="186.5" stroke="#e6e6e6"/><text x="159" y="256" text-anchor="middle">5</text><text x="50" y="190.5" text-anchor="end">0.3</text>
+<line x1="262" y1="26" x2="262" y2="240" stroke="#e6e6e6"/><line x1="56" y1="133" x2="468" y2="133" stroke="#e6e6e6"/><text x="262" y="256" text-anchor="middle">10</text><text x="50" y="137" text-anchor="end">0.6</text>
+<line x1="365" y1="26" x2="365" y2="240" stroke="#e6e6e6"/><line x1="56" y1="79.5" x2="468" y2="79.5" stroke="#e6e6e6"/><text x="365" y="256" text-anchor="middle">15</text><text x="50" y="83.5" text-anchor="end">0.9</text>
+<line x1="468" y1="26" x2="468" y2="240" stroke="#e6e6e6"/><line x1="56" y1="26" x2="468" y2="26" stroke="#e6e6e6"/><text x="468" y="256" text-anchor="middle">20</text><text x="50" y="30" text-anchor="end">1.2</text>
+<rect x="56" y="26" width="412" height="214" fill="none" stroke="#555"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56,61.67 76.6,63.46 97.2,66.79 117.8,71.6 138.4,77.78 159,85.21 179.6,93.71 200.2,103.1 220.8,113.16 241.4,123.67 262,134.43 282.6,145.2 303.2,155.8 323.8,166.04 344.4,175.77 365,184.86 385.6,193.23 406.2,200.81 426.8,207.57 447.4,213.51 468,218.64"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56,240 76.6,214.78 97.2,197.57 117.8,181.32 138.4,165.92 159,151.44 179.6,138.01 200.2,125.72 220.8,114.64 241.4,104.83 262,96.27 282.6,88.95 303.2,82.8 323.8,77.73 344.4,73.64 365,70.4 385.6,67.91 406.2,66.03 426.8,64.64 447.4,63.65 468,62.95"/>
+<rect x="318" y="34" width="12" height="4" fill="#2e5aa8"/><text x="336" y="40">signal factor</text>
+<rect x="318" y="50" width="12" height="4" fill="#c4561a"/><text x="336" y="56">noise level</text>
+<text x="56" y="16" font-weight="bold">The forward process</text>
+<text x="262" y="274" text-anchor="middle">noising step t</text>
+<text transform="translate(14,133) rotate(-90)" text-anchor="middle">level</text>
 </svg>

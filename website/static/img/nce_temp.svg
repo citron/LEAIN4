@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 250" font-family="sans-serif" font-size="12">
 <rect width="480" height="250" fill="white"/>
-<clipPath id="c"><rect x="56.000000" y="26.000000" width="412.000000" height="184.000000"/></clipPath>
-<line x1="56.000000" y1="26.000000" x2="56.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="210.000000" x2="468.000000" y2="210.000000" stroke="#e6e6e6"/><text x="56.000000" y="226.000000" text-anchor="middle">0</text><text x="50.000000" y="214.000000" text-anchor="end">0</text>
-<line x1="159.000000" y1="26.000000" x2="159.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="164.000000" x2="468.000000" y2="164.000000" stroke="#e6e6e6"/><text x="159.000000" y="226.000000" text-anchor="middle">1.5</text><text x="50.000000" y="168.000000" text-anchor="end">0.38</text>
-<line x1="262.000000" y1="26.000000" x2="262.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="118.000000" x2="468.000000" y2="118.000000" stroke="#e6e6e6"/><text x="262.000000" y="226.000000" text-anchor="middle">3</text><text x="50.000000" y="122.000000" text-anchor="end">0.75</text>
-<line x1="365.000000" y1="26.000000" x2="365.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="72.000000" x2="468.000000" y2="72.000000" stroke="#e6e6e6"/><text x="365.000000" y="226.000000" text-anchor="middle">4.5</text><text x="50.000000" y="76.000000" text-anchor="end">1.13</text>
-<line x1="468.000000" y1="26.000000" x2="468.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="26.000000" x2="468.000000" y2="26.000000" stroke="#e6e6e6"/><text x="468.000000" y="226.000000" text-anchor="middle">6</text><text x="50.000000" y="30.000000" text-anchor="end">1.5</text>
-<rect x="56.000000" y="26.000000" width="412.000000" height="184.000000" fill="none" stroke="#555"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56.000000,39.947892 66.300000,53.482743 76.600000,66.462411 86.900000,78.851692 97.200000,90.619154 107.500000,101.738284 117.800000,112.188532 128.100000,121.956161 138.400000,131.034841 148.700000,139.425931 159.000000,147.138414 169.300000,154.188508 179.600000,160.598968 189.900000,166.398165 200.200000,171.618991 210.500000,176.297698 220.800000,180.472733 231.100000,184.183641 241.400000,187.470087 251.700000,190.371024 262.000000,192.924025 272.300000,195.164782 282.600000,197.126749 292.900000,198.840928 303.200000,200.335764 313.500000,201.637131 323.800000,202.768392 334.100000,203.750501 344.400000,204.602153 354.700000,205.339942 365.000000,205.978535 375.300000,206.530852 385.600000,207.008235 395.900000,207.420616 406.200000,207.776668 416.500000,208.083956 426.800000,208.349058 437.100000,208.577693 447.400000,208.774824 457.700000,208.944749 468.000000,209.091194"/>
-<rect x="318.000000" y="34.000000" width="12" height="4" fill="#2e5aa8"/><text x="336.000000" y="40.000000">loss (3 negatives)</text>
-<text x="56.000000" y="16" font-weight="bold">InfoNCE loss -log(e^s / (e^s + 3)) vs positive gap s: 1.39 blind, 0 aligned</text>
-<text x="262.000000" y="244.000000" text-anchor="middle">similarity gap s</text>
-<text transform="translate(14,118.000000) rotate(-90)" text-anchor="middle">loss</text>
+<clipPath id="c"><rect x="56" y="26" width="412" height="184"/></clipPath>
+<line x1="56" y1="26" x2="56" y2="210" stroke="#e6e6e6"/><line x1="56" y1="210" x2="468" y2="210" stroke="#e6e6e6"/><text x="56" y="226" text-anchor="middle">0</text><text x="50" y="214" text-anchor="end">0</text>
+<line x1="159" y1="26" x2="159" y2="210" stroke="#e6e6e6"/><line x1="56" y1="164" x2="468" y2="164" stroke="#e6e6e6"/><text x="159" y="226" text-anchor="middle">1.5</text><text x="50" y="168" text-anchor="end">0.38</text>
+<line x1="262" y1="26" x2="262" y2="210" stroke="#e6e6e6"/><line x1="56" y1="118" x2="468" y2="118" stroke="#e6e6e6"/><text x="262" y="226" text-anchor="middle">3</text><text x="50" y="122" text-anchor="end">0.75</text>
+<line x1="365" y1="26" x2="365" y2="210" stroke="#e6e6e6"/><line x1="56" y1="72" x2="468" y2="72" stroke="#e6e6e6"/><text x="365" y="226" text-anchor="middle">4.5</text><text x="50" y="76" text-anchor="end">1.13</text>
+<line x1="468" y1="26" x2="468" y2="210" stroke="#e6e6e6"/><line x1="56" y1="26" x2="468" y2="26" stroke="#e6e6e6"/><text x="468" y="226" text-anchor="middle">6</text><text x="50" y="30" text-anchor="end">1.5</text>
+<rect x="56" y="26" width="412" height="184" fill="none" stroke="#555"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56,39.95 66.3,53.48 76.6,66.46 86.9,78.85 97.2,90.62 107.5,101.74 117.8,112.19 128.1,121.96 138.4,131.03 148.7,139.43 159,147.14 169.3,154.19 179.6,160.6 189.9,166.4 200.2,171.62 210.5,176.3 220.8,180.47 231.1,184.18 241.4,187.47 251.7,190.37 262,192.92 272.3,195.16 282.6,197.13 292.9,198.84 303.2,200.34 313.5,201.64 323.8,202.77 334.1,203.75 344.4,204.6 354.7,205.34 365,205.98 375.3,206.53 385.6,207.01 395.9,207.42 406.2,207.78 416.5,208.08 426.8,208.35 437.1,208.58 447.4,208.77 457.7,208.94 468,209.09"/>
+<rect x="318" y="34" width="12" height="4" fill="#2e5aa8"/><text x="336" y="40">loss (3 negatives)</text>
+<text x="56" y="16" font-weight="bold">InfoNCE loss -log(e^s / (e^s + 3)) vs positive gap s: 1.39 blind, 0 aligned</text>
+<text x="262" y="244" text-anchor="middle">similarity gap s</text>
+<text transform="translate(14,118) rotate(-90)" text-anchor="middle">loss</text>
 </svg>

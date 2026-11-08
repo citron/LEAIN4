@@ -1,0 +1,6 @@
+# Demos NOT in the fast smoke loop, each with a reason. check.mjs rule 9 accepts
+# a demo only if it is in smoke.txt, in this file, or a dedicated CI step.
+jepa  # thousands of EMA steps; dedicated CI step (timeout 30 min)
+mnist  # needs the MNIST dataset; dedicated accuracy-gate CI step
+props  # property tests; dedicated CI step (seeded, fixed)
+figures  # figure generator, not a demo; CI runs it then diffs website/static/img

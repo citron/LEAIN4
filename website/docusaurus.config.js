@@ -10,10 +10,10 @@ const config = {
   title: 'Deep Learning in Lean 4',
   tagline: 'Learn Lean 4 and deep learning at the same time — Apprenez Lean 4 et le deep learning ensemble',
   favicon: 'img/favicon.svg',
-  url: 'https://example.github.io',
-  // /LEAIN4/ for GitHub Pages; local viewing: SITE_BASE_URL=/ npx docusaurus build && npx docusaurus serve
+  url: 'https://gacquer.com',
+  // /LEAIN4/ for the published site; local viewing: SITE_BASE_URL=/ npx docusaurus build && npx docusaurus serve
   baseUrl: process.env.SITE_BASE_URL || '/LEAIN4/',
-  organizationName: 'leandl',
+  organizationName: 'citron',
   projectName: 'LEAIN4',
   onBrokenLinks: 'throw',
   markdown: {mermaid: true, hooks: {onBrokenMarkdownLinks: 'throw'}},
@@ -36,10 +36,10 @@ const config = {
   },
 
   stylesheets: [
-    {
-      href: 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css',
-      type: 'text/css',
-    },
+    // KaTeX served from this site (static/katex, copied from the katex npm dependency):
+    // no CDN at page view time, no third-party IP leak, works offline.
+    // Relative href: Docusaurus prepends baseUrl (works both at /LEAIN4/ and locally at /).
+    {href: 'katex/katex.min.css', type: 'text/css'},
   ],
 
   presets: [
@@ -50,6 +50,7 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
+          editUrl: 'https://github.com/citron/LEAIN4/edit/main/website/',
           remarkPlugins: [remarkMath, remarkLeanAnchor],
           rehypePlugins: [rehypeKatex],
         },
@@ -67,6 +68,7 @@ const config = {
       items: [
         {type: 'docSidebar', sidebarId: 'course', position: 'left', label: 'Course'},
         {type: 'localeDropdown', position: 'right'},
+        {href: 'https://github.com/citron/LEAIN4', label: 'GitHub', position: 'right'},
       ],
     },
     footer: {

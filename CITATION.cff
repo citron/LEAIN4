@@ -1,0 +1,17 @@
+---
+cff-version: 1.2.0
+message: "If you use this course, please cite it as below. Author name/year to confirm."
+title: "LEAIN4 — Deep Learning in Lean 4, a bilingual formalized course (no Mathlib)"
+type: software
+license: EUPL-1.2
+repository-code: "https://github.com/citron/LEAIN4"
+url: "https://gacquer.com/LEAIN4/"
+authors:
+  - name: "William Gacquer"
+    affiliation: "AMILTO SARL"
+keywords:
+  - deep learning
+  - Lean 4
+  - formal verification
+  - theorem proving
+  - education

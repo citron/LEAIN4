@@ -149,6 +149,28 @@ for (const [dir, label] of [[enDir, 'en'], [frDir, 'fr']]) {
   }
 }
 
+// 9. demo coverage: every lean/Demos/*.lean has a Lake target, and every target is
+//    smoke-run by CI (scripts/smoke.txt) or explicitly excluded with a reason
+//    (scripts/smoke-skip.txt). Negative test: removing a demo from both lists must fail here.
+{
+  const lake = read(path.join(root, 'lean', 'lakefile.toml'));
+  const targets = [...lake.matchAll(/\[\[lean_exe\]\]\s*\nname\s*=\s*"([^"]+)"\s*\nroot\s*=\s*"Demos\.([A-Za-z0-9_]+)"/g)];
+  const roots = new Set(targets.map((m) => m[2]));
+  const names = new Map(targets.map((m) => [m[2], m[1]]));
+  for (const f of fs.readdirSync(path.join(root, 'lean', 'Demos')).filter((x) => x.endsWith('.lean'))) {
+    const mod = f.replace(/\.lean$/, '');
+    if (!roots.has(mod)) errors.push(`Demos/${f}: no lake_exe target with root "Demos.${mod}"`);
+  }
+  const inList = (file) => new Set(read(path.join(root, 'scripts', file)).split('\n').map((l) => l.split('#')[0].trim()).filter(Boolean));
+  const covered = new Set([...inList('smoke.txt'), ...inList('smoke-skip.txt')]);
+  for (const [mod, name] of names) {
+    if (!covered.has(name)) errors.push(`target "${name}" (Demos.${mod}): in neither scripts/smoke.txt nor scripts/smoke-skip.txt — CI would build it and never run it`);
+  }
+  for (const n of covered) {
+    if (![...names.values()].includes(n)) errors.push(`scripts/smoke*.txt lists "${n}" but no such lean_exe target exists`);
+  }
+}
+
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exit(1);

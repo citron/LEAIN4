@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" font-family="sans-serif" font-size="12">
 <rect width="480" height="240" fill="white"/>
-<clipPath id="c"><rect x="56.000000" y="26.000000" width="412.000000" height="174.000000"/></clipPath>
-<line x1="56.000000" y1="26.000000" x2="56.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="200.000000" x2="468.000000" y2="200.000000" stroke="#e6e6e6"/><text x="56.000000" y="216.000000" text-anchor="middle">1</text><text x="50.000000" y="204.000000" text-anchor="end">0</text>
-<line x1="159.000000" y1="26.000000" x2="159.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="156.500000" x2="468.000000" y2="156.500000" stroke="#e6e6e6"/><text x="159.000000" y="216.000000" text-anchor="middle">4.75</text><text x="50.000000" y="160.500000" text-anchor="end">1</text>
-<line x1="262.000000" y1="26.000000" x2="262.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="113.000000" x2="468.000000" y2="113.000000" stroke="#e6e6e6"/><text x="262.000000" y="216.000000" text-anchor="middle">8.5</text><text x="50.000000" y="117.000000" text-anchor="end">2</text>
-<line x1="365.000000" y1="26.000000" x2="365.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="69.500000" x2="468.000000" y2="69.500000" stroke="#e6e6e6"/><text x="365.000000" y="216.000000" text-anchor="middle">12.25</text><text x="50.000000" y="73.500000" text-anchor="end">3</text>
-<line x1="468.000000" y1="26.000000" x2="468.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="26.000000" x2="468.000000" y2="26.000000" stroke="#e6e6e6"/><text x="468.000000" y="216.000000" text-anchor="middle">16</text><text x="50.000000" y="30.000000" text-anchor="end">4</text>
-<rect x="56.000000" y="26.000000" width="412.000000" height="174.000000" fill="none" stroke="#555"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56.000000,200.000000 81.750000,171.229166 107.500000,154.061709 133.250000,141.784596 159.000000,132.220709 184.750000,124.385221 210.500000,117.748009 236.250000,111.990721 262.000000,106.907122 287.750000,102.355937 313.500000,98.236141 339.250000,94.472989 365.000000,91.009622 390.750000,87.801781 416.500000,84.814337 442.250000,82.018943 468.000000,79.392391"/>
-<rect x="318.000000" y="34.000000" width="12" height="4" fill="#2e5aa8"/><text x="336.000000" y="40.000000">log (B)</text>
-<text x="56.000000" y="16" font-weight="bold">Collapsed CLIP model pays log (n + 1): batch size raises the floor</text>
-<text x="262.000000" y="234.000000" text-anchor="middle">batch B = n + 1</text>
-<text transform="translate(14,113.000000) rotate(-90)" text-anchor="middle">loss</text>
+<clipPath id="c"><rect x="56" y="26" width="412" height="174"/></clipPath>
+<line x1="56" y1="26" x2="56" y2="200" stroke="#e6e6e6"/><line x1="56" y1="200" x2="468" y2="200" stroke="#e6e6e6"/><text x="56" y="216" text-anchor="middle">1</text><text x="50" y="204" text-anchor="end">0</text>
+<line x1="159" y1="26" x2="159" y2="200" stroke="#e6e6e6"/><line x1="56" y1="156.5" x2="468" y2="156.5" stroke="#e6e6e6"/><text x="159" y="216" text-anchor="middle">4.75</text><text x="50" y="160.5" text-anchor="end">1</text>
+<line x1="262" y1="26" x2="262" y2="200" stroke="#e6e6e6"/><line x1="56" y1="113" x2="468" y2="113" stroke="#e6e6e6"/><text x="262" y="216" text-anchor="middle">8.5</text><text x="50" y="117" text-anchor="end">2</text>
+<line x1="365" y1="26" x2="365" y2="200" stroke="#e6e6e6"/><line x1="56" y1="69.5" x2="468" y2="69.5" stroke="#e6e6e6"/><text x="365" y="216" text-anchor="middle">12.25</text><text x="50" y="73.5" text-anchor="end">3</text>
+<line x1="468" y1="26" x2="468" y2="200" stroke="#e6e6e6"/><line x1="56" y1="26" x2="468" y2="26" stroke="#e6e6e6"/><text x="468" y="216" text-anchor="middle">16</text><text x="50" y="30" text-anchor="end">4</text>
+<rect x="56" y="26" width="412" height="174" fill="none" stroke="#555"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56,200 81.75,171.23 107.5,154.06 133.25,141.78 159,132.22 184.75,124.39 210.5,117.75 236.25,111.99 262,106.91 287.75,102.36 313.5,98.24 339.25,94.47 365,91.01 390.75,87.8 416.5,84.81 442.25,82.02 468,79.39"/>
+<rect x="318" y="34" width="12" height="4" fill="#2e5aa8"/><text x="336" y="40">log (B)</text>
+<text x="56" y="16" font-weight="bold">Collapsed CLIP model pays log (n + 1): batch size raises the floor</text>
+<text x="262" y="234" text-anchor="middle">batch B = n + 1</text>
+<text transform="translate(14,113) rotate(-90)" text-anchor="middle">loss</text>
 </svg>

@@ -49,13 +49,13 @@ Vocabulaire de statut utilisé partout dans le cours (contrat de preuve) :
 
 ## 4. Prochaines tâches (par ordre de valeur)
 
-1. **Mini-GPT pédagogique** : pile de `N` blocs avec conservation de la non-fuite par récurrence ; petit modèle autoregressif sur corpus minuscule livré ; logits, cross-entropy, génération. KV cache documenté comme extension s'il reste hors périmètre.
-2. **MDP fini + contraction de Bellman** : états/actions/récompenses/transitions/γ, opérateur de Bellman, contraction en norme sup pour `0 ≤ γ < 1`, unicité du point fixe si les outils le permettent. La convergence stochastique reste hors périmètre.
-3. **Projets de synthèse** : pipeline MNIST de bout en bout, mini-GPT, apprentissage de représentations (deux encodeurs + InfoNCE/CLIP + sonde linéaire) — cahier des charges, critères de réussite, grille séparant garanties prouvées et objectifs empiriques.
-4. **Parcours de prérequis** : module de préparation (algèbre linéaire, analyse, probabilités, information, optimisation, RL) et cartes de dépendances chapitre par chapitre ; liens explicites depuis les chapitres 5, 10, 11, 13 vers les sections de Ch16.
-5. **Références bibliographiques par chapitre** : sources primaires citées pour les affirmations précises (perceptron, rétroprop, CNN, LSTM/GRU, Transformer, VAE, GAN, diffusion, RL, JEPA, CLIP, Switch Transformer, scaling laws) — la section Switch du Ch18 cite déjà l'article original.
-6. **Évaluation multi-graines hors CI** : benchmark séparé rapportant moyenne et dispersion ; la CI garde l'exécution déterministe comme test de non-régression.
-7. **Fiches de preuve** : pour chaque résultat important, une fiche courte (énoncé, hypothèses, type numérique, code, validation, limites) — le contrat de statut de la section 1 est en place, les fiches restent à généraliser.
+1. **Projets de synthèse** : pipeline MNIST de bout en bout, mini-GPT, apprentissage de représentations (deux encodeurs + InfoNCE/CLIP + sonde linéaire) — cahier des charges, critères de réussite, grille séparant garanties prouvées et objectifs empiriques.
+2. **Parcours de prérequis** : le module de préparation et les cartes de dépendances sont livrés (page `prerequisites`, bannières Ch05/10/11/13) ; reste à étendre les bannières aux autres chapitres lourds.
+3. **Évaluation multi-graines hors CI** : benchmark séparé rapportant moyenne et dispersion ; la CI garde l'exécution déterministe comme test de non-régression.
+4. **Fiches de preuve** : pour chaque résultat important, une fiche courte (énoncé, hypothèses, type numérique, code, validation, limites) — le contrat de statut de la section 1 est en place, les fiches restent à généraliser.
+5. **Pont Rat ↔ Float** : modèle d'arrondi nommé (`fl`, unité `u`, `|δ| ≤ u`), borne de Higham sur le produit scalaire arrondi, puis composition de couches. L'ε par pas de `drift_bound_seq` doit devenir une conséquence de `u`, pas une donnée.
+6. **Lien dérivée formelle ↔ différences finies** : développement exact du premier ordre pour le fragment polynomial de `Expr` (`eval e (x + h·eⱼ) = eval e x + h · deriv j e x + h² · R`), qui justifie les contrôles de gradient des démos.
+7. **RL, opérateur d'optimalité** : Bellman avec `max` sur les actions, contraction, unicité de `V*`. La convergence stochastique (Q-learning/TD) reste hors périmètre.
 
 ## Questions closes (décisions appliquées)
 

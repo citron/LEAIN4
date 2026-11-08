@@ -23,3 +23,5 @@ def main (args : List String) : IO Unit := do
     for i in order do
       net := net.sgdStep 0.01 trainX.pixels (i * 784) trainY[i]!
     IO.println s!"epoch {e + 1}: test accuracy = {net.accuracy testX testY}"
+  -- Machine-readable summary line for CI (grep '^RESULT'); keep the key=value format stable.
+  IO.println s!"RESULT accuracy={net.accuracy testX testY} seed=123 n_train={trainX.count} n_test={testX.count} epochs={epochs}"

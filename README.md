@@ -1,5 +1,9 @@
 # Deep Learning in Lean 4 / Le Deep Learning en Lean 4
 
+[![CI](https://github.com/citron/LEAIN4/actions/workflows/ci.yml/badge.svg)](https://github.com/citron/LEAIN4/actions/workflows/ci.yml)
+
+Published site / Site publié : **https://gacquer.com/LEAIN4/**
+
 A bilingual (English / Français) course that teaches Lean 4 and deep learning together. All models are implemented, and key properties proved, in Lean 4 without Mathlib.
 
 Un cours bilingue qui enseigne Lean 4 et le deep learning ensemble. Tous les modèles sont implémentés, et leurs propriétés clés démontrées, en Lean 4 sans Mathlib.
@@ -75,7 +79,7 @@ parité FR/EN, ≥ 4 ancres Lean et une section d'exercices par chapitre, et can
 aucun axiome non standard), les tests de propriétés, le seuil de précision MNIST et le
 contrôle du site.
 
-## Licence (suite) / local viewing
+## Local viewing / Vue locale
 
 ```bash
 cd website && npm run build && npx docusaurus serve --port 3000 --no-open
