@@ -4,6 +4,7 @@ import LeanDL.Ch18.Efficiency
 import LeanDL.Core.Rng
 import LeanDL.Core.Algebra
 import LeanDL.Core.Tensor
+import LeanDL.Core.Rounding
 
 /-!
 # Property tests — the theorems, exercised on pseudorandom inputs
@@ -189,6 +190,77 @@ def prop_causal_f (n : Nat) : Bool := Id.run do
     ok := ok && ltB (Float.abs (attendF 3 s1 v1 - attendF 3 s2 v2)) 1e-12
   return ok
 
+/-- Exact value of a (normal) binary64 as a `Rat`, via its raw bits:
+`(man + 2^52) · 2^(exp − 1075)` with the sign. -/
+def ratOfFloat (x : Float) : Rat := Id.run do
+  let bits := x.toBits
+  let s := UInt64.shiftRight bits 63
+  let e := UInt64.toNat ((UInt64.shiftRight bits 52) &&& 0x7FF)
+  let m := UInt64.toNat (bits &&& 0xFFFFFFFFFFFFF)
+  let v : Rat :=
+    if e == 0 then
+      -- zero and subnormals: m · 2^(-1074)
+      Rat.ofInt (Int.ofNat m) / Rat.ofInt (Int.ofNat (2 ^ 1074))
+    else
+      -- normals: (m + 2^52) · 2^(e − 1075)
+      (Rat.ofInt (Int.ofNat m) + powRat 2 52) * pow2Rat (e : Int)
+  if s == 1 then -v else v
+where
+  powRat (b : Nat) : Nat → Rat
+    | 0 => 1
+    | k + 1 => Rat.ofInt (Int.ofNat b) * powRat b k
+  pow2Rat (e : Int) : Rat :=
+    -- 2^(e − 1075): multiply by 2^(e) for e ≥ 1075, divide by 2^(1075 − e)
+    if e ≥ 1075 then
+      Rat.ofInt (Int.ofNat (2 ^ (e - 1075).toNat))
+    else
+      1 / Rat.ofInt (Int.ofNat (2 ^ (1075 - e).toNat))
+
+/-- Core.Rounding, numerically: the sequential floating dot product
+(`acc := fl(acc + fl(xᵢ·yᵢ))`, mirroring `flDot`) satisfies the **proved**
+Higham bound `|acc − Σ xᵢyᵢ| ≤ γ₍₂ₙ₎ · Σ |xᵢyᵢ|` (`flDot_error`) with
+`u = 2⁻⁵³`, checked EXACTLY in `Rat`: the float accumulator is converted to
+its exact binary value (`ratOfFloat`) and the exact dot is accumulated over
+the `Rat` mirrors of the inputs. This validates the *instantiation*
+`u = 2⁻⁵³` on binary64 (a platform hypothesis, see the Rounding.lean
+docstring — Lean has no IEEE-754 theory for `Float`); the bound theorem
+itself is proved over `Rat`. -/
+def prop_rounding_f (n : Nat) : Bool := Id.run do
+  let mut g := Rng.seed 0x243F6A8885A308D3
+  let mut ok := true
+  for _ in [0:n] do
+    let mut xs : Array Float := #[]
+    let mut ys : Array Float := #[]
+    let mut xsr : Array Rat := #[]
+    let mut ysr : Array Rat := #[]
+    for _ in [0:8] do
+      let (w1, g1) := word g
+      let (w2, g2) := word g1
+      g := g2
+      -- random dyadic values in [-8, 8): exact in binary64 and in Rat
+      let mk (w : Nat) : Float × Rat :=
+        (Float.ofInt (Int.ofNat (w % 512) - 256) / 32.0,
+         Rat.ofInt (Int.ofNat (w % 512) - 256) / Rat.ofInt 32)
+      let (x, xr) := mk w1
+      let (y, yr) := mk w2
+      xs := xs.push x
+      ys := ys.push y
+      xsr := xsr.push xr
+      ysr := ysr.push yr
+    let mut accF : Float := 0.0
+    let mut dotR : Rat := 0
+    let mut sumAbsR : Rat := 0
+    for i in [0:xs.size] do
+      accF := accF + (xs[i]! * ys[i]!)
+      dotR := dotR + xsr[i]! * ysr[i]!
+      sumAbsR := sumAbsR + Rat.abs (xsr[i]! * ysr[i]!)
+    let k : Nat := 2 * xs.size
+    let ku : Rat := Rat.ofInt (Int.ofNat k) / Rat.ofInt (Int.ofNat (2 ^ 53))
+    let γ : Rat := ku / (1 - ku)
+    let err : Rat := Rat.abs (ratOfFloat accF - dotR)
+    ok := ok && decide (err ≤ γ * sumAbsR)
+  return ok
+
 end FloatMirrors
 
 def main : IO UInt32 := do
@@ -200,7 +272,8 @@ def main : IO UInt32 := do
       ("Core.Tensor: flatMulVec == Mat.mulVec + flatten round-trip (300 Rat tensors)", prop_tensor 300),
       ("Float softmax: positive weights, sum == 1 (500 rows)", prop_softmax_f 500),
       ("Float layerNorm: mean 0, var 1, shift-invariant (500 rows)", prop_layerNorm_f 500),
-      ("Float causal attention: rows j>3 invisible at t=3 (500 draws)", prop_causal_f 500) ] do
+      ("Float causal attention: rows j>3 invisible at t=3 (500 draws)", prop_causal_f 500),
+      ("Core.Rounding |fl dot - exact dot| <= gamma_(2n) * sum |xi yi|, exact Rat check (500 dots)", prop_rounding_f 500) ] do
     IO.println s!"{if b then "PASS" else "FAIL"}  {name}"
     if !b then fails := fails ++ [name]
   if fails.isEmpty then
