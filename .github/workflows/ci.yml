@@ -108,7 +108,7 @@ jobs:
           find . -maxdepth 1 ! -name LEAIN4 ! -name . -exec mv {} LEAIN4/ \;
           echo 'gacquer.com' > CNAME
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: website/build
       - id: deployment
