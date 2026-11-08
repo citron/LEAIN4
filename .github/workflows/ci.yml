@@ -107,7 +107,7 @@ jobs:
           mkdir -p LEAIN4
           find . -maxdepth 1 ! -name LEAIN4 ! -name . -exec mv {} LEAIN4/ \;
           echo 'gacquer.com' > CNAME
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: website/build
