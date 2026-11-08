@@ -59,6 +59,10 @@ name = "gpt"
 root = "Demos.Gpt"
 
 [[lean_exe]]
+name = "minigpt"
+root = "Demos.MiniGpt"
+
+[[lean_exe]]
 name = "mhead"
 root = "Demos.MHead"
 
@@ -122,3 +126,8 @@ root = "Demos.Capstone"
 [[lean_exe]]
 name = "props"
 root = "Demos.Props"
+
+
+[[lean_exe]]
+name = "bellman"
+root = "Demos.Bellman"

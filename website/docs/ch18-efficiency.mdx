@@ -52,7 +52,13 @@ The router gives expert $i$ a weight $p_i \ge 0$ with $\sum_i p_i = 1$. The load
 
 **Collapse pays $E$ times the floor** (`balance_collapse`): the collapsed router `oneAt0` — all mass on expert 0 — is a genuine distribution (`vsum_oneAt0`, by induction over `Fin (E + 1)`), and its collision loss is exactly $1 = E \cdot (1/E)$. A collapsed router is $E$ times more expensive on the balance loss *and* leaves $E-1$ experts idle: the floor is attained at uniform and the loss is unbounded above in the collapsed corner. No hypothesis is missing from `balance_ge`: it is the whole story.
 
-**The floor survives the full router matrix** (`frac_sum`, `balancing_ge`). Real load-balancing losses are not computed on a single weight vector: they are computed on the *fraction of tokens* $f_i$ routed to expert $i$ over a batch, and the auxiliary loss is $E\cdot\sum_i f_i^2$. The floor is a theorem about the whole routing matrix: if every token's weights are normalised, then $\sum_i f_i = 1$ — per-token normalisation, `vsum_comm` to exchange the two finite sums, and the double sum telescopes to $rac1B\sum_k 1 = 1$ — so `balance_ge` applies and the balancing loss is $\ge 1$ for **any** router, however degenerate or token-dependent.
+**The floor survives the full router matrix** (`frac_sum`, `balancing_ge`). Real load-balancing losses are not computed on a single weight vector: they are computed on the *fraction of tokens* $f_i$ routed to expert $i$ over a batch, and the auxiliary loss is $E\cdot\sum_i f_i^2$. The floor is a theorem about the whole routing matrix: if every token's weights are normalised, then $\sum_i f_i = 1$ — per-token normalisation, `vsum_comm` to exchange the two finite sums, and the double sum telescopes to $\frac1B\sum_k 1 = 1$ — so `balance_ge` applies and the balancing loss is $\ge 1$ for **any** router, however degenerate or token-dependent.
+
+**What this is, precisely: a concentration penalty, not the Switch loss.** $E\cdot\sum_i f_i^2$ is a quadratic penalty on the *routing fractions* — collision probability times $E$ — minimised at the uniform split. The standard Switch Transformer auxiliary loss (Fedus, Zoph & Shazeer, *Switch Transformers*, 2021, [arXiv:2101.03961](https://arxiv.org/abs/2101.03961)) is instead
+
+$$L_{\mathrm{aux}} = E \sum_{i=1}^{E} f_i\, P_i,$$
+
+where $f_i$ is the *hard* fraction of tokens dispatched to expert $i$ (top-1 routing) and $P_i$ is the router's *soft* mean probability for expert $i$ over the batch. The product of a hard count with a soft probability is what makes the gradient flow to the router — $E\cdot\sum_i f_i^2$ alone carries no gradient through a discrete top-1 decision. The inequality proved here ($E\cdot\sum_i f_i^2 \ge 1$) therefore bounds a *concentration measure* of the routing, with minimum at equilibrium; it is not a proof that $L_{\mathrm{aux}} \ge 1$, and this course does not formalise $f_i P_i$ (mixing a hard fraction with a soft mean needs the routing and the probabilities as a joint object). Top-$k$ variants normalise gate weights over the selected $k$ experts — a convention, not a theorem.
 
 ```lean file=Ch18/Efficiency.lean#routing
 ```
@@ -97,6 +103,14 @@ Empirically (Kaplan et al., Chinchilla), loss follows power laws in the budget: 
 - **MoE**, $E = 8$: floor $1/E = 0.125$; uniform `0.125` (attains it), skewed `0.23`, collapsed `1.0` — exactly $E$ times the floor, the `balance_collapse` line in numbers.
 - **Distillation**: teacher $T = [0.7, 0.2, 0.08, 0.02]$, $H(T) = 0.85$; a uniform student scores $\text{CE} = 1.39 = 0.85 + 0.53$, a peaked student $1.47 = 0.85 + 0.61$, the copy $0.85 = 0.85 + 0$. The identity $\text{CE} = H + \text{KL}$ holds to the printed digit on every row. Then 200 SGD steps: the student converges to $T$, KL to $0$, loss to $H(T)$ — and never below, `true` at every step.
 - **Scaling**, $L(N) = 0.10 + 16/N$: $N = 100 \to 800$ drives the excess $0.16 \to 0.02$; every doubling halves it, `data_scale_double` in a table.
+
+## References
+
+- B. Jacob, S. Ligorio, V. Delaviz, et al., *Quantizing Neural Networks for Efficient Inference: A Fully Compiled Case*, ICMS 2017, arXiv:1712.05877 — uniform quantization with the clipping grid this chapter bounds exactly on scalars.
+- N. Shazeer et al., *Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer*, ICLR 2017, arXiv:1701.06538 — the MoE load-balancing lineage.
+- W. Fedus, B. Zoph and N. Shazeer, *Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity*, JMLR 23 (2022), arXiv:2101.03961 — the auxiliary loss $E\sum_i f_i P_i$ this chapter's concentration penalty is distinguished from.
+- G. Hinton, O. Vinyals and J. Dean, *Distilling the Knowledge in a Neural Network*, arXiv:1503.02531 (2015) — distillation, whose CE = H + KL identity this chapter reuses.
+- J. Kaplan, S. McCandlish, T. Henighan, et al., *Scaling Laws for Neural Language Models*, arXiv:2001.08361 (2020) — the empirical scaling literature; the chapter's $L(N)=L_\infty+C/N$ is a stated illustrative model, not a fitted law.
 
 ## Exercises
 

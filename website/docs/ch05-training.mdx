@@ -32,6 +32,10 @@ Chapter 4 gave us gradients. This chapter turns them into *learning*: which func
 <Figure src="arch_pipeline.svg"
 caption="The training loop: data, model, loss, gradients, optimizer"
  />
+:::info[Prerequisites]
+The loss functions here use expectation and softmax: review **Expectation and variance** and **Entropy, cross-entropy, KL** in [Chapter 16](ch16-tools) — and the [prerequisite map](prerequisites) — before the first softmax loss. The optimisation kit (learning rate, stability) is built inside this chapter.
+:::
+
 ## Cross-entropy and softmax
 
 For classification, the network outputs $m$ numbers $z$ (the *logits*). The softmax turns them into probabilities $p_k = e^{z_k} / \sum_i e^{z_i}$, and the loss for true class $y$ is $-\log p_y = \log\sum_i e^{z_i} - z_y$. As an expression:
@@ -255,6 +259,11 @@ The geometric sum is exact (`geom_sum`), so `lr_decay_total` bounds
 schedule of part 2 spends an unbounded budget. This is the exact difference
 between "decay" and "decay fast" — and why late-training behaviour under a
 fast decay stops exploring.
+
+## References
+
+- Y. LeCun, B. Boser, J. S. Denker, et al., *Gradient-Based Learning Applied to Document Recognition*, Proceedings of the IEEE 86 (1998) — SGD on MNIST-scale data, the training recipe this chapter formalises the kit for.
+- L. Bottou, *Large-Scale Machine Learning with Stochastic Gradient Descent*, COMPSTAT 2010 — the stochastic-gradient view of the mini-batch loop.
 
 ## Exercises
 

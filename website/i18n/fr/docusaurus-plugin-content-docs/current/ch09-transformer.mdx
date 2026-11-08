@@ -164,6 +164,24 @@ z = layerNorm (y + FFN(y))                     -- sous-couche feed-forward
 
 L'exécutable GPT (`lake exe gpt`) calcule exactement cette structure en `Float`, avec ReLU pour `σ` — les théorèmes portent sur un corps exact, la démo tourne en virgule flottante, et c'est le même bloc dans les deux cas.
 
+## Empiler les blocs : un GPT causalement prouvé, de profondeur quelconque
+
+Un bloc est causal. Une **pile** de blocs l'est-elle ? La réponse naïve (« évident ») est exactement le genre d'affirmation que ce cours existe pour vérifier : la pile est définie par récursion, donc la causalité doit être démontrée **par récurrence sur le nombre de blocs**. `Ch09/Stack.lean` le fait :
+
+```lean file=Ch09/Stack.lean#stack_no_leak
+```
+
+`stack bs xs` exécute une **liste** de blocs `bs = [b₁, …, bₙ]` en ordre sur une matrice de séquence : la sortie du bloc 1 est l'entrée du bloc 2, etc. Le théorème `stack_no_leak` dit : si deux séquences d'entrée coïncident sur toutes les lignes `j ≤ t`, alors les **sorties empilées coïncident à la ligne `t`, quel que soit le nombre de blocs**. La preuve est une récurrence :
+
+- **nil** : la pile est l'identité, l'hypothèse s'applique directement ;
+- **cons b rest** : la sortie est `runBlock b (stack rest xs)`. Par l'hypothèse de récurrence, `stack rest xs` et `stack rest xs'` coïncident sur toute ligne `i ≤ t` — alimentées dans `runBlock b`, ces séquences égales donnent des sorties égales en `t` par le lemme mono-bloc `runBlock_no_leak` (qui emballe `blockOut_no_leak`).
+
+La récurrence transforme la causalité du bloc en causalité du modèle, à toute profondeur, sans hypothèse analytique : arithmétique de corps exact, paramètres arbitraires, n'importe quel nombre de têtes. L'exécutable `minigpt` (`lake exe minigpt`) entraîne un GPT **empilé** (`nLayer` blocs) sur du texte au niveau caractère, avec une rétropropagation écrite à la main qui s'enchaîne à travers la pile, et certifie cette rétropropagation par un contrôle de gradient par différences finies sur **tous** les paramètres d'une config à 2 couches — même discipline que la démo `gpt` mono-bloc, un niveau plus haut.
+
+:::warning Portée
+`stack_no_leak` est une garantie structurelle sur les définitions exactes de blocs de ce chapitre (corps exact, activations idéalisées). Elle ne dit rien de l'arrondi de l'exécutable `Float`, de l'entraînabilité, ni des GPT de production ; le contrôle de gradient de `minigpt` est la preuve numérique du côté implémentation.
+:::
+
 ## Expériences
 
 `lake exe gpt` commence par comparer le gradient des 171 paramètres d'un minuscule modèle à des différences finies centrées (erreur maximale inférieure à $10^{-6}$, affichée 0.000000).
@@ -199,6 +217,11 @@ Le texte a les bons mots, espaces et ponctuation, et des formes de phrases du co
 
 - Les quatre théorèmes portent sur les *abstractions* (un softmax sur des scores, l'attention sur un ensemble, un masque, la normalisation de couche) ; le code tableau du modèle est vérifié par différences finies, pas démontré.
 - L'attention multi-têtes est implémentée (disposition formelle dans `Ch09/Attention.lean`, bloc exécutable dans `Demos/MHead.lean`) ; les encodages de position sinusoïdaux et l'empilement de blocs sont décrits mais pas implémentés.
+
+## Références
+
+- A. Vaswani, N. Shazeer, N. Parmar, et al., *Attention Is All You Need*, NeurIPS 2017, arXiv:1706.03762 — l'attention à produit scalaire normalisé, l'attention multi-têtes et le masque causal que ce chapitre assemble et prouve sans fuite.
+- *The Annotated Transformer* — https://nlp.seas.harvard.edu/annotated-transformer/ (l'implémentation de référence dont le bloc Lean suit l'agencement).
 
 ## Exercices
 

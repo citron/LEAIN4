@@ -214,6 +214,11 @@ fixed $T$) the GRU stays near chance at $T \ge 20$, exactly like the LSTM and th
 on this task the curriculum, not the gate count, is what makes the difference. Everything
 is a toy: 8 units, one seed, small budgets.
 
+## References
+
+- S. Hochreiter and J. Schmidhuber, *Long Short-Term Memory*, Neural Computation 9 (1997) — the cell, the gates and the constant error carousel this chapter's memory-lens proof makes precise.
+- K. Cho, B. van Merriënboer, C. Gulcehre, et al., *Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation*, EMNLP 2014 — the gated recurrent unit (GRU) implemented in this chapter.
+
 ## Exercises
 
 1. Implement the GRU on arrays and check its gradient with finite differences. (Done: it is in `lean/LeanDL/Ch08/Gru.lean`.)

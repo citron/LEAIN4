@@ -1,0 +1,54 @@
+---
+sidebar_position: 1.5
+title: "Prerequisites and dependency map"
+---
+
+# Prerequisites and dependency map
+
+**Who this course is for.** A student comfortable with high-school algebra (vectors, sums, inequalities) who has never seen a proof assistant and never trained a neural network. Nothing else is assumed: every mathematical tool is either reviewed below, built in Lean inside the course, or declared as a named hypothesis when real analysis is out of scope.
+
+**Indicative load.** 25 chapters ≈ 25 weeks at 5–7 h/week (reading + Lean code + graded exercises). The MNIST chapters add one download step (`scripts/get-mnist.sh`).
+
+## The six preparation blocks
+
+Each block lists what you must be able to *do* before the chapters that first demand it, and where the course covers it.
+
+1. **Linear algebra** — vectors, matrices, dot products, norms, dimensions, index arithmetic on bounded ranges. First demanded: Ch01–Ch03, Ch09. Lean: `Vec R n`, `Mat R m n`, `Fin` indices — built in Ch01–Ch03.
+2. **Analysis** — derivative, partial derivative, chain rule, gradient as the vector of partials. First demanded informally: Ch03–Ch04. The course does **not** construct the real derivative as a limit (no Mathlib); the differentiation table of `Expr` is verified by reverse-mode tests, and its link to the classical derivative is declared as a boundary (see Ch04 and the proof contract).
+3. **Probability** — finite distributions, expectation, variance, independence. First demanded: Ch05 (loss), Ch10 (ELBO), Ch11 (minimax), Ch13 (returns). Lean: `Dist n` (strictly positive weights on `Rat`) in Ch16 — **read Ch16 “Expectation” before Ch10**.
+4. **Information** — logarithm laws, entropy, cross-entropy, KL divergence, Gibbs' inequality. First demanded: Ch05 (softmax loss), Ch10 (ELBO), Ch15/Ch17 (contrastive losses). Lean: `LawfulLog` in Ch16 — the log is an abstract operation with named laws; the real logarithm is not constructed.
+5. **Optimization** — convexity at the level of quadratic functions, learning rates, stability conditions, gradient descent as a dynamical system. First demanded: Ch05, Ch20. Lean: the Ch05 kit (`sq_le_one`, `powN_le_one`), Ch20 (`recipe_iter_sq_le`).
+6. **Reinforcement learning** — state, action, reward, return, discount, Bellman equation. First demanded: Ch13. Lean: one-state Bellman and TD in Ch13; a full finite MDP is listed as a next task.
+
+## Dependency map
+
+| Chapter | Mathematical prerequisites | Lean prerequisites | Where reviewed |
+|---|---|---|---|
+| 01 Neuron | functions, dot product | `Rat`, vectors, `decide` | Ch00 |
+| 02 Perceptron | inequalities, convergence intuition | `Vec`, finite case analysis | Ch01 |
+| 03 MLP | chain rule (informal) | recursion, arrays | Ch02, Ch04 |
+| 04 Autodiff | derivatives, chain rule | induction over expressions | block 2 above |
+| 05 Training | expectation, SGD | IO loops, datasets | blocks 3, 5; Ch16 |
+| 06 CNN | 2-D indexing, convolution | nested `Array` | block 1 |
+| 07 RNN | recurrences, products of Jacobians | array loops | block 2 |
+| 08 LSTM/GRU | gating algebra | array invariants | Ch07 |
+| 09 Transformer | softmax, matrix products, causal masks | `Mat`, `Fin`, masking lemmas | blocks 1, 4 |
+| 10 VAE | log, KL, Gaussian (informal) | `Rat` field toolkit, `LawfulLog` | blocks 3, 4; **Ch16 first** |
+| 10.5 Boltzmann | Gibbs measures, expectations | `Rat` inverses, case analysis | Ch10, Ch16 |
+| 11 GAN | minimax, sup/inf | `Rat` inequalities | blocks 3, 4; **Ch16 first** |
+| 12 Diffusion | telescoping sums, products | `pow`, geometric sums | Ch16 |
+| 13 RL | returns, Bellman fixed point | recurrences | block 6; **Ch16 first** |
+| 14 World models | composition, error propagation | inequality chains | Ch13 |
+| 15 JEPA | EMA, variance, collapse | contraction lemmas | Ch11, Ch16 |
+| 16 Tools | (this **is** the toolbox) | `LawfulLog`, `LawfulExp` | — |
+| 17 Contrastive | log-sum-exp, softplus | `MonotoneExp` | Ch16 |
+| 18 Efficiency | grids, sums, scaling shape | `Fin` grids, `Sum` | Ch16 |
+| 19 CLIP | two InfoNCE losses, symmetry | Ch17 toolkit | Ch17 |
+| 20 Capstone | dynamical-systems reading | `pow`, sum budgets | Ch05 kit |
+
+## Two tracks, one course
+
+- **Track “understand deep learning”** — read every chapter, run every demo (`lake exe chNN`), do the fundamental and application exercises; treat proofs as readable specifications.
+- **Track “formalize in Lean”** — same reading, plus the deepening exercises and the `Solutions.lean` files; the goal is to write and prove your own lemmas on the course's structures.
+
+Both tracks share every chapter: Lean is the medium, deep learning is the subject. Evaluation: exercises (fundamental + application) certify the track-1 goals; completed proofs of deepening exercises certify track-2 goals; the three [integrative projects](projects) certify the combined goal.

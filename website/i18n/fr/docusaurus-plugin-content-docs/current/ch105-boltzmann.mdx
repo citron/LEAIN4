@@ -98,6 +98,16 @@ Où ce chapitre se situe dans le cours :
 - **Chapitre 11 (GAN)** : un générateur entraîné par un adversaire ; la machine de Boltzmann s'entraîne par *énergie libre*, sans adversaire.
 - **Chapitres 17 / 19 (contrastif, multimodal)** : InfoNCE contraste des paires positives et négatives ; la divergence contrastive contraste les phases positive et négative *de la même énergie* — même forme d'idée, une génération plus tôt.
 
+:::warning Ce qui est prouvé ici, et ce qui ne l'est pas
+Prouvé, exactement et sur `Rat` : la normalisation de la machine canonique à 4 états, les conditionnelles de Gibbs, l'invariance de l'équilibre sous un balayage Gibbs complet (état par état, couplage par couplage), et la forme énergétique de la loi jointe. Non prouvé — et hors du périmètre de ce modèle : que *plusieurs* balayages mélangent (pas de théorie du temps de mélange ici), que les résultats s'étendent au-delà de quatre états à de vraies RBM à nombreuses unités cachées, que la divergence contrastive entraîne une RBM réaliste, ni quoi que ce soit sur la qualité d'échantillonnage à l'échelle. Le jouet est petit volontairement : c'est la plus petite machine où chaque énoncé est une identité close.
+:::
+
+## Références
+
+- D. H. Ackley, G. E. Hinton et T. J. Sejnowski, *A Learning Algorithm for Boltzmann Machines*, Cognitive Science 8 (1984) — la loi jointe énergétique et l'échantillonnage de Gibbs que la machine canonique à 4 états de ce chapitre prouve exactement.
+- G. E. Hinton, S. Osindero et Y.-W. Teh, *A Fast Learning Algorithm for Deep Belief Nets*, Neural Computation 18 (2006) — la divergence contrastive, l'objectif pratique discuté dans les limites du chapitre.
+- G. E. Hinton et R. R. Salakhutdinov, *Reducing the Dimensionality of Data with Neural Networks*, Science 313 (2006) — les RBM à échelle réaliste, explicitement hors du périmètre de preuve de ce chapitre.
+
 ## Exercices
 
 1. Calculer à la main la distribution de Gibbs de la machine canonique pour $a = b = g = 1$, et vérifier les quatre masses contre `w_sum`.

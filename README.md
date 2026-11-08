@@ -7,13 +7,15 @@ Un cours bilingue qui enseigne Lean 4 et le deep learning ensemble. Tous les mod
 ## Layout
 
 - `lean/` — Lake project `LeanDL` (code, proofs, exercises, `lake exe chNN` demos).
+
+> **`ch20` vs `capstone`:** chapter 20 lives in the library as the `LeanDL` module `LeanDL/Ch20` (proved with the rest of `LeanDL`); its runnable MNIST demo executable is named `capstone`, not `ch20` — that is why the build and smoke commands below list `capstone`. All other chapters ship a `chNN` executable.
 - `website/` — Docusaurus site (English in `docs/`, French in `i18n/fr/`). Lean snippets are pulled from `lean/LeanDL` through `-- ANCHOR: name` markers, so every displayed snippet compiles.
 - `scripts/check.mjs` — checks EN/FR parity and that `sorry` only appears in `Exercises` files.
 
 ## Build
 
 ```bash
-cd lean && lake build LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 ch19 ch20 figures && lake exe ch05
+cd lean && lake build LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt minigpt mhead vae gan diffusion rl bellman worldmodel jepa ch16 ch17 ch18 ch19 capstone figures && lake exe ch05
 cd ../website && npm install && npm start          # English (dev, hot reload)
 npm run build && npm run serve                      # bilingual EN+FR, static
 node ../scripts/check.mjs

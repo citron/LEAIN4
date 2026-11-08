@@ -144,6 +144,12 @@ after 1000 steps: loss = 0.000666
 
 The random initial parameters come from a deterministic generator written in Lean (`Core/Rng.lean`), so every run is reproducible.
 
+## References
+
+- A. E. Bryson, *Applied Optimal Control*, Hemisphere (1975) — the earliest complete reverse-mode pass cited in the literature.
+- A. Griewank and A. Walther, *Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation*, SIAM (2008) — the reverse-mode tape the `grad` implementation follows.
+- D. Bayard, *Rationale of reverse mode (short)*, arXiv:2009.04867 (2020) — the chain-rule algebra behind the `backprop_correct` proof.
+
 ## Exercises
 
 1. Add a `softplus` constructor ($\log(1+e^x)$, derivative $\sigma$) and extend the proofs.

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 21
-title: "Chapitre 20 — Capstone : tout le cours en une boucle prouvée"
+title: "Chapitre 20 — Capstone : une recette d'entraînement, prouvée"
 ---
 
 # Chapitre 20 — Capstone : une recette d'entraînement, prouvée
@@ -66,7 +66,12 @@ MNIST face: train 4000, test 2000
   epoch 3: lr = 0.024500, test accuracy = 0.900000
 ```
 
-Lisez les deux faces ensemble : les preuves disent que la boucle **ne peut pas** aggraver sa perte à aucune époque ; le parcours MNIST est cet énoncé, dépensé en virgule flottante sur 4 000 images réelles, finissant à 90 % avec 64 unités cachées et sans GPU.
+Lisez les deux faces ensemble — et gardez-les distinctes : les théorèmes vivent sur une quadratique **scalaire** $L(w) = w^2$ à taux constant (la boîte de clipping inactif de `recipe_step_eq`, la contraction géométrique de `recipe_iter_sq_le`, le budget de schedule de `recipe_budget` pris séparément). Le parcours MNIST est un MLP **vectoriel** avec un schedule variable, un clipping actif sur de vrais gradients, et une perte non convexe. Les preuves scalaires ne certifient pas cette expérience, et le budget de schedule seul ne dit rien sur la perte du MLP : le parcours est un *compagnon exécutable* de la recette — mêmes définitions, arithmétique `Float`, graine documentée dans le code — pas l'instance numérique du théorème. Ce qui se transfère est la conception de la boucle, pas la garantie. Ce que montre le parcours à 90 % sur une seule graine est une démonstration, pas une évaluation statistique (le relancer sur plusieurs graines et rapporter moyenne et dispersion est un bon exercice).
+
+## Références
+
+- I. Loshchilov et F. Hutter, *Decoupled Weight Decay Regularization (AdamW)*, ICLR 2019, arXiv:1711.05101 — le weight decay découplé, une des trois cases de la recette prouvée dans ce chapitre.
+- M. Zhang, S. Lucas, C. Hino, et al., *Three Factors of Seed Sensitivity in Deep Neural Networks*, ICLR 2021, arXiv:1910.03023 — sensibilité aux graines ; la raison pour laquelle ce chapitre présente son parcours MNIST comme démonstration à graine unique, pas comme évaluation.
 
 ## Exercices
 

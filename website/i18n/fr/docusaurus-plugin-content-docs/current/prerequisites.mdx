@@ -1,0 +1,54 @@
+---
+sidebar_position: 1.5
+title: "Prérequis et carte des dépendances"
+---
+
+# Prérequis et carte des dépendances
+
+**Public visé.** Un étudiant à l'aise avec l'algèbre de niveau lycée (vecteurs, sommes, inégalités) qui n'a jamais vu d'assistant de preuve et n'a jamais entraîné de réseau de neurones. Rien d'autre n'est supposé : chaque outil mathématique est soit rappelé ci-dessous, soit construit en Lean dans le cours, soit déclaré comme hypothèse nommée quand l'analyse réelle est hors périmètre.
+
+**Charge indicative.** 25 chapitres ≈ 25 semaines à 5–7 h/semaine (lecture + code Lean + exercices gradués). Les chapitres MNIST ajoutent un téléchargement (`scripts/get-mnist.sh`).
+
+## Les six blocs de préparation
+
+Chaque bloc liste ce qu'il faut savoir *faire* avant les chapitres qui l'exigent d'abord, et où le cours le couvre.
+
+1. **Algèbre linéaire** — vecteurs, matrices, produits scalaires, normes, dimensions, arithmétique d'indices bornés. Exigée dès : Ch01–Ch03, Ch09. Lean : `Vec R n`, `Mat R m n`, indices `Fin` — construits en Ch01–Ch03.
+2. **Analyse** — dérivée, dérivées partielles, règle de chaîne, gradient comme vecteur des partielles. Exigée informellement dès : Ch03–Ch04. Le cours ne construit **pas** la dérivée réelle comme limite (pas de Mathlib) ; la table de dérivation d'`Expr` est vérifiée par les tests de mode inverse, et son lien avec la dérivée classique est déclaré comme frontière (voir Ch04 et le contrat de preuve).
+3. **Probabilités** — distributions finies, espérance, variance, indépendance. Exigées dès : Ch05 (perte), Ch10 (ELBO), Ch11 (minimax), Ch13 (retours). Lean : `Dist n` (poids strictement positifs sur `Rat`) en Ch16 — **lire « Espérance » du Ch16 avant le Ch10**.
+4. **Information** — lois du logarithme, entropie, entropie croisée, divergence KL, inégalité de Gibbs. Exigées dès : Ch05 (perte softmax), Ch10 (ELBO), Ch15/Ch17 (pertes contrastives). Lean : `LawfulLog` en Ch16 — le logarithme est une opération abstraite à lois nommées ; le logarithme réel n'est pas construit.
+5. **Optimisation** — convexité au niveau des fonctions quadratiques, taux d'apprentissage, conditions de stabilité, descente de gradient comme système dynamique. Exigée dès : Ch05, Ch20. Lean : le kit du Ch05 (`sq_le_one`, `powN_le_one`), Ch20 (`recipe_iter_sq_le`).
+6. **Apprentissage par renforcement** — état, action, récompense, retour, facteur de remise, équation de Bellman. Exigé dès : Ch13. Lean : Bellman un état et TD en Ch13 ; le MDP fini complet est une tâche listée comme prochaine.
+
+## Carte des dépendances
+
+| Chapitre | Prérequis mathématiques | Prérequis Lean | Où c'est revu |
+|---|---|---|---|
+| 01 Neurone | fonctions, produit scalaire | `Rat`, vecteurs, `decide` | Ch00 |
+| 02 Perceptron | inégalités, intuition de convergence | `Vec`, analyse de cas finie | Ch01 |
+| 03 MLP | règle de chaîne (informelle) | récursion, tableaux | Ch02, Ch04 |
+| 04 Autodiff | dérivées, règle de chaîne | induction sur les expressions | bloc 2 ci-dessus |
+| 05 Entraînement | espérance, SGD | boucles IO, jeux de données | blocs 3, 5 ; Ch16 |
+| 06 CNN | indexation 2-D, convolution | `Array` imbriqués | bloc 1 |
+| 07 RNN | récurrences, produits de jacobiens | boucles sur tableaux | bloc 2 |
+| 08 LSTM/GRU | algèbre des portes | invariants de tableaux | Ch07 |
+| 09 Transformer | softmax, produits matriciels, masques causaux | `Mat`, `Fin`, lemmes de masque | blocs 1, 4 |
+| 10 VAE | log, KL, gaussienne (informelle) | toolkit de corps `Rat`, `LawfulLog` | blocs 3, 4 ; **Ch16 d'abord** |
+| 10.5 Boltzmann | mesures de Gibbs, espérances | inverses `Rat`, analyse de cas | Ch10, Ch16 |
+| 11 GAN | minimax, sup/inf | inégalités `Rat` | blocs 3, 4 ; **Ch16 d'abord** |
+| 12 Diffusion | sommes télescopiques, produits | `pow`, sommes géométriques | Ch16 |
+| 13 RL | retours, point fixe de Bellman | récurrences | bloc 6 ; **Ch16 d'abord** |
+| 14 Modèles du monde | composition, propagation d'erreur | chaînes d'inégalités | Ch13 |
+| 15 JEPA | EMA, variance, effondrement | lemmes de contraction | Ch11, Ch16 |
+| 16 Outils | (c'est **la** boîte à outils) | `LawfulLog`, `LawfulExp` | — |
+| 17 Contrastif | log-sum-exp, softplus | `MonotoneExp` | Ch16 |
+| 18 Efficacité | grilles, sommes, forme d'échelle | grilles `Fin`, `Sum` | Ch16 |
+| 19 CLIP | deux pertes InfoNCE, symétrie | toolkit du Ch17 | Ch17 |
+| 20 Capstone | lecture en système dynamique | `pow`, budgets de sommes | kit du Ch05 |
+
+## Deux parcours, un seul cours
+
+- **Parcours « comprendre le deep learning »** — lire chaque chapitre, lancer chaque démo (`lake exe chNN`), faire les exercices fondamentaux et d'application ; considérer les preuves comme des spécifications lisibles.
+- **Parcours « formaliser en Lean »** — mêmes lectures, plus les exercices d'approfondissement et les fichiers `Solutions.lean` ; l'objectif est d'écrire et prouver ses propres lemmes sur les structures du cours.
+
+Les deux parcours partagent chaque chapitre : Lean est le moyen, le deep learning est le sujet. Évaluation : les exercices (fondamental + application) certifient les objectifs du parcours 1 ; les preuves complétées des exercices d'approfondissement certifient le parcours 2 ; les trois [projets de synthèse](projects) certifient l'objectif combiné.

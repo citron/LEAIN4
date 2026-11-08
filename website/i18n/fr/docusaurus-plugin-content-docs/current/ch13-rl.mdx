@@ -49,6 +49,10 @@ flowchart LR
 <Figure src="arch_rl.svg"
 caption="Actor-critic : politique et valeur dans la boucle de l'environnement"
  />
+:::info[Prérequis]
+Les retours sont des espérances de récompenses actualisées : revoir **Espérance et variance** du [Chapitre 16](ch16-tools) d'abord, et le bloc 6 de la [carte des prérequis](prerequisites) (état, action, récompense, Bellman). Ce chapitre prouve une borne TD à cible fixe ; la convergence stochastique de Q-learning est hors périmètre.
+:::
+
 ## Par les valeurs : Q-learning
 
 La **valeur d'action** $Q(s,a)$ est le retour espéré après avoir pris $a$ en $s$ puis agi au mieux. Elle satisfait l'**équation de Bellman** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Le Q-learning en fait une mise à jour vers une **cible** $r+\gamma\max_{a'}Q(s',a')$.
@@ -119,6 +123,32 @@ Le couloir est volontairement facile : l'état est entièrement observé, la mei
 :::warning Ce qui est prouvé ici
 Prouvé : la convergence géométrique de la mise à jour de Bellman (un état), le facteur d'erreur TD, l'identité REINFORCE pour le bandit à deux bras et l'invariance par ligne de base, et (chapitre 4) les gradients corrects de la perte. Non prouvé : la convergence du Q-learning ou de REINFORCE dans des MDP généraux, ou le fait que ces expériences se reproduisent avec d'autres graines.
 :::
+
+## L’opérateur de Bellman sur les MDP finis — démontré
+
+La preuve phare du chapitre 13 porte sur un seul état. `Ch13/Bellman.lean` la relève sur un **MDP fini entier**, en arithmétique exacte sur `Rat`. Fixons une politique ; l’opérateur de Bellman agit sur les vecteurs de valeur $V \in \mathbb{Q}^S$ :
+
+$$(TV)(s) \;=\; r(s) + \gamma \sum_{s'} P(s' \mid s)\, V(s')$$
+
+Avec la norme sup $\lVert V \rVert = \max_s |V(s)|$ (`maxV`), trois théorèmes, sans bibliothèque d’analyse :
+
+```lean file=Ch13/Bellman.lean#contraction
+```
+
+- **`cheb_le` — contraction.** $\lVert TV - TW \rVert \le \gamma \lVert V - W \rVert$. La différence de chaque coordonnée est $\gamma$ fois l’**espérance** des différences ponctuelles ; l’espérance de nombres bornés est bornée par la même borne (`Dist.expect_abs_bound`), et le max sur les états l’hérite.
+- **`fixed_point_unique` — au plus un point fixe.** Si $TV = V$ et $TW = W$, alors $\lVert V - W\rVert \le \gamma\lVert V-W\rVert$ force $V = W$ (lemme scalaire `le_self_mul_of_lt` : $a \le \gamma a$ avec $\gamma < 1$ donne $a = 0$).
+- **`vIter_rate` — l’itération de valeur converge géométriquement.** Depuis le départ $V_0$, la $k$-ième itérée vérifie $\lVert V_k - V_* \rVert \le \gamma^k \lVert V_1 - V_0 \rVert$ — la borne classique, par récurrence via `cheb_le`.
+
+L’exécutable `lake exe bellman` déroule l’itération sur une chaîne à 4 états (avancer avec probabilité 3/4, diffuser 1/12 ailleurs, récompense au bout, $\gamma = 1/2$) en **rationnels exacts**, et imprime à chaque passe l’écart $d_k$ et la borne $\gamma\, d_{k-1}$ — chaque ligne obéit au théorème, sans aucun flottant. (L’arithmétique exacte coûte cher : les numérateurs croissent comme $24^k$, la démo s’arrête donc à 8 passes — le facteur de contraction est établi sur chaque ligne imprimée.)
+
+:::warning Ce qui est prouvé, et ce qui ne l’est pas
+Prouvé ici : contraction en norme sup, unicité du point fixe, et taux géométrique de l’**itération de valeur sous politique fixe**, le tout en rationnels exacts sur des espaces d’états finis. Non prouvé : la convergence des algorithmes d’**apprentissage** (Q-learning, TD, SARSA) — ils ajoutent du bruit d’échantillonnage et l’argument du point fixe ne s’applique plus directement, limite de portée assumée de ce cours.
+:::
+
+## Références
+
+- R. S. Sutton et A. G. Barto, *Reinforcement Learning: An Introduction*, MIT Press (1998) — l'apprentissage TD et le REINFORCE bandit que ce chapitre implémente.
+- C. J. Watkins, *Learning from Delayed Rewards*, thèse, Cambridge (1989) — Q-learning ; sa convergence stochastique est explicitement hors du périmètre de ce chapitre (seule la borne à cible fixe est prouvée).
 
 ## Exercices
 

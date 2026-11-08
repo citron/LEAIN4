@@ -12,13 +12,25 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: lean
-          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt mhead vae gan diffusion rl worldmodel jepa ch16 ch17 ch18 props figures
+          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt minigpt mhead vae gan diffusion rl bellman worldmodel jepa ch16 ch17 ch18 ch19 capstone figures
       - name: "Audit axioms (expects: using sorry #[])"
         run: lake env lean ../scripts/audit_axioms.lean
         working-directory: lean
-      - name: Smoke-run fast demos (ch05, ch16, ch17, ch18)
-        run: lake exe ch05 && lake exe ch16 && lake exe ch17 && lake exe ch18
+      - name: Download MNIST (used by capstone smoke and the regression step)
+        run: ./scripts/get-mnist.sh
+      - name: Smoke-run representative demos (one per area; MNIST-heavy ones live in dedicated steps)
+        run: |
+          set -e
+          for exe in ch01 ch02 ch03 ch04 ch05 ch16 ch17 ch18 ch19 capstone gru mhead gan rl bellman minigpt; do
+            echo "== lake exe $exe =="
+            lake exe "$exe"
+          done
         working-directory: lean
+        timeout-minutes: 20
+      - name: "JEPA demo (long-running: thousands of EMA steps, kept out of the fast loop)"
+        run: lake exe jepa
+        working-directory: lean
+        timeout-minutes: 30
 
       - name: Property tests (theorems exercised on seeded pseudorandom inputs)
         run: lake exe props

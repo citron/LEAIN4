@@ -123,6 +123,11 @@ epoch 3: test accuracy = 0.970600
 
 The gradient check agrees to better than $10^{-6}$ (the printed value rounds to 0). With only **4 channels and 3 passes of plain SGD** the network reaches **97.1 %** on the 10 000 test images, in under three minutes on a laptop CPU. The dip at epoch 2 is ordinary SGD noise with a constant learning rate; this is one run with one seed, not a benchmark. Compare with the 96.4 % of the one-hidden-layer network in Chapter 5, which has far more weights.
 
+## References
+
+- Y. LeCun, B. Boser, J. S. Denker, et al., *Gradient-Based Learning Applied to Document Recognition*, Proceedings of the IEEE 86 (1998) — convolution, pooling and the LeNet layout this chapter implements in miniature.
+- K. Fukushima, *Neocognitron: A Self-Organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Translation Deformation*, Biological Cybernetics 36 (1980) — the receptive-field ancestor of the convolution/pooling alternation.
+
 ## Exercises
 
 1. Prove that `conv1d` with the one-hot kernel $(0,\dots,0,1,0,\dots,0)$ is a shifted copy of the input.

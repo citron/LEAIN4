@@ -14,10 +14,12 @@ This course teaches **Lean 4** and **deep learning** at the same time. Every mod
 - Each chapter has a **Lean Corner**: the Lean feature you need for that chapter, introduced just in time.
 - Each chapter ends with exercises (Lean files containing `sorry` for you to fill in).
 - Each chapter starts with a **TL;DR** box: a short summary and the new words in simple terms. If you are lost, see the [Index of essential concepts](concepts-index) (which concepts are mandatory, and where) and the [Glossary](glossary).
+- Before chapter 5, read the [Prerequisites and dependency map](prerequisites): the six mathematical blocks, and which chapter needs which.
+- The course ends with three [integrative projects](projects) with a spec, success criteria and a grading grid that separates proved guarantees from empirical targets.
 
 ## Two ways of using numbers
 
-Lean cannot reason about floating-point numbers, so the code is written once, **generically over a scalar type** `α`:
+Lean can compute on floating-point numbers, but this course does not certify IEEE-754 rounding effects; exact theorems are stated over `Rat` or abstract structures. The code is therefore written once, **generically over a scalar type** `α`:
 
 - To **run** a model we use `α := Float`.
 - To **prove** theorems we use exact numbers (`Int`, `Rat`) or abstract algebraic structures, using the algebra classes that ship with Lean's `grind` tactic.
@@ -72,7 +74,8 @@ flowchart LR
 | 14 | World models | induction with hypotheses on functions, the triangle inequality | learning dynamics, imagined rollouts, compounding error, training a controller in a dream |
 | 15 | JEPA | `Prop`-level reasoning about minimisers, geometric sequences | predicting in representation space, collapse, EMA targets, variance regularisation |
 | 16 | Mathematical tools: probability, entropy, KL | induction over `Nat` on dot products, abstract type classes (`LawfulLog`), inequalities over `Rat` | expectation, variance, entropy, cross-entropy = entropy + KL, Gibbs inequality KL ≥ 0 |
-| 17 | Contrastive learning: InfoNCE, exactly | reusing Chapter 5's cross-entropy gradient, exact `Rat` softmax | softmax as a distribution, loss ≥ 0, collapse floor `log (n+1)`, gradient `p − onehot`, a trained embedding || 18 | Efficiency: quantization, MoE, distillation, scaling | bounds over `Rat`, sums of squares, one-line inheritance from Chapter 16 | quantization error < one step, MoE load-balance `Sum p^2 >= 1/E`, distillation `CE = H + KL`, scaling laws proved |
+| 17 | Contrastive learning: InfoNCE, exactly | reusing Chapter 5's cross-entropy gradient, exact `Rat` softmax | softmax as a distribution, loss ≥ 0, collapse floor `log (n+1)`, gradient `p − onehot`, a trained embedding |
+| 18 | Efficiency: quantization, MoE, distillation, scaling | bounds over `Rat`, sums of squares, one-line inheritance from Chapter 16 | quantization error < one step, MoE concentration penalty `Sum p^2 >= 1/E`, distillation `CE = H + KL`, shape of the scaling model, proved |
 | 19 | Multimodal learning: CLIP's symmetric loss | composing Chapter 17's machine in two directions | symmetric InfoNCE, shared positive, collapse floor `log B` in each direction, closed form of the 2x2 batch |
 | 20 | Capstone: the whole training loop, proved | composing the Chapter 5 kit: decay + clipping + schedule in one recipe | invisible step inside the box, closed form `(1-lr(2+wd))^t w0`, loss never grows at any iterate, finite schedule budget, MNIST 90% in 3 epochs |
 

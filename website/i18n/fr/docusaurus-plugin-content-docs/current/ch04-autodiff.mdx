@@ -144,6 +144,12 @@ after 1000 steps: loss = 0.000666
 
 Les paramètres initiaux aléatoires proviennent d'un générateur déterministe écrit en Lean (`Core/Rng.lean`) : chaque exécution est donc reproductible.
 
+## Références
+
+- A. E. Bryson, *Applied Optimal Control*, Hemisphere (1975) — la plus ancienne passe complète en mode inverse citée dans la littérature.
+- A. Griewank et A. Walther, *Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation*, SIAM (2008) — la bande en mode inverse que suit l'implémentation `grad`.
+- D. Bayard, *Rationale of reverse mode (short)*, arXiv:2009.04867 (2020) — l'algèbre de la règle de chaîne derrière la preuve `backprop_correct`.
+
 ## Exercices
 
 1. Ajoutez un constructeur `softplus` ($\log(1+e^x)$, dérivée $\sigma$) et étendez les preuves.

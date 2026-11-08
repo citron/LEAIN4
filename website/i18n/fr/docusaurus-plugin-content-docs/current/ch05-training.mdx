@@ -32,6 +32,10 @@ Le chapitre 4 nous a donné les gradients. Ce chapitre les transforme en *appren
 <Figure src="arch_pipeline.svg"
 caption="La boucle d'entraînement : données, modèle, perte, gradients, optimiseur"
  />
+:::info[Prérequis]
+Les fonctions de perte d'ici utilisent l'espérance et le softmax : relire **Espérance et variance** et **Entropie, entropie croisée, KL** du [Chapitre 16](ch16-tools) — et la [carte des prérequis](prerequisites) — avant la première perte softmax. Le kit d'optimisation (taux d'apprentissage, stabilité) est construit dans ce chapitre.
+:::
+
 ## Entropie croisée et softmax
 
 Pour la classification, le réseau produit $m$ nombres $z$ (les *logits*). Le softmax les transforme en probabilités $p_k = e^{z_k} / \sum_i e^{z_i}$, et la perte pour la vraie classe $y$ vaut $-\log p_y = \log\sum_i e^{z_i} - z_y$. Sous forme d'expression :
@@ -260,6 +264,11 @@ La somme geometrique est exacte (`geom_sum`), donc `lr_decay_total` borne
 calendrier `1/t` de la partie 2 depense un budget sans borne. C'est la
 difference exacte entre « decroitre » et « decroitre vite » — et pourquoi un
 entrainement a decroissance rapide cesse d'explorer en fin de course.
+
+## Références
+
+- Y. LeCun, B. Boser, J. S. Denker, et al., *Gradient-Based Learning Applied to Document Recognition*, Proceedings of the IEEE 86 (1998) — SGD sur des données d'échelle MNIST, la recette d'entraînement dont ce chapitre formalise le kit.
+- L. Bottou, *Large-Scale Machine Learning with Stochastic Gradient Descent*, COMPSTAT 2010 — la lecture du gradient stochastique de la boucle mini-batch.
 
 ## Exercices
 
