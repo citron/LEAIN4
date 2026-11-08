@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # katex is pinned to 0.16.x: the Docusaurus 3.10 markdown pipeline
+      # (remark-math/rehype-katex) targets the katex 0.16 API. 0.19 breaks
+      # the website build (failing CI on dependabot PR #8, closed).
+      - dependency-name: katex
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
