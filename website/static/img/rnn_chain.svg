@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" font-family="sans-serif" font-size="12">
 <rect width="480" height="240" fill="white"/>
-<clipPath id="c"><rect x="56.000000" y="26.000000" width="412.000000" height="174.000000"/></clipPath>
-<line x1="56.000000" y1="26.000000" x2="56.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="200.000000" x2="468.000000" y2="200.000000" stroke="#e6e6e6"/><text x="56.000000" y="216.000000" text-anchor="middle">1</text><text x="50.000000" y="204.000000" text-anchor="end">-12</text>
-<line x1="159.000000" y1="26.000000" x2="159.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="156.500000" x2="468.000000" y2="156.500000" stroke="#e6e6e6"/><text x="159.000000" y="216.000000" text-anchor="middle">4.25</text><text x="50.000000" y="160.500000" text-anchor="end">-8.75</text>
-<line x1="262.000000" y1="26.000000" x2="262.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="113.000000" x2="468.000000" y2="113.000000" stroke="#e6e6e6"/><text x="262.000000" y="216.000000" text-anchor="middle">7.5</text><text x="50.000000" y="117.000000" text-anchor="end">-5.5</text>
-<line x1="365.000000" y1="26.000000" x2="365.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="69.500000" x2="468.000000" y2="69.500000" stroke="#e6e6e6"/><text x="365.000000" y="216.000000" text-anchor="middle">10.75</text><text x="50.000000" y="73.500000" text-anchor="end">-2.25</text>
-<line x1="468.000000" y1="26.000000" x2="468.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="26.000000" x2="468.000000" y2="26.000000" stroke="#e6e6e6"/><text x="468.000000" y="216.000000" text-anchor="middle">14</text><text x="50.000000" y="30.000000" text-anchor="end">1</text>
-<rect x="56.000000" y="26.000000" width="412.000000" height="174.000000" fill="none" stroke="#555"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56.000000,43.413786 87.692308,47.442957 119.384615,51.472128 151.076923,55.501298 182.769231,59.530469 214.461538,63.559640 246.153846,67.588810 277.846154,71.617981 309.538462,75.647152 341.230769,79.676322 372.923077,83.705493 404.615385,87.734664 436.307692,91.763835 468.000000,95.793005"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56.000000,47.442957 87.692308,55.501298 119.384615,63.559640 151.076923,71.617981 182.769231,79.676322 214.461538,87.734664 246.153846,95.793005 277.846154,103.851347 309.538462,111.909688 341.230769,119.968030 372.923077,128.026371 404.615385,136.084712 436.307692,144.143054 468.000000,152.201395"/>
-<rect x="318.000000" y="34.000000" width="12" height="4" fill="#2e5aa8"/><text x="336.000000" y="40.000000">typical  0.5^T</text>
-<rect x="318.000000" y="50.000000" width="12" height="4" fill="#c4561a"/><text x="336.000000" y="56.000000">worst    0.25^T</text>
-<text x="56.000000" y="16" font-weight="bold">RNN: gradient magnitude through T unrolled steps (log10)</text>
-<text x="262.000000" y="234.000000" text-anchor="middle">time steps T</text>
-<text transform="translate(14,113.000000) rotate(-90)" text-anchor="middle">log10 |grad|</text>
+<clipPath id="c"><rect x="56" y="26" width="412" height="174"/></clipPath>
+<line x1="56" y1="26" x2="56" y2="200" stroke="#e6e6e6"/><line x1="56" y1="200" x2="468" y2="200" stroke="#e6e6e6"/><text x="56" y="216" text-anchor="middle">1</text><text x="50" y="204" text-anchor="end">-12</text>
+<line x1="159" y1="26" x2="159" y2="200" stroke="#e6e6e6"/><line x1="56" y1="156.5" x2="468" y2="156.5" stroke="#e6e6e6"/><text x="159" y="216" text-anchor="middle">4.25</text><text x="50" y="160.5" text-anchor="end">-8.75</text>
+<line x1="262" y1="26" x2="262" y2="200" stroke="#e6e6e6"/><line x1="56" y1="113" x2="468" y2="113" stroke="#e6e6e6"/><text x="262" y="216" text-anchor="middle">7.5</text><text x="50" y="117" text-anchor="end">-5.5</text>
+<line x1="365" y1="26" x2="365" y2="200" stroke="#e6e6e6"/><line x1="56" y1="69.5" x2="468" y2="69.5" stroke="#e6e6e6"/><text x="365" y="216" text-anchor="middle">10.75</text><text x="50" y="73.5" text-anchor="end">-2.25</text>
+<line x1="468" y1="26" x2="468" y2="200" stroke="#e6e6e6"/><line x1="56" y1="26" x2="468" y2="26" stroke="#e6e6e6"/><text x="468" y="216" text-anchor="middle">14</text><text x="50" y="30" text-anchor="end">1</text>
+<rect x="56" y="26" width="412" height="174" fill="none" stroke="#555"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56,43.41 87.69,47.44 119.38,51.47 151.08,55.5 182.77,59.53 214.46,63.56 246.15,67.59 277.85,71.62 309.54,75.65 341.23,79.68 372.92,83.71 404.62,87.73 436.31,91.76 468,95.79"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56,47.44 87.69,55.5 119.38,63.56 151.08,71.62 182.77,79.68 214.46,87.73 246.15,95.79 277.85,103.85 309.54,111.91 341.23,119.97 372.92,128.03 404.62,136.08 436.31,144.14 468,152.2"/>
+<rect x="318" y="34" width="12" height="4" fill="#2e5aa8"/><text x="336" y="40">typical  0.5^T</text>
+<rect x="318" y="50" width="12" height="4" fill="#c4561a"/><text x="336" y="56">worst    0.25^T</text>
+<text x="56" y="16" font-weight="bold">RNN: gradient magnitude through T unrolled steps (log10)</text>
+<text x="262" y="234" text-anchor="middle">time steps T</text>
+<text transform="translate(14,113) rotate(-90)" text-anchor="middle">log10 |grad|</text>
 </svg>

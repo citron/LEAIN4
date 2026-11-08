@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 250" font-family="sans-serif" font-size="12">
 <rect width="480" height="250" fill="white"/>
-<clipPath id="c"><rect x="56.000000" y="26.000000" width="412.000000" height="184.000000"/></clipPath>
-<line x1="56.000000" y1="26.000000" x2="56.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="210.000000" x2="468.000000" y2="210.000000" stroke="#e6e6e6"/><text x="56.000000" y="226.000000" text-anchor="middle">1</text><text x="50.000000" y="214.000000" text-anchor="end">0</text>
-<line x1="159.000000" y1="26.000000" x2="159.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="164.000000" x2="468.000000" y2="164.000000" stroke="#e6e6e6"/><text x="159.000000" y="226.000000" text-anchor="middle">5.75</text><text x="50.000000" y="168.000000" text-anchor="end">3</text>
-<line x1="262.000000" y1="26.000000" x2="262.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="118.000000" x2="468.000000" y2="118.000000" stroke="#e6e6e6"/><text x="262.000000" y="226.000000" text-anchor="middle">10.5</text><text x="50.000000" y="122.000000" text-anchor="end">6</text>
-<line x1="365.000000" y1="26.000000" x2="365.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="72.000000" x2="468.000000" y2="72.000000" stroke="#e6e6e6"/><text x="365.000000" y="226.000000" text-anchor="middle">15.25</text><text x="50.000000" y="76.000000" text-anchor="end">9</text>
-<line x1="468.000000" y1="26.000000" x2="468.000000" y2="210.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="26.000000" x2="468.000000" y2="26.000000" stroke="#e6e6e6"/><text x="468.000000" y="226.000000" text-anchor="middle">20</text><text x="50.000000" y="30.000000" text-anchor="end">12</text>
-<rect x="56.000000" y="26.000000" width="412.000000" height="184.000000" fill="none" stroke="#555"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56.000000,208.083333 76.600000,207.630749 97.200000,207.071295 117.800000,206.379737 138.400000,205.524880 159.000000,204.468166 179.600000,203.161928 200.200000,201.547247 220.800000,199.551290 241.400000,197.084025 262.000000,194.034162 282.600000,190.264132 303.200000,185.603881 323.800000,179.843200 344.400000,172.722244 365.000000,163.919808 385.600000,153.038845 406.200000,139.588548 426.800000,122.962219 447.400000,102.409897 468.000000,77.004534"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56.000000,206.166667 76.600000,202.525000 97.200000,198.883333 117.800000,195.241667 138.400000,191.600000 159.000000,187.958333 179.600000,184.316667 200.200000,180.675000 220.800000,177.033333 241.400000,173.391667 262.000000,169.750000 282.600000,166.108333 303.200000,162.466667 323.800000,158.825000 344.400000,155.183333 365.000000,151.541667 385.600000,147.900000 406.200000,144.258333 426.800000,140.616667 447.400000,136.975000 468.000000,133.333333"/>
-<rect x="318.000000" y="34.000000" width="12" height="4" fill="#2e5aa8"/><text x="336.000000" y="40.000000">model-based 0.1 x 1.25^k</text>
-<rect x="318.000000" y="50.000000" width="12" height="4" fill="#c4561a"/><text x="336.000000" y="56.000000">model-free 0.25 k</text>
-<text x="56.000000" y="16" font-weight="bold">Plan error: model-based 0.1 L^k (L = 1.25) vs model-free 0.25 k</text>
-<text x="262.000000" y="244.000000" text-anchor="middle">horizon k</text>
-<text transform="translate(14,118.000000) rotate(-90)" text-anchor="middle">error</text>
+<clipPath id="c"><rect x="56" y="26" width="412" height="184"/></clipPath>
+<line x1="56" y1="26" x2="56" y2="210" stroke="#e6e6e6"/><line x1="56" y1="210" x2="468" y2="210" stroke="#e6e6e6"/><text x="56" y="226" text-anchor="middle">1</text><text x="50" y="214" text-anchor="end">0</text>
+<line x1="159" y1="26" x2="159" y2="210" stroke="#e6e6e6"/><line x1="56" y1="164" x2="468" y2="164" stroke="#e6e6e6"/><text x="159" y="226" text-anchor="middle">5.75</text><text x="50" y="168" text-anchor="end">3</text>
+<line x1="262" y1="26" x2="262" y2="210" stroke="#e6e6e6"/><line x1="56" y1="118" x2="468" y2="118" stroke="#e6e6e6"/><text x="262" y="226" text-anchor="middle">10.5</text><text x="50" y="122" text-anchor="end">6</text>
+<line x1="365" y1="26" x2="365" y2="210" stroke="#e6e6e6"/><line x1="56" y1="72" x2="468" y2="72" stroke="#e6e6e6"/><text x="365" y="226" text-anchor="middle">15.25</text><text x="50" y="76" text-anchor="end">9</text>
+<line x1="468" y1="26" x2="468" y2="210" stroke="#e6e6e6"/><line x1="56" y1="26" x2="468" y2="26" stroke="#e6e6e6"/><text x="468" y="226" text-anchor="middle">20</text><text x="50" y="30" text-anchor="end">12</text>
+<rect x="56" y="26" width="412" height="184" fill="none" stroke="#555"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56,208.08 76.6,207.63 97.2,207.07 117.8,206.38 138.4,205.52 159,204.47 179.6,203.16 200.2,201.55 220.8,199.55 241.4,197.08 262,194.03 282.6,190.26 303.2,185.6 323.8,179.84 344.4,172.72 365,163.92 385.6,153.04 406.2,139.59 426.8,122.96 447.4,102.41 468,77"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56,206.17 76.6,202.53 97.2,198.88 117.8,195.24 138.4,191.6 159,187.96 179.6,184.32 200.2,180.68 220.8,177.03 241.4,173.39 262,169.75 282.6,166.11 303.2,162.47 323.8,158.82 344.4,155.18 365,151.54 385.6,147.9 406.2,144.26 426.8,140.62 447.4,136.98 468,133.33"/>
+<rect x="318" y="34" width="12" height="4" fill="#2e5aa8"/><text x="336" y="40">model-based 0.1 x 1.25^k</text>
+<rect x="318" y="50" width="12" height="4" fill="#c4561a"/><text x="336" y="56">model-free 0.25 k</text>
+<text x="56" y="16" font-weight="bold">Plan error: model-based 0.1 L^k (L = 1.25) vs model-free 0.25 k</text>
+<text x="262" y="244" text-anchor="middle">horizon k</text>
+<text transform="translate(14,118) rotate(-90)" text-anchor="middle">error</text>
 </svg>

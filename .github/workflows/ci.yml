@@ -9,22 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Read the single source of truth for build targets (scripts/targets.txt)
+        id: targets
+        run: echo "args=$(tr '\n' ' ' < scripts/targets.txt)" >> "$GITHUB_OUTPUT"
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: lean
-          build-args: LeanDL ch01 ch02 ch03 ch04 ch05 mnist cnn rnn lstm gru gpt minigpt mhead vae gan diffusion rl bellman worldmodel jepa ch16 ch17 ch18 ch19 capstone figures
+          build-args: ${{ steps.targets.outputs.args }}
       - name: "Audit axioms (expects: using sorry #[])"
         run: lake env lean ../scripts/audit_axioms.lean
         working-directory: lean
       - name: Download MNIST (used by capstone smoke and the regression step)
         run: ./scripts/get-mnist.sh
-      - name: Smoke-run representative demos (one per area; MNIST-heavy ones live in dedicated steps)
-        run: |
-          set -e
-          for exe in ch01 ch02 ch03 ch04 ch05 ch16 ch17 ch18 ch19 capstone gru mhead gan rl bellman minigpt; do
-            echo "== lake exe $exe =="
-            lake exe "$exe"
-          done
+      - name: Smoke-run the fast demos (list = scripts/smoke.txt; exclusions justified in scripts/smoke-skip.txt)
+        run: bash ../scripts/smoke.sh
         working-directory: lean
         timeout-minutes: 20
       - name: "JEPA demo (long-running: thousands of EMA steps, kept out of the fast loop)"
@@ -38,13 +36,24 @@ jobs:
         timeout-minutes: 10
       - name: MNIST integration test (seeded SGD, accuracy must reach 90%)
         run: |
-          ../scripts/get-mnist.sh
-          out=$(lake exe mnist 10000 5000 3 | tail -1)
+          out=$(lake exe mnist 10000 5000 3)
           echo "$out"
-          acc=$(echo "$out" | sed 's/.*= //')
+          line=$(echo "$out" | grep '^RESULT')
+          acc=$(echo "$line" | sed -n 's/.*accuracy=\([0-9.]*\).*/\1/p')
+          test -n "$acc" || { echo "no RESULT accuracy= line"; exit 1; }
           awk -v a="$acc" 'BEGIN { exit !(a >= 0.90) }' || { echo "MNIST regression: $acc < 0.90"; exit 1; }
         working-directory: lean
         timeout-minutes: 10
+      - name: Figure drift check (lake exe figures must reproduce website/static/img byte-for-byte)
+        run: |
+          lake exe figures
+          cd ..
+          git diff --exit-code -- website/static/img || {
+            echo "figures drifted — run lake exe figures and commit the regenerated SVGs";
+            git diff --stat -- website/static/img;
+            exit 1; }
+        shell: bash
+        working-directory: lean
 
   website:
     runs-on: ubuntu-latest
@@ -60,3 +69,42 @@ jobs:
         working-directory: website
       - run: npm run build
         working-directory: website
+
+  deploy:
+    # Publish the built site to GitHub Pages on pushes to main.
+    # Custom domain gacquer.com (CNAME in the artifact); the site lives under /LEAIN4/.
+    needs: website
+    if: github.ref == 'refs/heads/main' && github.repository == 'citron/LEAIN4'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - run: npm ci
+        working-directory: website
+      - run: npm run build
+        working-directory: website
+      - name: Stage site under /LEAIN4/ + CNAME for the custom domain
+        run: |
+          cd website/build
+          mkdir -p LEAIN4
+          find . -maxdepth 1 ! -name LEAIN4 ! -name . -exec mv {} LEAIN4/ \;
+          echo 'gacquer.com' > CNAME
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/build
+      - id: deployment
+        uses: actions/deploy-pages@v4

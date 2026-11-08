@@ -18,7 +18,7 @@ Chaque bloc liste ce qu'il faut savoir *faire* avant les chapitres qui l'exigent
 3. **Probabilités** — distributions finies, espérance, variance, indépendance. Exigées dès : Ch05 (perte), Ch10 (ELBO), Ch11 (minimax), Ch13 (retours). Lean : `Dist n` (poids strictement positifs sur `Rat`) en Ch16 — **lire « Espérance » du Ch16 avant le Ch10**.
 4. **Information** — lois du logarithme, entropie, entropie croisée, divergence KL, inégalité de Gibbs. Exigées dès : Ch05 (perte softmax), Ch10 (ELBO), Ch15/Ch17 (pertes contrastives). Lean : `LawfulLog` en Ch16 — le logarithme est une opération abstraite à lois nommées ; le logarithme réel n'est pas construit.
 5. **Optimisation** — convexité au niveau des fonctions quadratiques, taux d'apprentissage, conditions de stabilité, descente de gradient comme système dynamique. Exigée dès : Ch05, Ch20. Lean : le kit du Ch05 (`sq_le_one`, `powN_le_one`), Ch20 (`recipe_iter_sq_le`).
-6. **Apprentissage par renforcement** — état, action, récompense, retour, facteur de remise, équation de Bellman. Exigé dès : Ch13. Lean : Bellman un état et TD en Ch13 ; le MDP fini complet est une tâche listée comme prochaine.
+6. **Apprentissage par renforcement** — état, action, récompense, retour, facteur de remise, équation de Bellman. Exigé dès : Ch13. Lean : Bellman un état et TD en Ch13 ; l'opérateur de Bellman sur MDP fini (politique fixe), sa contraction en norme sup, l'unicité du point fixe et le taux géométrique de l'itération de valeur sont démontrés dans `Ch13/Bellman.lean` ; l'opérateur d'optimalité (max sur les actions) et la convergence stochastique de Q-learning restent hors périmètre.
 
 ## Carte des dépendances
 

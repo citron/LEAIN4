@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" font-family="sans-serif" font-size="12">
 <rect width="480" height="240" fill="white"/>
-<clipPath id="c"><rect x="56.000000" y="26.000000" width="412.000000" height="174.000000"/></clipPath>
-<line x1="56.000000" y1="26.000000" x2="56.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="200.000000" x2="468.000000" y2="200.000000" stroke="#e6e6e6"/><text x="56.000000" y="216.000000" text-anchor="middle">1</text><text x="50.000000" y="204.000000" text-anchor="end">0</text>
-<line x1="159.000000" y1="26.000000" x2="159.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="156.500000" x2="468.000000" y2="156.500000" stroke="#e6e6e6"/><text x="159.000000" y="216.000000" text-anchor="middle">3.75</text><text x="50.000000" y="160.500000" text-anchor="end">0.28</text>
-<line x1="262.000000" y1="26.000000" x2="262.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="113.000000" x2="468.000000" y2="113.000000" stroke="#e6e6e6"/><text x="262.000000" y="216.000000" text-anchor="middle">6.5</text><text x="50.000000" y="117.000000" text-anchor="end">0.55</text>
-<line x1="365.000000" y1="26.000000" x2="365.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="69.500000" x2="468.000000" y2="69.500000" stroke="#e6e6e6"/><text x="365.000000" y="216.000000" text-anchor="middle">9.25</text><text x="50.000000" y="73.500000" text-anchor="end">0.83</text>
-<line x1="468.000000" y1="26.000000" x2="468.000000" y2="200.000000" stroke="#e6e6e6"/><line x1="56.000000" y1="26.000000" x2="468.000000" y2="26.000000" stroke="#e6e6e6"/><text x="468.000000" y="216.000000" text-anchor="middle">12</text><text x="50.000000" y="30.000000" text-anchor="end">1.1</text>
-<rect x="56.000000" y="26.000000" width="412.000000" height="174.000000" fill="none" stroke="#555"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56.000000,120.909091 93.454545,160.454545 130.909091,180.227273 168.363636,190.113636 205.818182,195.056818 243.272727,197.528409 280.727273,198.764205 318.181818,199.382102 355.636364,199.691051 393.090909,199.845526 430.545455,199.922763 468.000000,199.961381"/>
-<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56.000000,41.818182 93.454545,41.818182 130.909091,41.818182 168.363636,41.818182 205.818182,41.818182 243.272727,41.818182 280.727273,41.818182 318.181818,41.818182 355.636364,41.818182 393.090909,41.818182 430.545455,41.818182 468.000000,41.818182"/>
-<rect x="318.000000" y="34.000000" width="12" height="4" fill="#2e5aa8"/><text x="336.000000" y="40.000000">TD(0) V(s_i)</text>
-<rect x="318.000000" y="50.000000" width="12" height="4" fill="#c4561a"/><text x="336.000000" y="56.000000">true value (10 steps away)</text>
-<text x="56.000000" y="16" font-weight="bold">TD(0) on a chain: V(s_i) = 0.5^i approaches the true value 1</text>
-<text x="262.000000" y="234.000000" text-anchor="middle">state i (steps to end)</text>
-<text transform="translate(14,113.000000) rotate(-90)" text-anchor="middle">value</text>
+<clipPath id="c"><rect x="56" y="26" width="412" height="174"/></clipPath>
+<line x1="56" y1="26" x2="56" y2="200" stroke="#e6e6e6"/><line x1="56" y1="200" x2="468" y2="200" stroke="#e6e6e6"/><text x="56" y="216" text-anchor="middle">1</text><text x="50" y="204" text-anchor="end">0</text>
+<line x1="159" y1="26" x2="159" y2="200" stroke="#e6e6e6"/><line x1="56" y1="156.5" x2="468" y2="156.5" stroke="#e6e6e6"/><text x="159" y="216" text-anchor="middle">3.75</text><text x="50" y="160.5" text-anchor="end">0.28</text>
+<line x1="262" y1="26" x2="262" y2="200" stroke="#e6e6e6"/><line x1="56" y1="113" x2="468" y2="113" stroke="#e6e6e6"/><text x="262" y="216" text-anchor="middle">6.5</text><text x="50" y="117" text-anchor="end">0.55</text>
+<line x1="365" y1="26" x2="365" y2="200" stroke="#e6e6e6"/><line x1="56" y1="69.5" x2="468" y2="69.5" stroke="#e6e6e6"/><text x="365" y="216" text-anchor="middle">9.25</text><text x="50" y="73.5" text-anchor="end">0.83</text>
+<line x1="468" y1="26" x2="468" y2="200" stroke="#e6e6e6"/><line x1="56" y1="26" x2="468" y2="26" stroke="#e6e6e6"/><text x="468" y="216" text-anchor="middle">12</text><text x="50" y="30" text-anchor="end">1.1</text>
+<rect x="56" y="26" width="412" height="174" fill="none" stroke="#555"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#2e5aa8" stroke-width="2" points="56,120.91 93.45,160.45 130.91,180.23 168.36,190.11 205.82,195.06 243.27,197.53 280.73,198.76 318.18,199.38 355.64,199.69 393.09,199.85 430.55,199.92 468,199.96"/>
+<polyline clip-path="url(#c)" fill="none" stroke="#c4561a" stroke-width="2" points="56,41.82 93.45,41.82 130.91,41.82 168.36,41.82 205.82,41.82 243.27,41.82 280.73,41.82 318.18,41.82 355.64,41.82 393.09,41.82 430.55,41.82 468,41.82"/>
+<rect x="318" y="34" width="12" height="4" fill="#2e5aa8"/><text x="336" y="40">TD(0) V(s_i)</text>
+<rect x="318" y="50" width="12" height="4" fill="#c4561a"/><text x="336" y="56">true value (10 steps away)</text>
+<text x="56" y="16" font-weight="bold">TD(0) on a chain: V(s_i) = 0.5^i approaches the true value 1</text>
+<text x="262" y="234" text-anchor="middle">state i (steps to end)</text>
+<text transform="translate(14,113) rotate(-90)" text-anchor="middle">value</text>
 </svg>

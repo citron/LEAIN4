@@ -1,0 +1,27 @@
+# Demos smoke-run by CI in the fast loop (scripts/smoke.sh).
+# Every lean/Demos/*.lean (minus the `figures` generator and `props`) must appear
+# here, in scripts/smoke-skip.txt with a reason, or in a dedicated CI step.
+# check.mjs rule 9 enforces this.
+ch01
+ch02
+ch03
+ch04
+ch05
+ch16
+ch17
+ch18
+ch19
+capstone
+gru
+mhead
+gan
+rl
+minigpt
+rnn
+lstm
+cnn
+vae
+gpt
+diffusion
+worldmodel
+bellman

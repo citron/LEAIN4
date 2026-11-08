@@ -1,5 +1,9 @@
 # PROJECT_AUDIT.md — LEAIN4, Phase 1 (audit intégral)
 
+> **Snapshot historique au 2026-11-02.** Ce fichier est un journal d'audit : l'état **courant**
+> (mesures rejouées, tâches, limites) est dans `ROADMAP.md §1`. Les chiffres ci-dessous
+> (18 chapitres, 21 exécutables, ≈1 720 déclarations) décrivent la branche à cette date.
+
 *Audité le 2026-11-02 sur la branche `hermes` (commit `35500f1`). Aucun fichier modifié par cet audit. Tous les chiffres proviennent de l'exécution réelle des commandes indiquées.*
 
 ---
