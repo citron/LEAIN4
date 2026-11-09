@@ -196,6 +196,40 @@ What a certified demo publishes is then a closed rational fact — `(mul (point 
 
 <Figure src="float_drift.svg" alt="Accumulated drift of the Float sum of ten thousand 0.1s against the exact rational answer, oscillating and growing with the exponent of the running sum" caption="The price of Float, measured: adding 0.1 one thousand times. The exact answer is the integer 1000 - a Rat certificate - but 0.1 is not a binary fraction, so every addition rounds. The drift oscillates with the exponent of the running sum and grows: exactly the gap Core/Interval.lean is built to bound." />
 
+## IEEE-754: where the rounding model comes from
+
+`Core/Rounding.lean` (above) *assumes* the rounding model — a function `fl` and a unit roundoff `u` with `fl x = x·(1 + δ)`, `|δ| ≤ u`. That hypothesis has a source: it is the **binary grid of IEEE-754**, the format every `Float` in the course executes on. The grid can be specified exactly, on `Rat`, with no axioms — and then the hypothesis becomes a theorem.
+
+A binade `[2^b, 2^(b+1))` of precision `p` carries numbers spaced by `2^b / 2^p` — the mantissa has `p` bits, so within one binade the grid is an arithmetic progression of step `step(p,b) = 2^(b+1-p)`. The structure below says: pick the binade of `x` (`pick`), round to the nearest grid point within half a step (`nearest`), and grid points are fixed points (`fixed`). All hypotheses are named fields of a structure — never `axiom`.
+
+```lean file=Core/Ieee754.lean#grid
+```
+
+The payoff is one theorem: **every such grid is a `RoundingModel` with `u = 2⁻ᵖ`.** The relative error is the absolute error (≤ half a step) divided by `x`, and `x` sits above the bottom of its binade, so the ratio is bounded by `(2^b / 2^p / 2) / 2^b = 2⁻ᵖ⁻¹ ≤ 2⁻ᵖ`. T9's hypothesis, proved.
+
+```lean file=Core/Ieee754.lean#reduction
+```
+
+One line of the proof shows what the formalisation is made of: the bound on `δ = (fl x − x)/x` chains multiplicative bound steps through `step/2 · x⁻¹ ≤ 2⁻ᵖ` — `grind` closing the ring arithmetic, no Mathlib anywhere.
+
+Rounding a grid point changes nothing — `fl (fl x) = fl x` — a fact the drift analysis of `Rounding.lean` needs (`flDot` re-rounds a product already rounded):
+
+```lean file=Core/Ieee754.lean#idem
+```
+
+And the numbers themselves, computed by `decide` — no trust in a table:
+
+```lean file=Core/Ieee754.lean#binary64
+```
+
+$$
+\text{binade } [2^b,\, 2^{b+1)): \quad \text{step} = 2^{b+1-p}, \qquad u = 2^{-p} \;\; (p = 53 \text{ for binary64})
+$$
+
+:::warning The grid is proved; that `Float` *is* the grid is not
+Lean has no IEEE-754 theory for `Float`: that the machine's `Float` implements this grid with roundTiesToEven is a **platform hypothesis**, verified by observation, not by proof. The observations (lake exe props, property prop_ieee754) are the grid's fingerprint: `1 + 2⁻⁵³ == 1` (a half-ulp tie, resolved down to the even mantissa), `1 + 2⁻⁵² ≠ 1` (a full ulp moves the sum), `1 + 3·2⁻⁵³ == 1 + 2⁻⁵¹` (the tie resolved *up* to the even neighbour), and `0.1 + 0.2 ≠ 0.3` — decimals are not grid points. Every one passes; the status is **« Vérifié numériquement »**.
+:::
+
 ## The practitioner's kit
 
 Between the optimiser theorems and a training run that does not explode sit four
@@ -271,6 +305,7 @@ fast decay stops exploring.
 2. Show that the shift $z \mapsto z - c$ does not change `softmax` in a field.
 3. Implement *dropout* with `Rng`: zero each hidden unit with probability $q$ during training and rescale by $1/(1-q)$. Measure the effect on test accuracy.
 4. Add an L2 penalty to `Net.sgdStep`. For which values does test accuracy improve?
+5. On the fixed grid of step $2^{-p}$, prove that the constructive rounding fixes the grid point $k \cdot 2^{-p}$.
 
 **Exercises in Lean.** The file `lean/LeanDL/Ch05/Exercises.lean` contains the statements below, with `sorry` for you to replace. The proved solutions are in `Solutions.lean` next to it: try first.
 
@@ -342,6 +377,24 @@ Forward: case on the two guards, each branch rewrites `h` to an inequality `grin
 <summary>Solution 4</summary>
 
 ```lean file=Ch05/Solutions.lean#sol4
+```
+
+</details>
+
+```lean file=Ch05/Exercises.lean#ex5
+```
+
+<details>
+<summary>Hint 5</summary>
+
+`Rat.le_floor_iff` turns `(k : Int) ≤ floor (k + ½)` into `(k : Rat) ≤ k + ½`; `Rat.floor_lt_iff` turns the other bound into `k + ½ < (k : Rat) + 1`; `omega` joins them into `floor (k + ½) = k`. The division closes with `push_cast` and `grind [Rat.div_def]` once you feed it `0 < 2 ^ p`.
+
+</details>
+
+<details>
+<summary>Solution 5</summary>
+
+```lean file=Ch05/Solutions.lean#sol5
 ```
 
 </details>

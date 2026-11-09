@@ -1,5 +1,6 @@
 import LeanDL.Ch05.Kit
 import LeanDL.Ch05.Optim
+import LeanDL.Core.Ieee754
 
 /-! Solutions for the Chapter 5 exercises. -/
 
@@ -71,5 +72,30 @@ theorem exercise_clip_fixed_solution (c x : Rat) (hc : 0 <= c) :
     unfold clip
     split <;> grind
 -- ANCHOR_END: sol4
+
+
+-- ANCHOR: sol5
+theorem exercise_fixed_grid_solution (p k : Nat) :
+    LeanDL.Core.Ieee754.fixedGrid p ((k : Rat) / (2 : Rat) ^ p) =
+      (k : Rat) / (2 : Rat) ^ p := by
+  unfold LeanDL.Core.Ieee754.fixedGrid
+  have hp : (0 : Rat) < (2 : Rat) ^ p := LeanDL.Core.Ieee754.pow2_pos p
+  have hmul : ((k : Rat) / (2 : Rat) ^ p) * (2 : Rat) ^ p = (k : Rat) := by
+    push_cast
+    grind [Rat.div_def]
+  have hfl : Rat.floor ((k : Rat) + 1 / 2) = (k : Int) := by
+    have h1 : (k : Int) ≤ Rat.floor ((k : Rat) + 1 / 2) := by
+      rw [Rat.le_floor_iff]
+      push_cast
+      grind
+    have h2 : Rat.floor ((k : Rat) + 1 / 2) < (k : Int) + 1 := by
+      rw [Rat.floor_lt_iff]
+      push_cast
+      grind
+    omega
+  rw [hmul, hfl]
+  push_cast
+  grind
+-- ANCHOR_END: sol5
 
 end LeanDL.Ch05
