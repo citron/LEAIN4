@@ -12,10 +12,34 @@ jobs:
       - name: Read the single source of truth for build targets (scripts/targets.txt)
         id: targets
         run: echo "args=$(tr '\n' ' ' < scripts/targets.txt)" >> "$GITHUB_OUTPUT"
-      - uses: leanprover/lean-action@v1
+      # lean-action's installer curls the elan release tarball with no retry
+      # and no cache: a reproducible GitHub 504 on that URL fails every job.
+      # Zero-dependency project => .lake has nothing to cache, elan + the
+      # pinned toolchain do. Cache ~/.elan, install with retry, build direct.
+      - name: Cache elan + pinned toolchain
+        uses: actions/cache@v5
         with:
-          lake-package-directory: lean
-          build-args: ${{ steps.targets.outputs.args }}
+          path: ~/.elan
+          key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean/lean-toolchain') }}
+      - name: Install elan (retry on transient GitHub release 504s)
+        run: |
+          if [ ! -x "$HOME/.elan/bin/lake" ]; then
+            for i in 1 2 3 4 5; do
+              if curl --retry 5 --retry-delay 10 --retry-all-errors -sSfL \
+                   https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o elan-init.sh; then
+                sh elan-init.sh -y --default-toolchain none --no-modify-path && break
+              fi
+              echo "elan download attempt $i failed"; sleep $((10 * i))
+            done
+          fi
+          test -x "$HOME/.elan/bin/lake" || { echo "elan install failed"; exit 1; }
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          lean --version && lake --version
+        shell: bash
+      - name: "Build all targets (single source of truth: scripts/targets.txt)"
+        run: lake build ${{ steps.targets.outputs.args }}
+        working-directory: lean
+        shell: bash
       - name: "Audit axioms (expects: using sorry #[])"
         run: lake env lean ../scripts/audit_axioms.lean
         working-directory: lean
