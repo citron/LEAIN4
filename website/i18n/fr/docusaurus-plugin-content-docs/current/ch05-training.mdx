@@ -196,6 +196,40 @@ Une démo certifiée publie alors un fait rationnel clos — `(mul (point (1/2))
 
 <Figure src="float_drift.svg" alt="Dérive accumulée de la somme Float de dix mille 0,1 contre la réponse rationnelle exacte, oscillante et croissante avec l'exposant de la somme courante" caption="Le prix de Float, mesuré : ajouter 0,1 mille fois. La réponse exacte est l'entier 1000 - un certificat Rat - mais 0,1 n'est pas une fraction binaire, donc chaque addition arrondit. La dérive oscille avec l'exposant de la somme courante et croît : exactement le fossé que Core/Interval.lean est conçu pour encadrer." />
 
+## IEEE-754 : d'où vient le modèle d'arrondi
+
+`Core/Rounding.lean` (ci-dessus) *suppose* le modèle d'arrondi — une fonction `fl` et un unit roundoff `u` tels que `fl x = x·(1 + δ)`, `|δ| ≤ u`. Cette hypothèse a une source : c'est la **grille binaire d'IEEE-754**, le format sur lequel tourne tout `Float` du cours. On peut la spécifier exactement, sur `Rat`, sans aucun axiome — et alors l'hypothèse devient un théorème.
+
+Une binade `[2^b, 2^(b+1))` de précision `p` porte des nombres espacés de `2^b / 2^p` — le mantisse a `p` bits, donc dans une binade la grille est une progression arithmétique de pas `step(p,b) = 2^(b+1-p)`. La structure ci-dessous dit : choisir la binade de `x` (`pick`), arrondir au point de grille le plus proche à demi-pas près (`nearest`), et les points de grille sont des points fixes (`fixed`). Toutes les hypothèses sont des champs nommés d'une structure — jamais d'`axiom`.
+
+```lean file=Core/Ieee754.lean#grid
+```
+
+Le gain tient en un théorème : **toute telle grille est un `RoundingModel` avec `u = 2⁻ᵖ`.** L'erreur relative est l'erreur absolue (au plus un demi-pas) divisée par `x`, et `x` est au-dessus du bas de sa binade, donc le rapport est borné par `(2^b / 2^p / 2) / 2^b = 2⁻ᵖ⁻¹ ≤ 2⁻ᵖ`. L'hypothèse du T9, prouvée.
+
+```lean file=Core/Ieee754.lean#reduction
+```
+
+Une ligne de la preuve montre la matière de la formalisation : la borne sur `δ = (fl x − x)/x` enchaîne des majorations multiplicatives jusqu'à `step/2 · x⁻¹ ≤ 2⁻ᵖ` — `grind` ferme l'arithmétique de l'anneau, sans aucun Mathlib.
+
+Arrondir un point de grille ne change rien — `fl (fl x) = fl x` — fait dont l'analyse de dérive de `Rounding.lean` a besoin (`flDot` arrondit à nouveau un produit déjà arrondi) :
+
+```lean file=Core/Ieee754.lean#idem
+```
+
+Et les nombres eux-mêmes, calculés par `decide` — aucune confiance dans une table :
+
+```lean file=Core/Ieee754.lean#binary64
+```
+
+$$
+\text{binade } [2^b,\, 2^{b+1)): \quad \text{pas} = 2^{b+1-p}, \qquad u = 2^{-p} \;\; (p = 53 \text{ en binary64})
+$$
+
+:::warning La grille est prouvée ; que `Float` *soit* cette grille ne l'est pas
+Lean n'a pas de théorie IEEE-754 pour `Float` : que le `Float` de la machine implémente cette grille avec roundTiesToEven est une **hypothèse de plateforme**, vérifiée par observation, pas par preuve. Les observations (lake exe props, propriété prop_ieee754) sont l'empreinte de la grille : `1 + 2⁻⁵³ == 1` (demi-ulp, égalité résolue vers le mantisse pair), `1 + 2⁻⁵² ≠ 1` (un ulp entier déplace la somme), `1 + 3·2⁻⁵³ == 1 + 2⁻⁵¹` (l'égalité résolue vers le voisin pair du haut) et `0.1 + 0.2 ≠ 0.3` — les décimales ne sont pas des points de grille. Toutes passent ; le statut est **« Vérifié numériquement »**.
+:::
+
 ## La trousse du praticien
 
 Entre les theoremes sur les optimiseurs et un entrainement qui ne pete pas, il y
@@ -276,6 +310,7 @@ entrainement a decroissance rapide cesse d'explorer en fin de course.
 2. Montrez que la translation $z \mapsto z - c$ ne change pas `softmax` dans un corps.
 3. Implémentez le *dropout* avec `Rng` : mettre à zéro chaque unité cachée avec probabilité $q$ pendant l'entraînement et rééchelonner par $1/(1-q)$. Mesurez l'effet sur la précision en test.
 4. Ajoutez une pénalité L2 à `Net.sgdStep`. Pour quelles valeurs la précision en test s'améliore-t-elle ?
+5. Sur la grille fixe de pas $2^{-p}$, prouvez que l'arrondi constructif laisse fixe le point de grille $k \cdot 2^{-p}$.
 
 **Exercices en Lean.** Le fichier `lean/LeanDL/Ch05/Exercises.lean` contient les énoncés ci-dessous, avec des `sorry` à remplacer. Les solutions démontrées sont dans `Solutions.lean`, à côté : essayez d’abord.
 
@@ -347,6 +382,24 @@ Sens direct : cas sur les deux gardes, chaque branche réécrit `h` en une inég
 <summary>Corrigé 4</summary>
 
 ```lean file=Ch05/Solutions.lean#sol4
+```
+
+</details>
+
+```lean file=Ch05/Exercises.lean#ex5
+```
+
+<details>
+<summary>Indice 5</summary>
+
+`Rat.le_floor_iff` transforme `(k : Int) ≤ floor (k + ½)` en `(k : Rat) ≤ k + ½` ; `Rat.floor_lt_iff` transforme l'autre borne en `k + ½ < (k : Rat) + 1` ; `omega` assemble les deux en `floor (k + ½) = k`. La division se ferme avec `push_cast` et `grind [Rat.div_def]` une fois `0 < 2 ^ p` fourni.
+
+</details>
+
+<details>
+<summary>Solution 5</summary>
+
+```lean file=Ch05/Solutions.lean#sol5
 ```
 
 </details>

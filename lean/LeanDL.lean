@@ -82,3 +82,4 @@ import LeanDL.Core.Theory
 import LeanDL.Core.Interval
 import LeanDL.Core.Vec
 import LeanDL.Core.Rounding
+import LeanDL.Core.Ieee754

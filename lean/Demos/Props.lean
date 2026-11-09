@@ -263,6 +263,33 @@ def prop_rounding_f (n : Nat) : Bool := Id.run do
 
 end FloatMirrors
 
+/-! ## IEEE-754 observable signatures (Ch05 — Core/Ieee754.lean)
+
+Lean has **no IEEE-754 theory for `Float`**: that binary64 implements the
+grid of `Core/Ieee754.lean` (with `roundTiesToEven`) is a platform
+hypothesis. What can be *observed* is the grid's fingerprint on the
+machine: -/
+
+def prop_ieee754 : Bool :=
+  -- exact dyadic constants: numerators < 2^53 divided by powers of two,
+  -- so each division below is exact in binary64 (no rounding)
+  let halfUlp : Float := 1.0 / 9007199254740992.0  -- 2⁻⁵³
+  let ulp : Float := 1.0 / 4503599627370496.0      -- 2⁻⁵²
+  -- `1 + 2⁻⁵³`: the half-ulp of binade [1,2) is 2⁻⁵³ — adding it to 1
+  -- lands exactly on a tie, which `roundTiesToEven` resolves DOWN (1 is
+  -- even), so the sum is exactly 1.
+  (1.0 + halfUlp == (1.0 : Float)) &&
+  -- `1 + 2⁻⁵²`: one full ulp — representable, the sum moves.
+  (1.0 + ulp != (1.0 : Float)) &&
+  -- `1 + 3·2⁻⁵³` = 1 + 1.5 ulp: exactly halfway between 1 + 2⁻⁵²
+  -- (odd mantissa) and 1 + 2⁻⁵¹ (even mantissa). `roundTiesToEven`
+  -- resolves UP to the even neighbour: 1 + 2⁻⁵¹.
+  (1.0 + 3.0 * halfUlp == 1.0 + ulp + ulp) &&
+  -- decimal fractions are not grid points: 0.1 + 0.2 ≠ 0.3 — the
+  -- grid's signature on decimals (each summand is rounded; the exact
+  -- sum of the two rounded values is strictly above the grid point 0.3).
+  (0.1 + 0.2 != (0.3 : Float))
+
 def main : IO UInt32 := do
   let mut fails : List String := []
   for (name, b) in
@@ -273,7 +300,8 @@ def main : IO UInt32 := do
       ("Float softmax: positive weights, sum == 1 (500 rows)", prop_softmax_f 500),
       ("Float layerNorm: mean 0, var 1, shift-invariant (500 rows)", prop_layerNorm_f 500),
       ("Float causal attention: rows j>3 invisible at t=3 (500 draws)", prop_causal_f 500),
-      ("Core.Rounding |fl dot - exact dot| <= gamma_(2n) * sum |xi yi|, exact Rat check (500 dots)", prop_rounding_f 500) ] do
+      ("Core.Rounding |fl dot - exact dot| <= gamma_(2n) * sum |xi yi|, exact Rat check (500 dots)", prop_rounding_f 500),
+      ("Core.Ieee754 binary64 grid fingerprint: 1+2^-53 == 1, 1+2^-52 != 1, ties-to-even 1+3*2^-53 == 1+2^-51, 0.1+0.2 != 0.3", prop_ieee754) ] do
     IO.println s!"{if b then "PASS" else "FAIL"}  {name}"
     if !b then fails := fails ++ [name]
   if fails.isEmpty then
