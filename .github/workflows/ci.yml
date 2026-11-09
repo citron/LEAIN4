@@ -77,10 +77,8 @@ jobs:
 
   deploy:
     # Publish the built site to GitHub Pages on pushes to main.
-    # Project page: https://citron.github.io/LEAIN4/ — url=https://citron.github.io,
-    # baseUrl=/LEAIN4/, artifact root deployed as-is (GitHub serves the repo
-    # root at /LEAIN4/). No CNAME: gacquer.com stays on OVH; the OVH sync
-    # uses the same default build (url=https://gacquer.com).
+    # GitHub Pages is the canonical host: https://citron.github.io/LEAIN4/
+    # (free static hosting, deploy on every merge; config defaults to it).
     needs: website
     if: github.ref == 'refs/heads/main' && github.repository == 'citron/LEAIN4'
     runs-on: ubuntu-latest

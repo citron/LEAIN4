@@ -5,7 +5,7 @@ title: "LEAIN4 — Deep Learning in Lean 4, a bilingual formalized course (no Ma
 type: software
 license: EUPL-1.2
 repository-code: "https://github.com/citron/LEAIN4"
-url: "https://gacquer.com/LEAIN4/"
+url: "https://citron.github.io/LEAIN4/"
 authors:
   - name: "William Gacquer"
     affiliation: "AMILTO SARL"

@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/citron/LEAIN4/actions/workflows/ci.yml/badge.svg)](https://github.com/citron/LEAIN4/actions/workflows/ci.yml)
 
-Published site / Site publié : **https://gacquer.com/LEAIN4/**
+Published site / Site publié : **https://citron.github.io/LEAIN4/** (GitHub Pages)
 
 A bilingual (English / Français) course that teaches Lean 4 and deep learning together. All models are implemented, and key properties proved, in Lean 4 without Mathlib.
 

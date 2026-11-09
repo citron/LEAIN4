@@ -10,8 +10,11 @@ const config = {
   title: 'Deep Learning in Lean 4',
   tagline: 'Learn Lean 4 and deep learning at the same time — Apprenez Lean 4 et le deep learning ensemble',
   favicon: 'img/favicon.svg',
-  url: process.env.SITE_URL || 'https://gacquer.com',
-  // /LEAIN4/ for the published site; local viewing: SITE_BASE_URL=/ npx docusaurus build && npx docusaurus serve
+  url: process.env.SITE_URL || 'https://citron.github.io',
+  // GitHub Pages project page is the canonical host:
+  // https://citron.github.io/LEAIN4/ (free, no self-hosting).
+  // baseUrl=/LEAIN4/ matches the project-page path; local viewing:
+  // npx docusaurus serve --port 3000 serves the built site at /LEAIN4/.
   baseUrl: process.env.SITE_BASE_URL || '/LEAIN4/',
   organizationName: 'citron',
   projectName: 'LEAIN4',
