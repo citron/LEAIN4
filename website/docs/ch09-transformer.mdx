@@ -141,7 +141,7 @@ One attention map produces one weighted average per position — one routing dec
 
 `headVec` slices a flat projection of width `dh * h` into its heads; `concatVec` glues the head outputs back into one vector. The two theorems say the glue and the slicing are inverse: reading the flat index `k * dh + j` of the concatenation returns the output of head `k` at coordinate `j` (`concat_head`), and slicing the concatenation recovers every head intact (`head_concat`). A layout bug — an off-by-one in the index arithmetic, a stride swapped for a width — is exactly the class of silent numerical error a proof removes: the division and modulo that implement the layout are pinned down by the lemmas `Nat.add_div`, `Nat.mul_div_left`, `Nat.add_mul_mod_self_right`, not by a test on one example.
 
-The running code (`lean/Demos/MHead.lean`, `lake exe mhead`) is one block of exactly this shape: $h = 4$ causal heads of width `dh = 4` (Q/K/V projections, scores scaled by $1/\sqrt{dh}$, causal softmax, concatenation), a linear read-out and a softmax, trained on the delay task with hand-written backward.
+The running code (`lean/Demos/MHead.lean`, `lake exe mhead`) is one block of exactly this shape: $h = 4$ causal heads of width `dh = 4` (Q/K/V projections, scores scaled by $1/\sqrt{dh}$, causal softmax, concatenation), a linear read-out and a softmax, trained on the delay task with handwritten backward.
 
 
 ## The block, assembled and proved
@@ -186,7 +186,7 @@ Induction turns the block's causality into the model's causality, at any depth, 
 
 `lake exe gpt` first checks the gradient of all 171 parameters of a tiny model against central finite differences (maximum error below $10^{-6}$, printed as 0.000000).
 
-`lake exe mhead` does the same for the four-head block: the hand-written backward of the multi-head Transformer (918 parameters plus 128 embedding entries) matches central finite differences to 0.000000 on every coordinate — the head slicing and concatenation of the section above are implemented at exactly the layout the theorems pin down.
+`lake exe mhead` does the same for the four-head block: the handwritten backward of the multi-head Transformer (918 parameters plus 128 embedding entries) matches central finite differences to 0.000000 on every coordinate — the head slicing and concatenation of the section above are implemented at exactly the layout the theorems pin down.
 
 ### Can attention find a token at a given distance?
 

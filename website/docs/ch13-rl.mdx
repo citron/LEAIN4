@@ -55,7 +55,7 @@ Returns are expectations of discounted rewards: review **Expectation and varianc
 
 ## Value-based: Q-learning
 
-The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterwards. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.
+The **action value** $Q(s,a)$ is the expected return after taking $a$ in $s$ and behaving well afterward. It satisfies the **Bellman equation** $Q(s,a)=r+\gamma\max_{a'}Q(s',a')$. Q-learning turns this into an update towards a **target** $r+\gamma\max_{a'}Q(s',a')$.
 
 <Figure src="value_iteration.svg" alt="Remaining error of value iteration for three discount factors" caption="The remaining error after k sweeps is gamma^k times the initial error (the theorem valueIter_error). A discount close to 1 means slow convergence." />
 

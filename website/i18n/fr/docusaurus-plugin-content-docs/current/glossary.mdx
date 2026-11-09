@@ -9,209 +9,209 @@ Chaque mot nouveau du cours, dans les termes les plus simples que nous ayons tro
 
 ## Chapitre 0 — Installation et tour de Lean
 
-- **Lean**: Un langage de programmation qui sait aussi vérifier des preuves mathématiques. Si votre preuve compile, elle est correcte.
-- **Type**: La sorte de chose qu’est une valeur (un nombre, une liste, un vecteur de longueur 3). Lean refuse de mélanger des types incompatibles.
-- **Structure**: Une boîte étiquetée de valeurs, comme un formulaire avec des champs nommés.
-- **Théorème**: Un énoncé accompagné de sa preuve. En Lean, la preuve est un programme dont le type est l’énoncé.
-- **Preuve et test**: Une preuve est certaine pour toute entrée possible ; un test ne dit que ce qui se passe sur les cas essayés. Ce cours fait les deux et dit toujours lequel est lequel.
-- **Tactique**: Une commande qui construit une preuve pas à pas. `grind` et `omega` sont des tactiques qui font à votre place beaucoup de raisonnement routinier.
-- **Code générique (classe de types)**: Du code écrit une fois pour tout type de nombre. Des crochets comme `[Add α]` disent à Lean quelles opérations sont nécessaires, et il les trouve pour vous.
-- **Float**: Les nombres décimaux de l’ordinateur. Ils arrondissent, donc nous exécutons les modèles sur des Float mais nous énonçons les preuves sur des nombres exacts.
+- **Lean** : Un langage de programmation qui sait aussi vérifier des preuves mathématiques. Si votre preuve compile, elle est correcte.
+- **Type** : La sorte de chose qu’est une valeur (un nombre, une liste, un vecteur de longueur 3). Lean refuse de mélanger des types incompatibles.
+- **Structure** : Une boîte étiquetée de valeurs, comme un formulaire avec des champs nommés.
+- **Théorème** : Un énoncé accompagné de sa preuve. En Lean, la preuve est un programme dont le type est l’énoncé.
+- **Preuve et test** : Une preuve est certaine pour toute entrée possible ; un test ne dit que ce qui se passe sur les cas essayés. Ce cours fait les deux et dit toujours lequel est lequel.
+- **Tactique** : Une commande qui construit une preuve pas à pas. `grind` et `omega` sont des tactiques qui font à votre place beaucoup de raisonnement routinier.
+- **Code générique (classe de types)** : Du code écrit une fois pour tout type de nombre. Des crochets comme `[Add α]` disent à Lean quelles opérations sont nécessaires, et il les trouve pour vous.
+- **Float** : Les nombres décimaux de l’ordinateur. Ils arrondissent, donc nous exécutons les modèles sur des Float mais nous énonçons les preuves sur des nombres exacts.
 
 ## Chapitre 1 — Le neurone seul
 
-- **Neurone**: Une toute petite calculatrice : multiplier chaque entrée par un poids, tout additionner, ajouter un biais, puis écraser le résultat avec une fonction d’activation.
-- **Poids**: Un nombre qui dit combien une entrée compte. Apprendre, c’est ajuster les poids.
-- **Biais**: Un nombre ajouté à la fin. Il déplace le seuil à partir duquel le neurone s’allume.
-- **Fonction d’activation**: L’étape d’écrasement après la somme (marche, sigmoïde, tanh, ReLU). Sans elle, empiler des neurones n’apporterait rien.
-- **Sigmoïde**: Une courbe lisse en S qui transforme n’importe quel nombre en une valeur entre 0 et 1.
-- **ReLU**: Garde les nombres positifs tels quels et transforme les négatifs en 0.
-- **tanh**: Comme la sigmoïde, mais sa sortie est entre -1 et 1.
-- **Vecteur**: Une liste ordonnée de nombres. En Lean, sa longueur fait partie de son type.
-- **Produit scalaire**: Multiplier deux listes position par position et additionner les résultats. C’est la somme pondérée d’un neurone.
-- **Porte logique**: Une petite règle sur des valeurs vrai/faux (ET, OU, NON-ET). Un seul neurone sait faire ET et OU.
-- **Linéaire**: Qui se comporte comme de simples mises à l’échelle et additions : doublez l’entrée, la sortie double ; additionnez deux entrées, les sorties s’additionnent.
+- **Neurone** : Une toute petite calculatrice : multiplier chaque entrée par un poids, tout additionner, ajouter un biais, puis écraser le résultat avec une fonction d’activation.
+- **Poids** : Un nombre qui dit combien une entrée compte. Apprendre, c’est ajuster les poids.
+- **Biais** : Un nombre ajouté à la fin. Il déplace le seuil à partir duquel le neurone s’allume.
+- **Fonction d’activation** : L’étape d’écrasement après la somme (marche, sigmoïde, tanh, ReLU). Sans elle, empiler des neurones n’apporterait rien.
+- **Sigmoïde** : Une courbe lisse en S qui transforme n’importe quel nombre en une valeur entre 0 et 1.
+- **ReLU** : Garde les nombres positifs tels quels et transforme les négatifs en 0.
+- **tanh** : Comme la sigmoïde, mais sa sortie est entre -1 et 1.
+- **Vecteur** : Une liste ordonnée de nombres. En Lean, sa longueur fait partie de son type.
+- **Produit scalaire** : Multiplier deux listes position par position et additionner les résultats. C’est la somme pondérée d’un neurone.
+- **Porte logique** : Une petite règle sur des valeurs vrai/faux (ET, OU, NON-ET). Un seul neurone sait faire ET et OU.
+- **Linéaire** : Qui se comporte comme de simples mises à l’échelle et additions : doublez l’entrée, la sortie double ; additionnez deux entrées, les sorties s’additionnent.
 
 ## Chapitre 2 — Le perceptron, le XOR et le premier hiver de l’IA
 
-- **Perceptron**: Un neurone à sortie tout-ou-rien, avec une règle pour apprendre de ses erreurs.
-- **Linéairement séparable**: Des données qu’une seule droite (ou un seul plan) peut séparer en deux groupes.
-- **XOR**: Vrai quand exactement une des deux entrées est active. Aucune droite ne sépare ses deux réponses.
-- **Règle d’apprentissage du perceptron**: Quand la réponse est fausse, pousser les poids vers la bonne : ajouter l’exemple s’il fallait dire oui, le retrancher s’il fallait dire non.
-- **Marge**: L’écart de sécurité entre les deux groupes de données. Plus il est grand, moins il y a d’erreurs.
-- **Théorème de convergence (Novikoff)**: Une preuve que sur des données séparables le perceptron fait un nombre limité d’erreurs puis s’arrête pour toujours.
-- **Inégalité de Cauchy–Schwarz**: Le produit scalaire de deux vecteurs n’est jamais plus grand que le produit de leurs longueurs.
-- **Hiver de l’IA**: Une période où l’argent et l’intérêt pour l’IA se sont effondrés faute de promesses tenues. Le premier a commencé dans les années 1970.
+- **Perceptron** : Un neurone à sortie tout-ou-rien, avec une règle pour apprendre de ses erreurs.
+- **Linéairement séparable** : Des données qu’une seule droite (ou un seul plan) peut séparer en deux groupes.
+- **XOR** : Vrai quand exactement une des deux entrées est active. Aucune droite ne sépare ses deux réponses.
+- **Règle d’apprentissage du perceptron** : Quand la réponse est fausse, pousser les poids vers la bonne : ajouter l’exemple s’il fallait dire oui, le retrancher s’il fallait dire non.
+- **Marge** : L’écart de sécurité entre les deux groupes de données. Plus il est grand, moins il y a d’erreurs.
+- **Théorème de convergence (Novikoff)** : Une preuve que sur des données séparables le perceptron fait un nombre limité d’erreurs puis s’arrête pour toujours.
+- **Inégalité de Cauchy–Schwarz** : Le produit scalaire de deux vecteurs n’est jamais plus grand que le produit de leurs longueurs.
+- **Hiver de l’IA** : Une période où l’argent et l’intérêt pour l’IA se sont effondrés faute de promesses tenues. Le premier a commencé dans les années 1970.
 
 ## Chapitre 3 — Le perceptron multicouche
 
-- **Couche**: Une rangée de neurones qui lisent tous les mêmes entrées.
-- **Couche cachée**: Une couche entre l’entrée et la sortie. Le réseau y invente ses propres caractéristiques intermédiaires utiles.
-- **MLP (perceptron multicouche)**: Plusieurs couches empilées : les sorties de chaque couche sont les entrées de la suivante.
-- **Réseau à formes vérifiées**: Un réseau dont les tailles de couches figurent dans le type : un réseau aux couches incompatibles ne compile pas.
-- **Universalité**: Avec assez de neurones, une couche cachée peut calculer n’importe quelle fonction vrai/faux.
-- **Perte**: Un seul nombre qui dit à quel point le réseau se trompe. Apprendre, c’est le réduire.
-- **Descente de gradient**: Apprendre par petits pas : mesurer comment la perte varie avec chaque poids, puis déplacer chaque poids un peu vers le bas.
-- **Taux d’apprentissage**: La taille de chaque pas de descente de gradient. Trop grand, on dépasse ; trop petit, on rampe.
-- **Règle de dérivation en chaîne**: Pour obtenir l’effet d’un premier changement sur un résultat final, multiplier les effets de chaque étape intermédiaire.
-- **Signal d’erreur (delta)**: La part de responsabilité d’un neurone dans l’erreur finale. Il est transmis en arrière de couche en couche.
+- **Couche** : Une rangée de neurones qui lisent tous les mêmes entrées.
+- **Couche cachée** : Une couche entre l’entrée et la sortie. Le réseau y invente ses propres caractéristiques intermédiaires utiles.
+- **MLP (perceptron multicouche)** : Plusieurs couches empilées : les sorties de chaque couche sont les entrées de la suivante.
+- **Réseau à formes vérifiées** : Un réseau dont les tailles de couches figurent dans le type : un réseau aux couches incompatibles ne compile pas.
+- **Universalité** : Avec assez de neurones, une couche cachée peut calculer n’importe quelle fonction vrai/faux.
+- **Perte** : Un seul nombre qui dit à quel point le réseau se trompe. Apprendre, c’est le réduire.
+- **Descente de gradient** : Apprendre par petits pas : mesurer comment la perte varie avec chaque poids, puis déplacer chaque poids un peu vers le bas.
+- **Taux d’apprentissage** : La taille de chaque pas de descente de gradient. Trop grand, on dépasse ; trop petit, on rampe.
+- **Règle de dérivation en chaîne** : Pour obtenir l’effet d’un premier changement sur un résultat final, multiplier les effets de chaque étape intermédiaire.
+- **Signal d’erreur (delta)** : La part de responsabilité d’un neurone dans l’erreur finale. Il est transmis en arrière de couche en couche.
 
 ## Chapitre 4 — Réseaux profonds et différentiation automatique
 
-- **Dérivée**: La vitesse à laquelle une sortie change quand on pousse un peu une entrée.
-- **Gradient**: La liste de toutes les dérivées par rapport à tous les poids. Il pointe vers le haut, donc on avance dans le sens opposé.
-- **Différentiation automatique (autodiff)**: Un programme qui calcule les dérivées exactes de n’importe quel calcul en appliquant mécaniquement la règle en chaîne.
-- **Arbre d’expression**: Un calcul écrit comme un arbre de petites opérations (addition, produit, sigmoïde…). L’autodiff parcourt cet arbre.
-- **Mode direct**: Transporter une dérivée pendant qu’on calcule la valeur. Une passe donne l’effet d’une direction choisie.
-- **Rétropropagation (mode inverse)**: Calculer vers l’avant, puis balayer une seule fois vers l’arrière pour obtenir la dérivée de tous les poids à la fois.
-- **Adjoint**: Le message qui circule pendant le balayage arrière : de combien le résultat final change par unité de changement de ce nœud.
-- **Vérification du gradient**: Vérifier un gradient en poussant un poids très légèrement et en regardant comment la perte bouge vraiment (différences finies).
-- **Preuve par récurrence**: Prouver un énoncé pour le plus petit cas, puis montrer que s’il est vrai pour les petits morceaux il l’est pour le grand.
+- **Dérivée** : La vitesse à laquelle une sortie change quand on pousse un peu une entrée.
+- **Gradient** : La liste de toutes les dérivées par rapport à tous les poids. Il pointe vers le haut, donc on avance dans le sens opposé.
+- **Différentiation automatique (autodiff)** : Un programme qui calcule les dérivées exactes de n’importe quel calcul en appliquant mécaniquement la règle en chaîne.
+- **Arbre d’expression** : Un calcul écrit comme un arbre de petites opérations (addition, produit, sigmoïde…). L’autodiff parcourt cet arbre.
+- **Mode direct** : Transporter une dérivée pendant qu’on calcule la valeur. Une passe donne l’effet d’une direction choisie.
+- **Rétropropagation (mode inverse)** : Calculer vers l’avant, puis balayer une seule fois vers l’arrière pour obtenir la dérivée de tous les poids à la fois.
+- **Adjoint** : Le message qui circule pendant le balayage arrière : de combien le résultat final change par unité de changement de ce nœud.
+- **Vérification du gradient** : Vérifier un gradient en poussant un poids très légèrement et en regardant comment la perte bouge vraiment (différences finies).
+- **Preuve par récurrence** : Prouver un énoncé pour le plus petit cas, puis montrer que s’il est vrai pour les petits morceaux il l’est pour le grand.
 
 ## Chapitre 5 — Pertes, optimiseurs, régularisation et MNIST
 
-- **Softmax**: Transforme une liste de scores en probabilités : toutes positives, de somme 1.
-- **Logits**: Les scores bruts qu’un réseau produit, avant le softmax.
-- **Entropie croisée**: La perte pour la classification : grande quand le réseau donne une faible probabilité à la vraie classe.
-- **Surapprentissage**: Apprendre les exemples d’entraînement par cœur plutôt que la règle générale, de sorte que les nouvelles données échouent.
-- **Régularisation (décroissance des poids)**: Une douce attraction qui garde les poids petits pour décourager le surapprentissage.
-- **Normalisation**: Recentrer et remettre à l’échelle les nombres à l’intérieur du réseau pour qu’ils restent dans une plage confortable.
-- **Optimiseur**: La règle qui transforme un gradient en mise à jour des poids.
-- **SGD**: Descente de gradient stochastique : descente de gradient où chaque pas n’utilise qu’un petit lot aléatoire d’exemples.
-- **Momentum**: Garder un peu de la direction du pas précédent, comme une bille qui roule.
-- **Adam**: Un optimiseur qui adapte la taille du pas de chaque poids grâce à des moyennes mobiles des gradients passés.
-- **Mini-lot et époque**: Un mini-lot est un petit groupe d’exemples utilisé pour un pas. Une époque est un passage sur toutes les données d’entraînement.
-- **Jeu de test**: Des exemples jamais utilisés pour l’entraînement, gardés pour mesurer la vraie performance.
-- **MNIST**: Un jeu de données célèbre de 70 000 chiffres manuscrits.
+- **Softmax** : Transforme une liste de scores en probabilités : toutes positives, de somme 1.
+- **Logits** : Les scores bruts qu’un réseau produit, avant le softmax.
+- **Entropie croisée** : La perte pour la classification : grande quand le réseau donne une faible probabilité à la vraie classe.
+- **Surapprentissage** : Apprendre les exemples d’entraînement par cœur plutôt que la règle générale, de sorte que les nouvelles données échouent.
+- **Régularisation (décroissance des poids)** : Une douce attraction qui garde les poids petits pour décourager le surapprentissage.
+- **Normalisation** : Recentrer et remettre à l’échelle les nombres à l’intérieur du réseau pour qu’ils restent dans une plage confortable.
+- **Optimiseur** : La règle qui transforme un gradient en mise à jour des poids.
+- **SGD** : Descente de gradient stochastique : descente de gradient où chaque pas n’utilise qu’un petit lot aléatoire d’exemples.
+- **Momentum** : Garder un peu de la direction du pas précédent, comme une bille qui roule.
+- **Adam** : Un optimiseur qui adapte la taille du pas de chaque poids grâce à des moyennes mobiles des gradients passés.
+- **Mini-lot et époque** : Un mini-lot est un petit groupe d’exemples utilisé pour un pas. Une époque est un passage sur toutes les données d’entraînement.
+- **Jeu de test** : Des exemples jamais utilisés pour l’entraînement, gardés pour mesurer la vraie performance.
+- **MNIST** : Un jeu de données célèbre de 70 000 chiffres manuscrits.
 
 ## Chapitre 6 — Réseaux convolutifs
 
-- **Convolution**: Faire glisser un petit détecteur de motif sur l’entrée et noter à quel point il correspond à chaque position.
-- **Noyau (filtre)**: La petite grille de poids utilisée par une convolution.
-- **Partage des poids**: Utiliser les mêmes poids à chaque position, ce qui réduit beaucoup le nombre de paramètres.
-- **Équivariance par translation**: Décalez l’entrée et la sortie se décale pareil : un motif est trouvé où qu’il soit.
-- **Canal (carte de caractéristiques)**: Une image de sortie produite par un noyau.
-- **Max-pooling**: Réduire une image en ne gardant que le plus grand nombre de chaque petit bloc.
-- **CNN**: Réseau de neurones convolutif : des convolutions, des non-linéarités et du pooling, suivis d’un classifieur.
+- **Convolution** : Faire glisser un petit détecteur de motif sur l’entrée et noter à quel point il correspond à chaque position.
+- **Noyau (filtre)** : La petite grille de poids utilisée par une convolution.
+- **Partage des poids** : Utiliser les mêmes poids à chaque position, ce qui réduit beaucoup le nombre de paramètres.
+- **Équivariance par translation** : Décalez l’entrée et la sortie se décale pareil : un motif est trouvé où qu’il soit.
+- **Canal (carte de caractéristiques)** : Une image de sortie produite par un noyau.
+- **Max-pooling** : Réduire une image en ne gardant que le plus grand nombre de chaque petit bloc.
+- **CNN** : Réseau de neurones convolutif : des convolutions, des non-linéarités et du pooling, suivis d’un classifieur.
 
 ## Chapitre 7 — Réseaux récurrents
 
-- **Réseau de neurones récurrent (RNN)**: Un réseau qui lit une séquence un élément à la fois et transporte une mémoire vers l’avant.
-- **État caché**: La mémoire du réseau : un vecteur mis à jour à chaque pas.
-- **Déroulement**: Écrire la boucle sous forme de nombreuses copies du même réseau, une par pas de temps.
-- **Rétropropagation à travers le temps (BPTT)**: La rétropropagation sur le réseau déroulé.
-- **Gradient qui s’évanouit**: Le signal d’apprentissage rétrécit à chaque pas en arrière jusqu’à disparaître, donc les causes lointaines ne sont pas apprises.
-- **Gradient qui explose**: L’inverse : le signal grandit à chaque pas jusqu’à devenir énorme et instable.
-- **Écrêtage du gradient**: Plafonner la taille du gradient pour dompter les explosions.
+- **Réseau de neurones récurrent (RNN)** : Un réseau qui lit une séquence un élément à la fois et transporte une mémoire vers l’avant.
+- **État caché** : La mémoire du réseau : un vecteur mis à jour à chaque pas.
+- **Déroulement** : Écrire la boucle sous forme de nombreuses copies du même réseau, une par pas de temps.
+- **Rétropropagation à travers le temps (BPTT)** : La rétropropagation sur le réseau déroulé.
+- **Gradient qui s’évanouit** : Le signal d’apprentissage rétrécit à chaque pas en arrière jusqu’à disparaître, donc les causes lointaines ne sont pas apprises.
+- **Gradient qui explose** : L’inverse : le signal grandit à chaque pas jusqu’à devenir énorme et instable.
+- **Écrêtage du gradient** : Plafonner la taille du gradient pour dompter les explosions.
 
 ## Chapitre 8 — LSTM et mémoire à portes
 
-- **LSTM**: Un RNN avec des portes et une cellule mémoire séparée, conçu pour que le signal d’apprentissage puisse remonter loin.
-- **Porte**: Un nombre entre 0 et 1 qui décide quelle part de quelque chose passe : 0 ferme, 1 ouvre.
-- **État de cellule**: La ligne de mémoire à long terme du LSTM, mise à jour par mise à l’échelle et addition.
-- **Porte d’oubli**: Décide quelle part de l’ancienne mémoire garder.
-- **Carrousel d’erreur constante**: Le chemin où la mémoire est conservée avec un facteur 1, de sorte que le gradient ne rétrécit ni ne grandit.
-- **GRU**: Une unité à portes plus légère, avec une porte qui mélange l’ancien état et le nouveau candidat.
-- **Apprentissage par curriculum**: S’entraîner d’abord sur des versions faciles de la tâche (séquences courtes), puis la durcir.
+- **LSTM** : Un RNN avec des portes et une cellule mémoire séparée, conçu pour que le signal d’apprentissage puisse remonter loin.
+- **Porte** : Un nombre entre 0 et 1 qui décide quelle part de quelque chose passe : 0 ferme, 1 ouvre.
+- **État de cellule** : La ligne de mémoire à long terme du LSTM, mise à jour par mise à l’échelle et addition.
+- **Porte d’oubli** : Décide quelle part de l’ancienne mémoire garder.
+- **Carrousel d’erreur constante** : Le chemin où la mémoire est conservée avec un facteur 1, de sorte que le gradient ne rétrécit ni ne grandit.
+- **GRU** : Une unité à portes plus légère, avec une porte qui mélange l’ancien état et le nouveau candidat.
+- **Apprentissage par curriculum** : S’entraîner d’abord sur des versions faciles de la tâche (séquences courtes), puis la durcir.
 
 ## Chapitre 9 — L’attention et le Transformer
 
-- **Jeton et plongement**: Un jeton est un morceau de texte (ici un caractère). Un plongement est la liste de nombres qui le représente.
-- **Attention**: Chaque position regarde toutes les autres, évalue leur pertinence et prend une moyenne pondérée de ce qu’elles portent.
-- **Requête, clé, valeur**: La requête est ce que je cherche, la clé est ce que chaque élément propose, la valeur est ce qu’il donne s’il est choisi.
-- **Transformer**: Un réseau construit avec de l’attention et de petits blocs MLP, sans récurrence.
-- **Connexion résiduelle**: Ajouter l’entrée d’un bloc à sa sortie, pour que l’information et les gradients aient un raccourci.
-- **Encodage positionnel**: Des nombres supplémentaires qui disent au modèle où se trouve chaque jeton, car l’attention seule ignore l’ordre.
-- **Masque causal**: Interdire de regarder les positions futures, pour qu’un modèle de langage ne puisse pas tricher.
-- **Normalisation de couche**: Recentrer et remettre à l’échelle les nombres d’une position. Ajouter la même constante à tous ne change rien.
-- **Modèle de langage**: Un modèle qui prédit le jeton suivant.
+- **Jeton et plongement** : Un jeton est un morceau de texte (ici un caractère). Un plongement est la liste de nombres qui le représente.
+- **Attention** : Chaque position regarde toutes les autres, évalue leur pertinence et prend une moyenne pondérée de ce qu’elles portent.
+- **Requête, clé, valeur** : La requête est ce que je cherche, la clé est ce que chaque élément propose, la valeur est ce qu’il donne s’il est choisi.
+- **Transformer** : Un réseau construit avec de l’attention et de petits blocs MLP, sans récurrence.
+- **Connexion résiduelle** : Ajouter l’entrée d’un bloc à sa sortie, pour que l’information et les gradients aient un raccourci.
+- **Encodage positionnel** : Des nombres supplémentaires qui disent au modèle où se trouve chaque jeton, car l’attention seule ignore l’ordre.
+- **Masque causal** : Interdire de regarder les positions futures, pour qu’un modèle de langage ne puisse pas tricher.
+- **Normalisation de couche** : Recentrer et remettre à l’échelle les nombres d’une position. Ajouter la même constante à tous ne change rien.
+- **Modèle de langage** : Un modèle qui prédit le jeton suivant.
 
 ## Chapitre 10 — Autoencodeurs et VAE
 
-- **Modèle génératif**: Un modèle capable de produire de nouvelles données qui ressemblent à ses données d’entraînement.
-- **Variable latente**: Un court code caché qui résume une donnée.
-- **Espace latent**: L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
-- **Autoencodeur**: Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
-- **VAE**: Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
-- **ELBO (borne inférieure de l’évidence)**: L’objectif du VAE ; démontrée (Ch10, `Elbo.lean`) comme borne inférieure de la log-vraisemblance des données, le terme KL étant l’écart à la postérieure vraie.
-- **A priori**: La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
-- **Divergence KL**: Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
-- **Astuce de reparamétrisation**: Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
+- **Modèle génératif** : Un modèle capable de produire de nouvelles données qui ressemblent à ses données d’entraînement.
+- **Variable latente** : Un court code caché qui résume une donnée.
+- **Espace latent** : L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
+- **Autoencodeur** : Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
+- **VAE** : Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
+- **ELBO (borne inférieure de l’évidence)** : L’objectif du VAE ; démontrée (Ch10, `Elbo.lean`) comme borne inférieure de la log-vraisemblance des données, le terme KL étant l’écart à la postérieure vraie.
+- **A priori** : La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
+- **Divergence KL** : Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
+- **Astuce de reparamétrisation** : Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
 
 ## Chapitre 10.5 — Machines de Boltzmann
 
-- **Modèle à base d'énergie**: Un modèle qui note chaque configuration par une énergie ; basse énergie signifie probable. La distribution est le modèle - pas de réseau générateur.
-- **Machine de Boltzmann**: Un réseau d'unités binaires dont la distribution jointe est proportionnelle à exp(-E), E étant une somme de biais et de couplages (Ackley, Hinton, Sejnowski 1985).
-- **RBM (machine de Boltzmann restreinte)**: Une machine de Boltzmann bipartie : unités visibles et cachées, aucun lien dans une couche, donc conditionner sur une couche rend l'autre indépendante.
-- **Energie E**: Un nombre attaché à chaque configuration ; en physique l'énergie d'un système de spins, ici le moins la log-probabilité à une constante près.
-- **Fonction de partition Z**: La somme de exp(-E) sur toutes les configurations ; elle transforme les énergies en probabilités. La calculer demande 2^n termes - l'intraitabilité au coeur du modèle.
-- **Distribution de Gibbs**: La distribution de masse exp(-E(s)) / Z sur l'état s ; le module prouve qu'elle est normalisée exactement sur `Rat` (Ch105, `w_sum`).
-- **Balayage Gibbs**: Echantillonnage alterné : redessiner toutes les unités cachées étant donné les visibles, puis toutes les visibles étant donné les cachées. Le module prouve qu'un balayage complet laisse la mesure d'équilibre invariante (`sweep_invariance`).
-- **Divergence contrastive**: Entraîner en faisant quelques pas de balayage depuis les données au lieu de la thermalisation complète qu'exige le gradient exact (Hinton 2002) ; le moteur de l'ère RBM du deep learning.
+- **Modèle à base d'énergie** : Un modèle qui note chaque configuration par une énergie ; basse énergie signifie probable. La distribution est le modèle - pas de réseau générateur.
+- **Machine de Boltzmann** : Un réseau d'unités binaires dont la distribution jointe est proportionnelle à exp(-E), E étant une somme de biais et de couplages (Ackley, Hinton, Sejnowski 1985).
+- **RBM (machine de Boltzmann restreinte)** : Une machine de Boltzmann bipartie : unités visibles et cachées, aucun lien dans une couche, donc conditionner sur une couche rend l'autre indépendante.
+- **Energie E** : Un nombre attaché à chaque configuration ; en physique l'énergie d'un système de spins, ici le moins la log-probabilité à une constante près.
+- **Fonction de partition Z** : La somme de exp(-E) sur toutes les configurations ; elle transforme les énergies en probabilités. La calculer demande 2^n termes - l'intraitabilité au cœur du modèle.
+- **Distribution de Gibbs** : La distribution de masse exp(-E(s)) / Z sur l'état s ; le module prouve qu'elle est normalisée exactement sur `Rat` (Ch105, `w_sum`).
+- **Balayage Gibbs** : Échantillonnage alterné : redessiner toutes les unités cachées étant donné les visibles, puis toutes les visibles étant donné les cachées. Le module prouve qu'un balayage complet laisse la mesure d'équilibre invariante (`sweep_invariance`).
+- **Divergence contrastive** : Entraîner en faisant quelques pas de balayage depuis les données au lieu de la thermalisation complète qu'exige le gradient exact (Hinton 2002) ; le moteur de l'ère RBM du deep learning.
 
 ## Chapitre 11 — GAN
 
-- **GAN**: Deux réseaux jouent un jeu : un faussaire fabrique des faux, un détective distingue le faux du vrai, et les deux s’améliorent.
-- **Générateur et discriminateur**: Le générateur est le faussaire (bruit en entrée, fausse donnée en sortie). Le discriminateur est le détective (donnée en entrée, probabilité d’être vraie en sortie).
-- **Jeu minimax**: Un joueur essaie de minimiser ce que l’autre essaie de maximiser.
-- **Discriminateur optimal**: La meilleure réponse possible du détective en un point : la part de données réelles parmi toutes les données de ce point.
-- **Effondrement de modes**: Le générateur ne couvre que quelques-unes des sortes de données qui existent.
-- **Distance en variation totale (TV)**: Un nombre de 0 à 1 qui dit à quel point deux histogrammes diffèrent.
+- **GAN** : Deux réseaux jouent un jeu : un faussaire fabrique des faux, un détective distingue le faux du vrai, et les deux s’améliorent.
+- **Générateur et discriminateur** : Le générateur est le faussaire (bruit en entrée, fausse donnée en sortie). Le discriminateur est le détective (donnée en entrée, probabilité d’être vraie en sortie).
+- **Jeu minimax** : Un joueur essaie de minimiser ce que l’autre essaie de maximiser.
+- **Discriminateur optimal** : La meilleure réponse possible du détective en un point : la part de données réelles parmi toutes les données de ce point.
+- **Effondrement de modes** : Le générateur ne couvre que quelques-unes des sortes de données qui existent.
+- **Distance en variation totale (TV)** : Un nombre de 0 à 1 qui dit à quel point deux histogrammes diffèrent.
 
 ## Chapitre 12 — Modèles de diffusion
 
-- **Modèle de diffusion**: Apprendre à retirer le bruit pas à pas ; générer en partant de bruit pur et en le nettoyant.
-- **Processus direct**: Ajouter progressivement du bruit aux données jusqu’à ce qu’il ne reste que du bruit.
-- **Calendrier de bruit**: La quantité de bruit ajoutée à chaque pas.
-- **Préservation de la variance**: Les pas de bruitage sont dosés pour que la dispersion globale des données reste la même.
-- **Réseau de débruitage**: Un réseau qui regarde une entrée bruitée et prédit le bruit qui a été ajouté.
-- **DDPM et DDIM**: Deux façons de lancer les étapes de nettoyage : avec du bruit aléatoire frais à chaque pas (DDPM) ou entièrement déterministe (DDIM).
+- **Modèle de diffusion** : Apprendre à retirer le bruit pas à pas ; générer en partant de bruit pur et en le nettoyant.
+- **Processus direct** : Ajouter progressivement du bruit aux données jusqu’à ce qu’il ne reste que du bruit.
+- **Calendrier de bruit** : La quantité de bruit ajoutée à chaque pas.
+- **Préservation de la variance** : Les pas de bruitage sont dosés pour que la dispersion globale des données reste la même.
+- **Réseau de débruitage** : Un réseau qui regarde une entrée bruitée et prédit le bruit qui a été ajouté.
+- **DDPM et DDIM** : Deux façons de lancer les étapes de nettoyage : avec du bruit aléatoire frais à chaque pas (DDPM) ou entièrement déterministe (DDIM).
 
 ## Chapitre 13 — Apprentissage par renforcement
 
-- **Apprentissage par renforcement**: Apprendre par essais et erreurs à partir de récompenses.
-- **Agent, environnement, récompense**: L’agent agit, l’environnement réagit, et la récompense est le score qu’il reçoit en retour.
-- **Politique**: La règle de l’agent pour choisir une action dans chaque situation.
-- **Retour et actualisation**: Le retour est la somme des récompenses futures ; l’actualisation fait compter moins les récompenses lointaines.
-- **Valeur Q**: À quel point il est bon de prendre une action dans un état, en comptant toutes les récompenses qui suivent.
-- **Équation de Bellman**: La valeur d’une action est la récompense immédiate plus la valeur actualisée du meilleur pas suivant.
-- **Mise à jour TD**: Mise à jour par différence temporelle : déplacer l’estimation actuelle d’une fraction du chemin vers une meilleure cible.
-- **Q-learning**: Apprendre les valeurs Q avec des mises à jour TD, en agissant un peu au hasard pour explorer.
-- **Gradient de politique (REINFORCE)**: Augmenter la probabilité des actions proportionnellement à la récompense qui les a suivies.
-- **Ligne de base**: Un nombre retranché des récompenses pour réduire le bruit sans changer la direction moyenne d’apprentissage.
+- **Apprentissage par renforcement** : Apprendre par essais et erreurs à partir de récompenses.
+- **Agent, environnement, récompense** : L’agent agit, l’environnement réagit, et la récompense est le score qu’il reçoit en retour.
+- **Politique** : La règle de l’agent pour choisir une action dans chaque situation.
+- **Retour et actualisation** : Le retour est la somme des récompenses futures ; l’actualisation fait compter moins les récompenses lointaines.
+- **Valeur Q** : À quel point il est bon de prendre une action dans un état, en comptant toutes les récompenses qui suivent.
+- **Équation de Bellman** : La valeur d’une action est la récompense immédiate plus la valeur actualisée du meilleur pas suivant.
+- **Mise à jour TD** : Mise à jour par différence temporelle : déplacer l’estimation actuelle d’une fraction du chemin vers une meilleure cible.
+- **Q-learning** : Apprendre les valeurs Q avec des mises à jour TD, en agissant un peu au hasard pour explorer.
+- **Gradient de politique (REINFORCE)** : Augmenter la probabilité des actions proportionnellement à la récompense qui les a suivies.
+- **Ligne de base** : Un nombre retranché des récompenses pour réduire le bruit sans changer la direction moyenne d’apprentissage.
 
 ## Chapitre 14 — Modèles du monde
 
-- **Modèle du monde**: Un simulateur appris : il prédit ce qui se passe ensuite à partir de la situation actuelle et d’une action.
-- **Imagination (rêve)**: S’entraîner dans le modèle du monde plutôt que dans le monde réel.
-- **Trajectoire simulée**: Une séquence de pas simulée.
-- **Accumulation d’erreur**: De petites erreurs de prédiction alimentent la prédiction suivante et s’additionnent.
-- **Constante de Lipschitz**: Une limite sur la manière dont une fonction peut amplifier les différences entre ses entrées.
-- **Contrôleur**: La petite politique qui choisit les actions.
-- **Stratégie d’évolution**: Optimiser en essayant des variations aléatoires et en se déplaçant vers les meilleures. Aucun gradient nécessaire.
+- **Modèle du monde** : Un simulateur appris : il prédit ce qui se passe ensuite à partir de la situation actuelle et d’une action.
+- **Imagination (rêve)** : S’entraîner dans le modèle du monde plutôt que dans le monde réel.
+- **Trajectoire simulée** : Une séquence de pas simulée.
+- **Accumulation d’erreur** : De petites erreurs de prédiction alimentent la prédiction suivante et s’additionnent.
+- **Constante de Lipschitz** : Une limite sur la manière dont une fonction peut amplifier les différences entre ses entrées.
+- **Contrôleur** : La petite politique qui choisit les actions.
+- **Stratégie d’évolution** : Optimiser en essayant des variations aléatoires et en se déplaçant vers les meilleures. Aucun gradient nécessaire.
 
 ## Chapitre 15 — JEPA
 
-- **Représentation (espace des plongements)**: Une liste de nombres qui capture ce qui compte dans une entrée.
-- **JEPA**: Architecture prédictive à plongement conjoint : prédire le plongement de la cible à partir du plongement du contexte, pas les pixels bruts.
-- **Prédicteur**: Le réseau qui transforme le plongement du contexte (et une action) en plongement cible prédit.
-- **Effondrement**: Le raccourci où toutes les entrées reçoivent le même plongement : la perte est nulle mais rien n’est appris.
-- **EMA (moyenne mobile exponentielle)**: Une copie lente : à chaque pas elle se rapproche d’une petite fraction des poids actuels.
-- **Arrêt du gradient (stop-gradient)**: Traiter une valeur comme une constante pendant la rétropropagation, pour qu’aucun apprentissage n’y entre.
-- **Régularisateur de variance**: Une pénalité qui punit des plongements trop semblables entre eux.
-- **Sonde linéaire**: Un modèle linéaire simple entraîné à lire une quantité dans un plongement, utilisé pour tester ce que le plongement contient.
+- **Représentation (espace des plongements)** : Une liste de nombres qui capture ce qui compte dans une entrée.
+- **JEPA** : Architecture prédictive à plongement conjoint : prédire le plongement de la cible à partir du plongement du contexte, pas les pixels bruts.
+- **Prédicteur** : Le réseau qui transforme le plongement du contexte (et une action) en plongement cible prédit.
+- **Effondrement** : Le raccourci où toutes les entrées reçoivent le même plongement : la perte est nulle mais rien n’est appris.
+- **EMA (moyenne mobile exponentielle)** : Une copie lente : à chaque pas elle se rapproche d’une petite fraction des poids actuels.
+- **Arrêt du gradient (stop-gradient)** : Traiter une valeur comme une constante pendant la rétropropagation, pour qu’aucun apprentissage n’y entre.
+- **Régularisateur de variance** : Une pénalité qui punit des plongements trop semblables entre eux.
+- **Sonde linéaire** : Un modèle linéaire simple entraîné à lire une quantité dans un plongement, utilisé pour tester ce que le plongement contient.
 
 ## Chapitre 16 — Outils mathématiques
 
-- **Distribution (finie)**: Une liste de poids positifs dont la somme vaut 1 : les chances de chacune d'un nombre fini d'issues.
-- **Espérance**: La moyenne pondérée d'une quantité sous une distribution : ce que l'on gagne en moyenne.
-- **Variance**: L'écart quadratique moyen à la moyenne : l'étalement d'une quantité. Une constante a une variance nulle.
-- **Entropie**: La surprise moyenne d'un tirage dans une distribution : nulle quand une issue est certaine, plus grande à mesure que la masse s'étale.
-- **Entropie croisée**: La surprise moyenne de la vraie distribution notée avec une distribution modèle : ce que l'entraînement minimise.
-- **Divergence KL**: La surprise supplémentaire due au code du modèle au lieu du vrai : toujours positive (Gibbs), nulle exactement quand les deux distributions coïncident.
-- **Inégalité de Gibbs**: KL(p‖q) ≥ 0 : aucun modèle ne prédit les données aussi bien que les données se prédisent elles-mêmes.
-- **Inégalité tangente**: log x ≤ x − 1, égalité seulement en x = 1 : le seul fait d'analyse dont découle Gibbs.
-- **Décomposition biais–variance**: risque d'un tirage = biais au carré de la moyenne d'ensemble + variance de la famille : moyenner des hypothèses tue la variance, jamais le biais.
+- **Distribution (finie)** : Une liste de poids positifs dont la somme vaut 1 : les chances de chacune d'un nombre fini d'issues.
+- **Espérance** : La moyenne pondérée d'une quantité sous une distribution : ce que l'on gagne en moyenne.
+- **Variance** : L'écart quadratique moyen à la moyenne : l'étalement d'une quantité. Une constante a une variance nulle.
+- **Entropie** : La surprise moyenne d'un tirage dans une distribution : nulle quand une issue est certaine, plus grande à mesure que la masse s'étale.
+- **Entropie croisée** : La surprise moyenne de la vraie distribution notée avec une distribution modèle : ce que l'entraînement minimise.
+- **Divergence KL** : La surprise supplémentaire due au code du modèle au lieu du vrai : toujours positive (Gibbs), nulle exactement quand les deux distributions coïncident.
+- **Inégalité de Gibbs** : KL(p‖q) ≥ 0 : aucun modèle ne prédit les données aussi bien que les données se prédisent elles-mêmes.
+- **Inégalité tangente** : log x ≤ x − 1, égalité seulement en x = 1 : le seul fait d'analyse dont découle Gibbs.
+- **Décomposition biais–variance** : risque d'un tirage = biais au carré de la moyenne d'ensemble + variance de la famille : moyenner des hypothèses tue la variance, jamais le biais.
 
 ## Chapitre 17 — Apprentissage contrastif
 

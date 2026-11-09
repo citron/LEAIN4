@@ -97,7 +97,7 @@ The closed form of the sum is also proved:
 
 ## Training the controller in the dream
 
-The controller is $u=\tanh(w_0x+w_1v+w_2)$. Instead of gradients through time (which would need a hand-written backward pass through the whole imagined rollout), we use an **evolution strategy**, as the original paper did (it used CMA-ES): perturb $w$ randomly, run imagined episodes with each perturbation, and move $w$ towards the ones that cost less. Every episode runs in the learned model; the real environment is never touched during this phase.
+The controller is $u=\tanh(w_0x+w_1v+w_2)$. Instead of gradients through time (which would need a handwritten backward pass through the whole imagined rollout), we use an **evolution strategy**, as the original paper did (it used CMA-ES): perturb $w$ randomly, run imagined episodes with each perturbation, and move $w$ towards the ones that cost less. Every episode runs in the learned model; the real environment is never touched during this phase.
 
 ## Experiment
 

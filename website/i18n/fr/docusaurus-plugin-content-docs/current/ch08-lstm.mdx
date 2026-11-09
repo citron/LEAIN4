@@ -6,23 +6,23 @@ title: "Chapitre 8 — LSTM et mémoire à portes"
 # Chapitre 8 — LSTM et mémoire à portes
 
 :::tip[En bref (TL;DR)]
-**En bref.** Le LSTM ajoute des portes et une cellule mémoire pour que le gradient puisse remonter loin. Nous prouvons cette autoroute du gradient, et nous constatons honnêtement que sur notre petite tâche il ne bat pas le RNN simple.
+**En bref.** Le LSTM ajoute des portes et une cellule mémoire pour que le gradient puisse remonter loin. Nous prouvons cette autoroute du gradient, et nous constatons honnêtement que sur notre petite tâche, il ne bat pas le RNN simple.
 
 **Mots nouveaux, en termes simples:**
 
-- **LSTM**: Un RNN avec des portes et une cellule mémoire séparée, conçu pour que le signal d’apprentissage puisse remonter loin.
-- **Porte**: Un nombre entre 0 et 1 qui décide quelle part de quelque chose passe : 0 ferme, 1 ouvre.
-- **État de cellule**: La ligne de mémoire à long terme du LSTM, mise à jour par mise à l’échelle et addition.
-- **Porte d’oubli**: Décide quelle part de l’ancienne mémoire garder.
-- **Carrousel d’erreur constante**: Le chemin où la mémoire est conservée avec un facteur 1, de sorte que le gradient ne rétrécit ni ne grandit.
-- **GRU**: Une unité à portes plus légère, avec une porte qui mélange l’ancien état et le nouveau candidat.
-- **Apprentissage par curriculum**: S’entraîner d’abord sur des versions faciles de la tâche (séquences courtes), puis la durcir.
+- **LSTM** : Un RNN avec des portes et une cellule mémoire séparée, conçu pour que le signal d’apprentissage puisse remonter loin.
+- **Porte** : Un nombre entre 0 et 1 qui décide quelle part de quelque chose passe : 0 ferme, 1 ouvre.
+- **État de cellule** : La ligne de mémoire à long terme du LSTM, mise à jour par mise à l’échelle et addition.
+- **Porte d’oubli** : Décide quelle part de l’ancienne mémoire garder.
+- **Carrousel d’erreur constante** : Le chemin où la mémoire est conservée avec un facteur 1, de sorte que le gradient ne rétrécit ni ne grandit.
+- **GRU** : Une unité à portes plus légère, avec une porte qui mélange l’ancien état et le nouveau candidat.
+- **Apprentissage par curriculum** : S’entraîner d’abord sur des versions faciles de la tâche (séquences courtes), puis la durcir.
 :::
 
 
 Le chapitre 7 s'est terminé sur un diagnostic : dans un RNN simple, le gradient est un produit de $T$ facteurs $(1-h_s^2)\,w$, chacun typiquement inférieur à 1. Le réseau **Long Short-Term Memory** (Hochreiter et Schmidhuber, 1997) change l'architecture pour que le gradient dispose d'un chemin dont les facteurs peuvent être fixés par le réseau lui-même proches de $1$.
 
-<Figure src="cell_hold.svg" alt="Etat de cellule ecrit 1 en t = 0 : f = 1 le porte plat, f = 0,95 s'efface lentement, f = 0,5 s'effondre" caption="L'etat de cellule est l'autoroute : une valeur ecrite en t = 0 avec le facteur f survit t pas comme f^t. f = 1 (portees ouvertes) le porte pour toujours - le chemin de gradient exact du theoreme de l'autoroute ; f = 0,95 s'efface en 40 pas ; f = 0,5 est l'effondrement RNN du Ch7 en une ligne. Le LSTM apprend f proche de 1 pour les pas a memoriser." />
+<Figure src="cell_hold.svg" alt="État de cellule ecrit 1 en t = 0 : f = 1 le porte plat, f = 0,95 s'efface lentement, f = 0,5 s'effondre" caption="L'état de cellule est l'autoroute : une valeur écrite en t = 0 avec le facteur f survit t pas comme f^t. f = 1 (portées ouvertes) le porte pour toujours - le chemin de gradient exact du théorème de l'autoroute ; f = 0,95 s'efface en 40 pas ; f = 0,5 est l'effondrement RNN du Ch7 en une ligne. Le LSTM apprend f proche de 1 pour les pas à mémoriser." />
 
 <Creators fr slugs="hochreiter,schmidhuber" />
 
@@ -68,7 +68,7 @@ La ligne qui compte est $c_t = f_t\odot c_{t-1} + i_t\odot g_t$ : la mémoire es
 ```lean file=Ch08/Lstm.lean#forward
 ```
 
-<Figure src="lstm_gates.svg" alt="Les quatre briques de la cellule LSTM : f et i sont des sigmoides dans (0,1), le candidat tanh dans (-1,1), f fois le candidat est la mise a jour gatee" caption="Chaque porte du LSTM est une de ces quatre courbes. f = sigmoid decide du taux de conservation (0 garde la memoire, 1 la reecrit - l'autoroute qu'utilise the theoreme du gradient), i = sigmoid du taux d'ecriture, le tanh borne le candidat, et f * c~ est le multiplie-additionnel qui constitue toute la mise a jour." />
+<Figure src="lstm_gates.svg" alt="Les quatre briques de la cellule LSTM : f et i sont des sigmoides dans (0,1), le candidat tanh dans (-1,1), f fois le candidat est la mise à jour gatée" caption="Chaque porte du LSTM est une de ces quatre courbes. f = sigmoid décide du taux de conservation (0 garde la mémoire, 1 la réécrit - l'autoroute qu'utilise le théorème du gradient), i = sigmoid du taux d'écriture, le tanh borne le candidat, et f * c~ est la multiplication-addition qui constitue toute la mise à jour." />
 
 ## Le gradient dispose d'une autoroute
 

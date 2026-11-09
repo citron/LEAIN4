@@ -10,13 +10,13 @@ title: "Chapitre 7 — Réseaux récurrents"
 
 **Mots nouveaux, en termes simples:**
 
-- **Réseau de neurones récurrent (RNN)**: Un réseau qui lit une séquence un élément à la fois et transporte une mémoire vers l’avant.
-- **État caché**: La mémoire du réseau : un vecteur mis à jour à chaque pas.
-- **Déroulement**: Écrire la boucle sous forme de nombreuses copies du même réseau, une par pas de temps.
-- **Rétropropagation à travers le temps (BPTT)**: La rétropropagation sur le réseau déroulé.
-- **Gradient qui s’évanouit**: Le signal d’apprentissage rétrécit à chaque pas en arrière jusqu’à disparaître, donc les causes lointaines ne sont pas apprises.
-- **Gradient qui explose**: L’inverse : le signal grandit à chaque pas jusqu’à devenir énorme et instable.
-- **Écrêtage du gradient**: Plafonner la taille du gradient pour dompter les explosions.
+- **Réseau de neurones récurrent (RNN)** : Un réseau qui lit une séquence un élément à la fois et transporte une mémoire vers l’avant.
+- **État caché** : La mémoire du réseau : un vecteur mis à jour à chaque pas.
+- **Déroulement** : Écrire la boucle sous forme de nombreuses copies du même réseau, une par pas de temps.
+- **Rétropropagation à travers le temps (BPTT)** : La rétropropagation sur le réseau déroulé.
+- **Gradient qui s’évanouit** : Le signal d’apprentissage rétrécit à chaque pas en arrière jusqu’à disparaître, donc les causes lointaines ne sont pas apprises.
+- **Gradient qui explose** : L’inverse : le signal grandit à chaque pas jusqu’à devenir énorme et instable.
+- **Écrêtage du gradient** : Plafonner la taille du gradient pour dompter les explosions.
 :::
 
 
@@ -61,7 +61,7 @@ $$ \frac{\partial h_T}{\partial h_0} \;=\; \prod_{s=1}^{T} \bigl(1-h_s^2\bigr)\,
 
 La BPTT multiplie $T$ facteurs. Que le produit diminue, reste stable ou grandisse fait toute l'histoire de l'entraînement des RNN.
 
-<Figure src="rnn_chain.svg" alt="log10 du gradient a travers T etapes de temps denroules : 0.5^T typique et 0.25^T pire cas tombent en lignes droites" caption="Denrouler un RNN transforme la retropropagation en produit de profondeur du Ch03, le temps remplacant les couches : log10 chute lineairement, -0.3 par pas typique, -0.6 pire cas. Dix pas en arriere ne laissent plus qu'un milliemieme du signal - l'evanescence formelle que l'autoroute du LSTM (Ch08) est construite pour fuir." />
+<Figure src="rnn_chain.svg" alt="log10 du gradient à travers T étapes de temps denroules : 0.5^T typique et 0.25^T pire cas tombent en lignes droites" caption="Dérouler un RNN transforme la rétropropagation en produit de profondeur du Ch03, le temps remplacant les couches : log10 chute linéairement, -0.3 par pas typique, -0.6 pire cas. Dix pas en arrière ne laissent plus qu'un milliemieme du signal - l'évanescence formelle que l'autoroute du LSTM (Ch08) est construite pour fuir." />
 
 ## Gradients qui s'évanouissent
 
@@ -86,11 +86,11 @@ Sans activation saturante, rien ne borne les facteurs. Pour la récurrence liné
 
 Avec $w=2$, le gradient est multiplié par un million en 20 pas ; avec $|w|<1$ il s'éteint. Entraîner un long RNN, c'est marcher sur un fil, et aucune valeur de $w$ n'est confortable. (Les praticiens écrêtent les gradients contre l'explosion ; l'évanouissement est le problème difficile, et motive le LSTM du chapitre suivant.)
 
-<Figure src="lag_copy.svg" alt="Deux impulsions sur un axe temporel, l'entree et la cible retardees de trois pas" caption="La tache de memoire du RNN : y_t = x_(t-3) - une impulsion d'entree en t = 3 doit ressortir en t = 6. La mise a jour d'etat doit porter l'impulsion exactement trois pas : pas trop peu (elle s'evanouit), pas trop (elle bave sur les sorties suivantes). Ce fil est la ou l'analyse des gradients evanescents du chapitre mord." />
+<Figure src="lag_copy.svg" alt="Deux impulsions sur un axe temporel, l’entrée et la cible retardée de trois pas" caption="La tâche de mémoire du RNN : y_t = x_(t-3) - une impulsion d'entrée en t = 3 doit ressortir en t = 6. La mise à jour d'état doit porter l'impulsion exactement trois pas : pas trop peu (elle s'évanouit), pas trop (elle bave sur les sorties suivantes). Ce fil est là où l'analyse des gradients evanescents du chapitre mord." />
 
 ## Un RNN à $n$ unités, en Lean
 
-Pour des vecteurs réels nous utilisons des tableaux. (L'`Expr` arborescente du chapitre 4 recopierait tout l'historique chaque fois qu'une unité lit l'état précédent, ce qui est exponentiel en $T$.) La passe avant conserve tous les états cachés :
+Pour des vecteurs réels, nous utilisons des tableaux. (L'`Expr` arborescente du chapitre 4 recopierait tout l'historique chaque fois qu'une unité lit l'état précédent, ce qui est exponentiel en $T$.) La passe avant conserve tous les états cachés :
 
 ```lean file=Ch07/Rnn.lean#forward
 ```
@@ -118,7 +118,7 @@ BPTT gradient check over 89 parameters: max error = 0.000000
   0.347510, 0.069822, 0.006518, 0.000685, 0.000059, 0.000006, 0.000001
 ```
 
-Le gradient arrivant au dernier état vaut $0{,}35$ ; cinq pas plus loin il vaut $0{,}07$, et au premier pas $10^{-6}$ : une perte de plus de **cinq ordres de grandeur** en 29 pas, un facteur d'environ 1,5 par pas, comme la théorie le prédit pour de petits poids.
+Le gradient arrivant au dernier état vaut $0{,}35$ ; cinq pas plus loin, il vaut $0{,}07$, et au premier pas $10^{-6}$ : une perte de plus de **cinq ordres de grandeur** en 29 pas, un facteur d'environ 1,5 par pas, comme la théorie le prédit pour de petits poids.
 
 ### Peut-il se souvenir ?
 
@@ -135,7 +135,7 @@ Pour $T\le 20$, le réseau apprend la règle. Pour $T\ge 60$ il s'ajuste aux 32 
 
 ## Références
 
-- M. I. Jordan, *Serial Order: A General Parallel Network Model*, Tech. Report BL-86-118, Bell Systems Technical Journal (1986) — réseaux récurrents à état.
+- M. I. Jordan, *Serial Order : A General Parallel Network Model*, Tech. Report BL-86-118, Bell Systems Technical Journal (1986) — réseaux récurrents à état.
 - J. L. Elman, *Finding Structure in Time*, Cognitive Science 14 (1990) — la cellule récurrente simple que ce chapitre formalise.
 - Y. Bengio, P. Simard et P. Frasconi, *Learning Long-Term Dependencies with Gradient Descent Fails*, IEEE Trans. Neural Networks 5 (1994) — la disparition/l'explosion du gradient que ce chapitre prouve comme produit de jacobiens.
 

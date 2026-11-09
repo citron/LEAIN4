@@ -97,7 +97,7 @@ Same numerator, and $a + b/2 < a + b$, so the smaller denominator wins:
 ```lean file=Ch11/Gan.lean#collapse
 ```
 
-`mode_collapse_reward` is the classic failure mode with a proof attached: in this game, covering strictly beats collapsing, for every $a, b > 0$ — the inverse's strict antitonicity (`Ch18.inv_antitone`) doing the work. The general statement (multi-mode, continuous densities) needs the full GAN variational machinery; what is proved here is the algebraic skeleton every collapse argument rests on.
+`mode_collapse_reward` is the classic failure mode with a proof attached: in this game, covering strictly beats collapsing, for every $a, b > 0$ — the inverse's strict antitonicity (`Ch18.inv_antitone`) doing the work. The general statement (multimodal, continuous densities) needs the full GAN variational machinery; what is proved here is the algebraic skeleton every collapse argument rests on.
 
 ## Two networks, one autodiff
 
@@ -126,7 +126,7 @@ The honest reading:
 - **Training is unstable.** With 4000 steps the single-Gaussian GAN had mean 2.23, with 15000 steps its width shrank to 0.29 (a partial mode collapse). More training did not help; the two networks chase each other. These are one-seed observations, not a benchmark.
 
 :::warning What is proved here, and what is not
-Proved: the optimal-discriminator formulas above, and (from Chapter 4) the gradients of both losses. Not proved: that the game converges. In general it does not, and the numbers above show it.
+Proved: the optimal-discriminator formulas above, and (from Chapter 4) the gradients of both losses. Not proved: that the game converges. In general, it does not, and the numbers above show it.
 :::
 
 ## References

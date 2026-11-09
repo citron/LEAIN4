@@ -10,14 +10,14 @@ title: "Chapitre 15 — JEPA"
 
 **Mots nouveaux, en termes simples:**
 
-- **Représentation (espace des plongements)**: Une liste de nombres qui capture ce qui compte dans une entrée.
-- **JEPA**: Architecture prédictive à plongement conjoint : prédire le plongement de la cible à partir du plongement du contexte, pas les pixels bruts.
-- **Prédicteur**: Le réseau qui transforme le plongement du contexte (et une action) en plongement cible prédit.
-- **Effondrement**: Le raccourci où toutes les entrées reçoivent le même plongement : la perte est nulle mais rien n’est appris.
-- **EMA (moyenne mobile exponentielle)**: Une copie lente : à chaque pas elle se rapproche d’une petite fraction des poids actuels.
-- **Arrêt du gradient (stop-gradient)**: Traiter une valeur comme une constante pendant la rétropropagation, pour qu’aucun apprentissage n’y entre.
-- **Régularisateur de variance**: Une pénalité qui punit des plongements trop semblables entre eux.
-- **Sonde linéaire**: Un modèle linéaire simple entraîné à lire une quantité dans un plongement, utilisé pour tester ce que le plongement contient.
+- **Représentation (espace des plongements)** : Une liste de nombres qui capture ce qui compte dans une entrée.
+- **JEPA** : Architecture prédictive à plongement conjoint : prédire le plongement de la cible à partir du plongement du contexte, pas les pixels bruts.
+- **Prédicteur** : Le réseau qui transforme le plongement du contexte (et une action) en plongement cible prédit.
+- **Effondrement** : Le raccourci où toutes les entrées reçoivent le même plongement : la perte est nulle mais rien n’est appris.
+- **EMA (moyenne mobile exponentielle)** : Une copie lente : à chaque pas, elle se rapproche d’une petite fraction des poids actuels.
+- **Arrêt du gradient (stop-gradient)** : Traiter une valeur comme une constante pendant la rétropropagation, pour qu’aucun apprentissage n’y entre.
+- **Régularisateur de variance** : Une pénalité qui punit des plongements trop semblables entre eux.
+- **Sonde linéaire** : Un modèle linéaire simple entraîné à lire une quantité dans un plongement, utilisé pour tester ce que le plongement contient.
 :::
 
 
@@ -81,9 +81,9 @@ Si l'encodeur cible n'est pas entraîné par la perte mais est une **moyenne mob
 
 `ema_error` et `emaIter_error` sont le même argument géométrique que la mise à jour TD du chapitre 13 : chaque mise à jour multiplie la distance par $m$, donc après $k$ mises à jour par $m^k$. En pratique $m\approx0{,}99$ à $0{,}999$, une cible *lente*. Nous ne prouvons **pas** que l'EMA empêche l'effondrement : c'est un fait empirique, que l'expérience ci-dessous teste.
 
-<Figure src="spread_collapse.svg" alt="Penalite de dispersion 2*d^2 selon la distance d des plongements, annulee exactement au point effondre d = 0" caption="La penalite de dispersion est une parabole : un lot de 2 plongements a distance d a une dispersion de 2 d^2 (l'identite des paires au carre demontree au chapitre), et le lot effondre - tous les plongements egaux - vaut exactement zero (spread_const). La penalite ne decourage pas l'effondrement a la marge : elle est minimale exactement la, donc la ponderer retire reellement l'effondrement des optima." />
+<Figure src="spread_collapse.svg" alt="Pénalité de dispersion 2*d^2 selon la distance d des plongements, annulee exactement au point effondré d = 0" caption="La pénalité de dispersion est une parabole : un lot de 2 plongements à distance d à une dispersion de 2 d^2 (l'identité des paires au carré démontrée au chapitre), et le lot effondré - tous les plongements egaux - vaut exactement zéro (spread_const). La pénalité ne decourage pas l'effondrement à la marge : elle est minimale exactement la, donc la ponderer retire reellement l'effondrement des optima." />
 
-<Figure src="var_hinge.svg" alt="La penalisation charniere max(0, delta - dispersion) : de delta a zero a la dispersion delta, puis plate" caption="La regularisation de variance est une charniere : le batch n'est penalise que tant que sa dispersion reste sous delta, et la penalisation est exactement nulle des que les plongements sont assez disperses - pourquoi elle arrete l'effondrement au seuil de la proposition du chapitre sans jamais combattre une representation saine." />
+<Figure src="var_hinge.svg" alt="La penalisation charniere max(0, delta - dispersion) : de delta à zéro à la dispersion delta, puis plate" caption="La régularisation de variance est une charniere : le batch n'est pénalisé que tant que sa dispersion reste sous delta, et la penalisation est exactement nulle des que les plongements sont assez disperses - pourquoi elle arrete l'effondrement au seuil de la proposition du chapitre sans jamais combattre une representation saine." />
 
 ## Remède 2 : garder explicitement les plongements dispersés
 
@@ -137,8 +137,8 @@ Prouvé : l'effondrement est un minimiseur global de la perte simple ; la mise �
 ## Références
 
 - Y. LeCun, *A Path Towards Autonomous Machine Intelligence*, OpenReview (2022) — l'article de position JEPA et sa motivation d'évitement de l'effondrement.
-- X.-Z. Bardes, J. Garrido, J. Siméon, et al., *VL-JEPA: The Open-World Quest for Real-Time Visual Understanding*, arXiv:2404.08471 (2024) — la perte JEPA dont le théorème sur le jouet de ce chapitre traite.
-- T. Chen, S. Kornblith, K. Swersky, et al., *BYOL: Bootstrap Your Own Latent*, NeurIPS 2020, arXiv:2006.07791 — le réglage EMA-target dont ce chapitre formalise la contraction.
+- X.-Z. Bardes, J. Garrido, J. Siméon, et al., *VL-JEPA : The Open-World Quest for Real-Time Visual Understanding*, arXiv:2404.08471 (2024) — la perte JEPA dont le théorème sur le jouet de ce chapitre traite.
+- T. Chen, S. Kornblith, K. Swersky, et al., *BYOL : Bootstrap Your Own Latent*, NeurIPS 2020, arXiv:2006.07791 — le réglage EMA-target dont ce chapitre formalise la contraction.
 
 ## Exercices
 

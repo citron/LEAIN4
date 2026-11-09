@@ -52,7 +52,7 @@ et symétriquement pour le visible. C'est pourquoi le balayage d'une RBM coûte 
 
 Le module prouve `qh_pos` / `qh_sum` (les conditionnelles sont de vraies probabilités) et les **identités de cotes** `odds_hidden_on` / `odds_hidden_off` : les paramètres d'échantillonnage sont exactement des rapports de poids — le mécanisme qu'exploite la divergence contrastive.
 
-<Figure src="boltzmann_cond.svg" alt="Conditionnelle p(h=1|v) en fonction du couplage g : la courbe v=1 monte de a/(a+1) vers 1, la courbe v=0 est plate" caption="La conditionnelle de Gibbs p(h = 1 | v) en fonction du couplage g (a = 0,8). Conditionnée sur v = 0, le couplage est invisible — la ligne plate ; conditionnée sur v = 1, le couplage allume l'unité cachée avec les cotes (a + g). C'est exactement la formule en deux lignes que code `qh`." />
+<Figure src="boltzmann_cond.svg" alt="Conditionnelle p(h=1|v) en fonction du couplage g : la courbe v=1 monte de à/(à+1) vers 1, la courbe v=0 est plate" caption="La conditionnelle de Gibbs p(h = 1 | v) en fonction du couplage g (à = 0,8). Conditionnée sur v = 0, le couplage est invisible — la ligne plate ; conditionnée sur v = 1, le couplage allume l'unité cachée avec les cotes (à + g). C'est exactement la formule en deux lignes que code `qh`." />
 
 ## Un balayage laisse l'équilibre tranquille : le théorème
 
@@ -67,9 +67,9 @@ $$ S(s, t) \;=\; p(h_t \mid v_s)\; p(v_t \mid h_t), $$
 
 et ramène l'invariance à deux familles d'**identités marginales** (`therm_hidden` et `gibbs_factor`) : thermaliser une couche depuis l'équilibre reproduit exactement la marginale d'équilibre de cette couche. Pas de limites, pas de temps de mélange — pour une machine finie c'est de l'algèbre.
 
-<Figure src="boltzmann_sweep.svg" alt="Masse d'équilibre et masse après un balayage de l'état (1,1) en fonction du couplage : les deux courbes coïncident" caption="L'invariance par balayage, dessinée : la masse exacte de l'état (1, 1) à l'équilibre (g / Z) et la masse après un balayage Gibbs complet de l'équilibre, pour chaque couplage g. Les courbes coïncident — pas approximativement : le module prouve les deux rationnels égaux, état par état, couplage par couplage." />
+<Figure src="boltzmann_sweep.svg" alt="Masse d'équilibre et masse après un balayage de l'état (1,1) en fonction du couplage : les deux courbes coïncident" caption="L'invariance par balayage, dessinée : la masse exacte de l'état (1, 1) à l'équilibre (g / Z) et la masse après un balayage Gibbs complet de l'équilibre, pour chaque couplage g. Les courbes coïncident — pas approximativement : le module prouvé les deux rationnels égaux, état par état, couplage par couplage." />
 
-<Figure src="boltzmann_equilibrium.svg" alt="La probabilité d'équilibre p(h=1) croît avec le couplage g et sature" caption="Le p(h = 1) d'équilibre = (a + g) / Z en fonction du couplage (a = 0,8, b = 0,6). Le couplage charge les deux états où la paire est allumée ; la montée sigmoïde de la conditionnelle devient une montée saturée de la marginale — la fonction de partition est le frein." />
+<Figure src="boltzmann_equilibrium.svg" alt="La probabilité d'équilibre p(h=1) croît avec le couplage g et sature" caption="Le p(h = 1) d'équilibre = (à + g) / Z en fonction du couplage (à = 0,8, b = 0,6). Le couplage charge les deux états où la paire est allumée ; la montée sigmoïde de la conditionnelle devient une montée saturée de la marginale — la fonction de partition est le frein." />
 
 ## La forme énergie
 

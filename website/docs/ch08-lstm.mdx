@@ -98,7 +98,7 @@ The theorems describe the *direct* cell path. The full gradient of an LSTM is th
 
 ## Backpropagation through time
 
-The hand-written backward pass follows the equations step by step. The line `dcPrev := dcj * f` is the cell path of the theorem.
+The handwritten backward pass follows the equations step by step. The line `dcPrev := dcj * f` is the cell path of the theorem.
 
 ```lean file=Ch08/Lstm.lean#bptt
 ```
@@ -161,7 +161,7 @@ with $f_t := z_t$ and $u_t := (1-z_t)\,n_t$. The highway is a **product of updat
 ```
 
 The implementation follows the equations on flat arrays, like the LSTM's, and the backward
-pass is hand-written gate by gate; `lake exe gru` checks all of its partial derivatives
+pass is handwritten gate by gate; `lake exe gru` checks all of its partial derivatives
 against central finite differences (maximum error printed as 0.000000 over
 `nParams nh` = 329 parameters at `nh = 8`):
 
@@ -195,7 +195,7 @@ within $T\varepsilon$ after $T$ steps.
 
 `lake exe gru` first checks every partial derivative of the 329-parameter BPTT against
 central finite differences: **maximum error $2\cdot 10^{-8}$** (printed as 0.000000) — the
-hand-written backward pass is right. Then, on the gradient sizes (30 steps, random weights),
+handwritten backward pass is right. Then, on the gradient sizes (30 steps, random weights),
 `‖∂L/∂h_t‖` decays slowly along the state path instead of collapsing like the plain RNN of
 Chapter 7 — the carousel at work.
 

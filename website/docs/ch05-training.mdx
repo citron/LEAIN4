@@ -121,7 +121,7 @@ Dividing by $1-\beta^t$, which is exactly what Adam does, removes the bias:
 ```lean file=Ch05/Optim.lean#bias_correction
 ```
 
-Third, **what SGD is guaranteed to do** — the optimiser's specification, over exact `Rat`. Write the quadratic step as $w' = (1-\eta a)\,w$: when the step size is in the stable range $0 < \eta a < 2$, the factor $1 - \eta a$ lies in $[-1,1]$, so it can never amplify the iterate. One step never increases the loss, *every* iterate stays below the initial loss, and at the critical step $\eta = 1/a$ the run lands on the minimiser in exactly one move. The divergence curve in the demo (a step too big) is the negation of this condition — a proven fact, not a curiosity.
+Third, **what SGD is guaranteed to do** — the optimizer's specification, over exact `Rat`. Write the quadratic step as $w' = (1-\eta a)\,w$: when the step size is in the stable range $0 < \eta a < 2$, the factor $1 - \eta a$ lies in $[-1,1]$, so it can never amplify the iterate. One step never increases the loss, *every* iterate stays below the initial loss, and at the critical step $\eta = 1/a$ the run lands on the minimiser in exactly one move. The divergence curve in the demo (a step too big) is the negation of this condition — a proven fact, not a curiosity.
 
 ```lean file=Ch05/Optim.lean#sgd_spec
 ```
@@ -147,7 +147,7 @@ MNIST is 60 000 training and 10 000 test images of handwritten digits, $28\times
 ```lean file=Ch05/Mnist.lean#idx
 ```
 
-The network has one hidden layer of 64 ReLU units. For speed it works on unboxed `FloatArray`s with hand-coded backpropagation (the generic `Expr` of Chapter 4 would build a graph with millions of nodes per image).
+The network has one hidden layer of 64 ReLU units. For speed, it works on unboxed `FloatArray`s with hand-coded backpropagation (the generic `Expr` of Chapter 4 would build a graph with millions of nodes per image).
 
 ```lean file=Ch05/Mnist.lean#net
 ```
@@ -232,7 +232,7 @@ Lean has no IEEE-754 theory for `Float`: that the machine's `Float` implements t
 
 ## The practitioner's kit
 
-Between the optimiser theorems and a training run that does not explode sit four
+Between the optimizer theorems and a training run that does not explode sit four
 devices every practitioner reaches for daily. Each has one exact fact that
 carries its whole justification — proved on `Rat`, in one file:
 `LeanDL/Ch05/Kit.lean`.

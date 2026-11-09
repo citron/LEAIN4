@@ -10,14 +10,14 @@ title: "Chapitre 10 — Autoencodeurs et VAE"
 
 **Mots nouveaux, en termes simples:**
 
-- **Modèle génératif**: Un modèle capable de produire de nouvelles données qui ressemblent à ses données d’entraînement.
-- **Variable latente**: Un court code caché qui résume une donnée.
-- **Espace latent**: L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
-- **Autoencodeur**: Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
-- **VAE**: Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
-- **A priori**: La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
-- **Divergence KL**: Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
-- **Astuce de reparamétrisation**: Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
+- **Modèle génératif** : Un modèle capable de produire de nouvelles données qui ressemblent à ses données d’entraînement.
+- **Variable latente** : Un court code caché qui résume une donnée.
+- **Espace latent** : L’espace de tous les codes possibles. Si un code a 2 nombres, l’espace latent est un plan, et chacun de ses points se décode en une donnée possible. Des points proches devraient donner des données semblables. (Le chapitre 15 appelle la même idée un espace de représentations ou de plongements.)
+- **Autoencodeur** : Un encodeur comprime les données en un code, et un décodeur reconstruit les données à partir du code.
+- **VAE** : Un autoencodeur dont les codes sont poussés à suivre une loi connue, pour qu’on puisse tirer de nouveaux codes et les décoder.
+- **A priori** : La loi que l’on veut voir suivre par les codes, ici une courbe en cloche standard.
+- **Divergence KL** : Un nombre qui mesure à quel point une loi diffère d’une autre. Il vaut zéro quand elles sont égales.
+- **Astuce de reparamétrisation** : Tirer d’abord le bruit aléatoire, puis calculer l’échantillon avec des maths ordinaires, pour que les gradients puissent passer.
 :::
 
 
@@ -49,7 +49,7 @@ Pour *générer*, on tirerait un code $z$ au hasard et on lancerait le décodeur
 ## L'autoencodeur variationnel
 
 <Figure src="arch_vae.svg"
-caption="VAE : échantillonner la loi a posteriori via z = μ + σ·ε, astuce de reparamétrisation"
+caption="VAE : échantillonner la loi à posteriori via z = μ + σ·ε, astuce de reparamétrisation"
  />
 
 Le VAE (Kingma et Welling, 2013) rend les codes échantillonnables par construction :
@@ -64,7 +64,7 @@ Après l'entraînement, générer est simple : tirer $z\sim\mathcal N(0,1)$ et d
 
 (La forme close du terme KL est une intégrale gaussienne classique ; nous la prenons comme définition et démontrons ses propriétés. La *structure* de la perte — une borne inférieure de la log-vraisemblance des données — ne demande pas d'intégrales : c'est une identité en sommes finies, prouvée exactement sur `Rat` dans `Ch10/Elbo.lean`, ci-dessous.)
 
-<Figure src="elbo_parts.svg" alt="Deux courbes en fonction de x : la reconstruction -log p(x) plonge dans les deux modes des donnees, le terme KL monte quadratiquement loin de la moyenne de q" caption="Les deux moities que the theoreme de l'ELBO recoud : -log p(x) veut le code pres d'un mode des donnees (les deux plongeons), KL(q||p) le veut pres de la moyenne du prior (la coupe montante). L'identite exacte prouvee en Lean (evidence_bound) dit que la perte est leur somme - toute courbe d'entrainement d'un VAE est ces deux termes qui negocient, mini-batch apres mini-batch." />
+<Figure src="elbo_parts.svg" alt="Deux courbes en fonction de x : la reconstruction -log p(x) plonge dans les deux modes des données, le terme KL monte quadratiquement loin de la moyenne de q" caption="Les deux moitiés que le théorème de l'ELBO recoud : -log p(x) veut le code près d'un mode des données (les deux plongeons), KL(q||p) le veut près de la moyenne du prior (la coupe montante). L'identité exacte prouvée en Lean (evidence_bound) dit que la perte est leur somme - toute courbe d'entraînement d'un VAE est ces deux termes qui négocient, mini-batch après mini-batch." />
 
 ## L'ELBO, prouvé
 
@@ -117,7 +117,7 @@ Nos données sont un **demi-cercle** bruité dans le plan. L'espace latent a une
 Nous n'avons jamais écrit de gradient pour ce modèle. `backprop_correct` (chapitre 4) est un théorème sur *toute* expression : le gradient de cette perte particulière, y compris l'étape de tirage et le terme KL, est donc correct par ce seul théorème. Les seules parties non démontrées sont les arrondis Float et le générateur de nombres aléatoires.
 :::
 
-<Figure src="beta_vae.svg" alt="Deux courbes selon beta : la distortion 1/(1+beta) tombe, le taux beta/(1+beta) monte, croisement a beta = 1" caption="L'objectif du VAE est un cadran, rendu visible dans le jouet execute au chapitre : monter beta achete du taux (information serree dans z, le terme KL) paye en distortion (la reconstruction floue) - la paire de courbes que le beta-VAE mesure. L'autoencodeur (beta = 0) est en distortion pure sans code du tout, exactement pourquoi son espace latent est structurellement desordonne." />
+<Figure src="beta_vae.svg" alt="Deux courbes selon beta : la distorsion 1/(1+beta) tombe, le taux beta/(1+beta) monte, croisement à beta = 1" caption="L'objectif du VAE est un cadran, rendu visible dans le jouet exécuté au chapitre : monter beta achète du taux (information serrée dans z, le terme KL) paye en distorsion (la reconstruction floue) - la paire de courbes que le beta-VAE mesure. L'autoencodeur (beta = 0) est en distorsion pure sans code du tout, exactement pourquoi son espace latent est structurellement désordonné." />
 
 ## Autoencodeur contre VAE
 

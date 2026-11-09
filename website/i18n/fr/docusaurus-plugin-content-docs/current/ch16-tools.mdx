@@ -10,17 +10,17 @@ title: "Chapitre 16 — Outils mathématiques : probabilité, entropie, KL"
 
 **Mots nouveaux, en termes simples:**
 
-- **Distribution**: Une liste de poids positifs dont la somme vaut 1 — les chances de chaque issue.
-- **Espérance**: La moyenne pondérée d'une quantité sous une distribution : « en moyenne, qu'est-ce que je gagne ? »
-- **Variance**: La distance quadratique moyenne à la moyenne : l'étalement d'une quantité.
-- **Entropie**: La surprise moyenne d'un tirage dans une distribution. Un événement certain ne surprend personne : entropie 0.
-- **Entropie croisée**: La surprise moyenne de la *vraie* distribution notée avec une distribution *modèle*. L'entraînement la minimise.
+- **Distribution** : Une liste de poids positifs dont la somme vaut 1 — les chances de chaque issue.
+- **Espérance** : La moyenne pondérée d'une quantité sous une distribution : « en moyenne, qu'est-ce que je gagne ? »
+- **Variance** : La distance quadratique moyenne à la moyenne : l'étalement d'une quantité.
+- **Entropie** : La surprise moyenne d'un tirage dans une distribution. Un événement certain ne surprend personne : entropie 0.
+- **Entropie croisée** : La surprise moyenne de la *vraie* distribution notée avec une distribution *modèle*. L'entraînement la minimise.
 - **Divergence KL**: La surprise *supplémentaire* due au code du modèle au lieu du vrai. Toujours $\ge 0$ ; égale à $0$ exactement quand les deux coïncident.
 - **Inégalité de Gibbs**: $\mathrm{KL}(p\|q) \ge 0$ : aucun modèle ne prédit jamais les données aussi bien que les données se prédisent elles-mêmes.
 :::
 
 
-Les chapitres 3, 6, 9 et suivants minimisent tous une perte en **entropie croisée**, les chapitres 11 et 13 mesurent des distances entre distributions avec la **KL**, le chapitre 15 punit les plongements effondrés avec une **variance**. À chaque fois nous avons cité une propriété — « l'entropie croisée vaut au moins l'entropie », « la KL est positive » — sans la prouver. Ce chapitre paie ces dettes : il est la boîte à outils que le reste du cours suppose en silence.
+Les chapitres 3, 6, 9 et suivants minimisent tous une perte en **entropie croisée**, les chapitres 11 et 13 mesurent des distances entre distributions avec la **KL**, le chapitre 15 punit les plongements effondrés avec une **variance**. À chaque fois, nous avons cité une propriété — « l'entropie croisée vaut au moins l'entropie », « la KL est positive » — sans la prouver. Ce chapitre paie ces dettes : il est la boîte à outils que le reste du cours suppose en silence.
 
 Le chapitre est aussi un tournant méthodologique. Dès ici, tout scalaire d'un *théorème* est un **`Rat`** — un rationnel exact, le modèle dans lequel ce cours prouve (comme l'algèbre du perceptron du chapitre 2 le fait déjà). Les distributions sont finies, sur `n` points : assez pour toutes les pertes du cours, et assez petit pour qu'une « somme » n'exige aucune analyse — pas de limites, pas d'intégrales, pas d'epsilon-delta. Ce que les théorèmes disent est exactement vrai *dans ce modèle* ; les expériences en `Float` ne le satisfont qu'à l'arrondi près, et la démo imprime l'écart.
 
@@ -85,11 +85,11 @@ La preuve est celle du manuel, entièrement vérifiée. La borne ponctuelle $\lo
 
 **Conséquences :** la KL vaut $0$ exactement quand $p = q$ (l'inégalité tangente est stricte ailleurs qu'en $1$) ; l'entropie croisée est bornée en dessous par $H(p)$, il y a un plancher qu'aucun modèle ne bat ; et un modèle qui donne une probabilité quasi nulle à un événement qui *se produit* paie une perte quasi infinie — la ligne « sûre et fausse » de la démo.
 
-<Figure src="kl_asymmetry.svg" alt="KL(p,q) et KL(q,p) en fonction de q pour p = 0,5 fixe : deux courbes en U distinctes, preuve que KL n'est pas une distance" caption="KL n'est pas une distance, en image : coder une source p = 0,5 avec un code conçu pour q coûte KL(p, q), et l'ordre inverse dessine une autre courbe. Les deux s'annulent exactement en q = p (Gibbs : KL ≥ 0, égalité si et seulement si q = p), les deux explosent aux bords (le log de zéro) - les deux théorèmes de la section « Inégalité de Gibbs » en une image." />
+<Figure src="kl_asymmetry.svg" alt="KL(p,q) et KL(q,p) en fonction de q pour p = 0,5 fixe : deux courbes en U distinctes, preuve que KL n'est pas une distance" caption="KL n'est pas une distance, en image : coder une source p = 0,5 avec un code conçu pour q coûte KL(p, q), et l'ordre inverse dessiné une autre courbe. Les deux s'annulent exactement en q = p (Gibbs : KL ≥ 0, égalité si et seulement si q = p), les deux explosent aux bords (le log de zéro) - les deux théorèmes de la section « Inégalité de Gibbs » en une image." />
 
-<Figure src="bias_var.svg" alt="Courbes de risque selon la taille n de l'ensemble : la variance 1/n tombe, le risque d'ensemble 0,09 + 1/n la suit et s'arrete au plancher plat biais^2 = 0,09" caption="La decomposition des ensembles, dessinee : le terme de variance 1/n meurt aussi vite qu'on moyenne, le risque d'ensemble 0,09 + 1/n le suit vers le bas - et s'arrete au plancher plat du biais qu'on ne moyenne jamais. Plus de modeles achete de la variance, jamais du biais : exactement le contenu de ensemble_risk_decomp, une droite et son asymptote." />
+<Figure src="bias_var.svg" alt="Courbes de risque selon la taille n de l'ensemble : la variance 1/n tombe, le risque d'ensemble 0,09 + 1/n la suit et s'arrete au plancher plat biais^2 = 0,09" caption="La décomposition des ensembles, dessinée : le terme de variance 1/n meurt aussi vite qu'on moyenne, le risque d'ensemble 0,09 + 1/n le suit vers le bas - et s'arrete au plancher plat du biais qu'on ne moyenne jamais. Plus de modèles achète de la variance, jamais du biais : exactement le contenu de ensemble_risk_decomp, une droite et son asymptote." />
 
-<Figure src="capacity_u.svg" alt="Biais^2 = 1/n qui tombe, variance = n/400 qui monte, leur somme en U selon la capacite" caption="La courbe en U de la generalisation tracee a partir de la decomposition exacte du chapitre : biais^2 = 1/n tombe avec la capacite, variance = n/400 monte avec elle, et le risque de test est leur somme - un U dont le fond est l'equilibre des deux. Un ensemble divise le terme de variance par n (le theoreme), aplatissant le bras droit." />
+<Figure src="capacity_u.svg" alt="Biais^2 = 1/n qui tombe, variance = n/400 qui monte, leur somme en U selon la capacité" caption="La courbe en U de la généralisation tracée à partir de la décomposition exacte du chapitre : biais^2 = 1/n tombe avec la capacité, variance = n/400 monte avec elle, et le risque de test est leur somme - un U dont le fond est l'équilibre des deux. Un ensemble divise le terme de variance par n (le théorème), aplatissant le bras droit." />
 
 ## Généralisation : biais, variance, et pourquoi les ensembles marchent
 

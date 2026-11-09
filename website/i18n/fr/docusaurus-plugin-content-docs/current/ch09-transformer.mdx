@@ -10,21 +10,21 @@ title: "Chapitre 9 — L'attention et le Transformer"
 
 **Mots nouveaux, en termes simples:**
 
-- **Jeton et plongement**: Un jeton est un morceau de texte (ici un caractère). Un plongement est la liste de nombres qui le représente.
-- **Attention**: Chaque position regarde toutes les autres, évalue leur pertinence et prend une moyenne pondérée de ce qu’elles portent.
-- **Requête, clé, valeur**: La requête est ce que je cherche, la clé est ce que chaque élément propose, la valeur est ce qu’il donne s’il est choisi.
-- **Transformer**: Un réseau construit avec de l’attention et de petits blocs MLP, sans récurrence.
-- **Connexion résiduelle**: Ajouter l’entrée d’un bloc à sa sortie, pour que l’information et les gradients aient un raccourci.
-- **Encodage positionnel**: Des nombres supplémentaires qui disent au modèle où se trouve chaque jeton, car l’attention seule ignore l’ordre.
-- **Masque causal**: Interdire de regarder les positions futures, pour qu’un modèle de langage ne puisse pas tricher.
-- **Normalisation de couche**: Recentrer et remettre à l’échelle les nombres d’une position. Ajouter la même constante à tous ne change rien.
-- **Modèle de langage**: Un modèle qui prédit le jeton suivant.
+- **Jeton et plongement** : Un jeton est un morceau de texte (ici un caractère). Un plongement est la liste de nombres qui le représente.
+- **Attention** : Chaque position regarde toutes les autres, évalue leur pertinence et prend une moyenne pondérée de ce qu’elles portent.
+- **Requête, clé, valeur** : La requête est ce que je cherche, la clé est ce que chaque élément propose, la valeur est ce qu’il donne s’il est choisi.
+- **Transformer** : Un réseau construit avec de l’attention et de petits blocs MLP, sans récurrence.
+- **Connexion résiduelle** : Ajouter l’entrée d’un bloc à sa sortie, pour que l’information et les gradients aient un raccourci.
+- **Encodage positionnel** : Des nombres supplémentaires qui disent au modèle où se trouve chaque jeton, car l’attention seule ignore l’ordre.
+- **Masque causal** : Interdire de regarder les positions futures, pour qu’un modèle de langage ne puisse pas tricher.
+- **Normalisation de couche** : Recentrer et remettre à l’échelle les nombres d’une position. Ajouter la même constante à tous ne change rien.
+- **Modèle de langage** : Un modèle qui prédit le jeton suivant.
 :::
 
 
 Les réseaux récurrents lisent une séquence un pas à la fois : l'information lointaine doit donc survivre à de nombreux pas. Le **Transformer** (Vaswani et al., 2017) abandonne la récurrence : chaque position peut regarder directement toutes les autres, grâce à l'**attention**.
 
-<Figure src="attn_sharp.svg" alt="Poids softmax de la cle dominante sur quatre cles selon l'ecart de logit beta, de 1/4 a 1, avec la ligne uniforme 1/4" caption="L'attention comme projecteur reglable : avec trois cles rivales, un ecart de logit beta met e^beta / (e^beta + 3) sur la gagnante - 1/4 aveugle, 98 % a l'ecart 6 (les faits softmax demontres au chapitre). La temperature est ce cadran : grand beta selectionne fort, beta = 0 degengere en moyenne uniforme." />
+<Figure src="attn_sharp.svg" alt="Poids softmax de la cle dominante sur quatre clés selon l'écart de logit beta, de 1/4 à 1, avec la ligne uniforme 1/4" caption="L'attention comme projecteur réglable : avec trois clés rivales, un écart de logit beta met e^beta / (e^beta + 3) sur la gagnante - 1/4 aveugle, 98 % à l'écart 6 (les faits softmax démontrés au chapitre). La temperature est ce cadran : grand beta selectionne fort, beta = 0 degengere en moyenne uniforme." />
 
 <Creators fr slugs="bengio" />
 
@@ -58,7 +58,7 @@ $$
 
 Un bloc Transformer ajoute ceci à son entrée (une **connexion résiduelle**) puis applique un petit MLP, de nouveau avec une connexion résiduelle. Les vrais modèles empilent de nombreux blocs, utilisent plusieurs « têtes » d'attention en parallèle et normalisent les activations par normalisation de couche.
 
-<Figure src="attention_causal.svg" alt="Matrice d'attention causale 6x6 a scores uniformes : la ligne t repartit 1/(t+1) sur son propre passe et zero sur le futur" caption="Le masque causal, dessine : scores uniformes, donc chaque ligne repartit sa masse a parts egales sur les positions qu'elle a le droit de voir. La ligne 0 ne voit qu'elle-meme (masse 1), la ligne 5 moyenne sur six. Tout ce qui est au-dessus de la diagonale vaut exactement zero - c'est la propriete sans fuite demontree au chapitre (causal_no_leak), visible en triangle blanc." />
+<Figure src="attention_causal.svg" alt="Matrice d'attention causale 6x6 à scores uniformes : la ligne t répartit 1/(t+1) sur son propre passe et zéro sur le futur" caption="Le masque causal, dessiné : scores uniformes, donc chaque ligne répartit sa masse à parts égales sur les positions qu'elle a le droit de voir. La ligne 0 ne voit qu'elle-même (masse 1), la ligne 5 moyenne sur six. Tout ce qui est au-dessus de la diagonale vaut exactement zéro - c'est la propriété sans fuite démontrée au chapitre (causal_no_leak), visible en triangle blanc." />
 
 ## Cinq faits, démontrés
 

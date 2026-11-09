@@ -10,14 +10,14 @@ title: "Chapitre 2 — Le perceptron, le XOR et le premier hiver de l'IA"
 
 **Mots nouveaux, en termes simples:**
 
-- **Perceptron**: Un neurone à sortie tout-ou-rien, avec une règle pour apprendre de ses erreurs.
-- **Linéairement séparable**: Des données qu’une seule droite (ou un seul plan) peut séparer en deux groupes.
-- **XOR**: Vrai quand exactement une des deux entrées est active. Aucune droite ne sépare ses deux réponses.
-- **Règle d’apprentissage du perceptron**: Quand la réponse est fausse, pousser les poids vers la bonne : ajouter l’exemple s’il fallait dire oui, le retrancher s’il fallait dire non.
-- **Marge**: L’écart de sécurité entre les deux groupes de données. Plus il est grand, moins il y a d’erreurs.
-- **Théorème de convergence (Novikoff)**: Une preuve que sur des données séparables le perceptron fait un nombre limité d’erreurs puis s’arrête pour toujours.
-- **Inégalité de Cauchy–Schwarz**: Le produit scalaire de deux vecteurs n’est jamais plus grand que le produit de leurs longueurs.
-- **Hiver de l’IA**: Une période où l’argent et l’intérêt pour l’IA se sont effondrés faute de promesses tenues. Le premier a commencé dans les années 1970.
+- **Perceptron** : Un neurone à sortie tout-ou-rien, avec une règle pour apprendre de ses erreurs.
+- **Linéairement séparable** : Des données qu’une seule droite (ou un seul plan) peut séparer en deux groupes.
+- **XOR** : Vrai quand exactement une des deux entrées est active. Aucune droite ne sépare ses deux réponses.
+- **Règle d’apprentissage du perceptron** : Quand la réponse est fausse, pousser les poids vers la bonne : ajouter l’exemple s’il fallait dire oui, le retrancher s’il fallait dire non.
+- **Marge** : L’écart de sécurité entre les deux groupes de données. Plus il est grand, moins il y a d’erreurs.
+- **Théorème de convergence (Novikoff)** : Une preuve que sur des données séparables le perceptron fait un nombre limité d’erreurs puis s’arrête pour toujours.
+- **Inégalité de Cauchy–Schwarz** : Le produit scalaire de deux vecteurs n’est jamais plus grand que le produit de leurs longueurs.
+- **Hiver de l’IA** : Une période où l’argent et l’intérêt pour l’IA se sont effondrés faute de promesses tenues. Le premier a commencé dans les années 1970.
 :::
 
 
@@ -33,7 +33,7 @@ En 1958, Frank Rosenblatt introduit le **perceptron** : un neurone à seuil acco
 
 <Figure src="xor.svg" alt="Les quatre points du XOR dans le plan" caption="Aucune droite ne sépare les deux points bleus des deux points rouges." />
 
-<Figure src="xor_points.svg" alt="Quatre points du XOR : +1 en (0,0) et (1,1), -1 en (0,1) et (1,0), aucune droite ne separe les couleurs" caption="L'image du theoreme 1 : un neurone trace une droite, et les points du XOR ne se laissent decouper par aucune droite - les deux coins positifs sont de part et d'autre de toute droite qui separe les deux negatifs. Une couche cachee n'est pas un luxe, c'est le minimum." />
+<Figure src="xor_points.svg" alt="Quatre points du XOR : +1 en (0,0) et (1,1), -1 en (0,1) et (1,0), aucune droite ne sépare les couleurs" caption="L'image du théorème 1 : un neurone trace une droite, et les points du XOR ne se laissent découper par aucune droite - les deux coins positifs sont de part et d'autre de toute droite qui sépare les deux négatifs. Une couche cachee n'est pas un luxe, c'est le minimum." />
 
 ## Théorème 1 — aucun neurone ne calcule le XOR
 
@@ -85,7 +85,7 @@ OR: mistakes per epoch = [3, 1, 2, 2, 1, 0]
 XOR: mistakes per epoch = [4, 4, 4, 4, 4, ...]
 ```
 
-<Figure src="perceptron_bound.svg" alt="La borne d'erreurs R^2/gamma^2 selon la marge : explosion hyperbolique quand gamma fond" caption="La borne de Novikoff, tracee : avec R = 1, un separateur a la marge gamma coute au plus 1/gamma^2 erreurs. Une marge epaisse (gamma = 1) apprend en une mise a jour ; une marge fine comme rasoir (gamma = 0,1) en demande cent. Le perceptron n'apprend jamais plus vite que la geometrie des donnees ne le permet." />
+<Figure src="perceptron_bound.svg" alt="La borne d'erreurs R^2/gamma^2 selon la marge : explosion hyperbolique quand gamma fond" caption="La borne de Novikoff, tracée : avec R = 1, un séparateur à la marge gamma coute au plus 1/gamma^2 erreurs. Une marge épaisse (gamma = 1) apprend en une mise à jour ; une marge fine comme rasoir (gamma = 0,1) en demande cent. Le perceptron n'apprend jamais plus vite que la geometrie des données ne le permet." />
 
 ## Théorème 2 — le théorème de convergence de Novikoff
 
@@ -116,7 +116,7 @@ En mettant les deux théorèmes côte à côte : sur des données séparables, l
 
 ## Références
 
-- F. Rosenblatt, *The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain*, Psychological Bulletin 65 (1958) — le perceptron et sa règle d'apprentissage.
+- F. Rosenblatt, *The Perceptron : A Probabilistic Model for Information Storage and Organization in the Brain*, Psychological Bulletin 65 (1958) — le perceptron et sa règle d'apprentissage.
 - M. L. Minsky et S. A. Papert, *Perceptrons*, MIT Press (1969) — la limitation XOR que ce chapitre prouve par construction.
 
 ## Exercices

@@ -10,17 +10,17 @@ title: "Chapitre 1 — Le neurone seul"
 
 **Mots nouveaux, en termes simples:**
 
-- **Neurone**: Une toute petite calculatrice : multiplier chaque entrée par un poids, tout additionner, ajouter un biais, puis écraser le résultat avec une fonction d’activation.
-- **Poids**: Un nombre qui dit combien une entrée compte. Apprendre, c’est ajuster les poids.
-- **Biais**: Un nombre ajouté à la fin. Il déplace le seuil à partir duquel le neurone s’allume.
-- **Fonction d’activation**: L’étape d’écrasement après la somme (marche, sigmoïde, tanh, ReLU). Sans elle, empiler des neurones n’apporterait rien.
-- **Sigmoïde**: Une courbe lisse en S qui transforme n’importe quel nombre en une valeur entre 0 et 1.
-- **ReLU**: Garde les nombres positifs tels quels et transforme les négatifs en 0.
-- **tanh**: Comme la sigmoïde, mais sa sortie est entre -1 et 1.
-- **Vecteur**: Une liste ordonnée de nombres. En Lean, sa longueur fait partie de son type.
-- **Produit scalaire**: Multiplier deux listes position par position et additionner les résultats. C’est la somme pondérée d’un neurone.
-- **Porte logique**: Une petite règle sur des valeurs vrai/faux (ET, OU, NON-ET). Un seul neurone sait faire ET et OU.
-- **Linéaire**: Qui se comporte comme de simples mises à l’échelle et additions : doublez l’entrée, la sortie double ; additionnez deux entrées, les sorties s’additionnent.
+- **Neurone** : Une toute petite calculatrice : multiplier chaque entrée par un poids, tout additionner, ajouter un biais, puis écraser le résultat avec une fonction d’activation.
+- **Poids** : Un nombre qui dit combien une entrée compte. Apprendre, c’est ajuster les poids.
+- **Biais** : Un nombre ajouté à la fin. Il déplace le seuil à partir duquel le neurone s’allume.
+- **Fonction d’activation** : L’étape d’écrasement après la somme (marche, sigmoïde, tanh, ReLU). Sans elle, empiler des neurones n’apporterait rien.
+- **Sigmoïde** : Une courbe lisse en S qui transforme n’importe quel nombre en une valeur entre 0 et 1.
+- **ReLU** : Garde les nombres positifs tels quels et transforme les négatifs en 0.
+- **tanh** : Comme la sigmoïde, mais sa sortie est entre -1 et 1.
+- **Vecteur** : Une liste ordonnée de nombres. En Lean, sa longueur fait partie de son type.
+- **Produit scalaire** : Multiplier deux listes position par position et additionner les résultats. C’est la somme pondérée d’un neurone.
+- **Porte logique** : Une petite règle sur des valeurs vrai/faux (ET, OU, NON-ET). Un seul neurone sait faire ET et OU.
+- **Linéaire** : Qui se comporte comme de simples mises à l’échelle et additions : doublez l’entrée, la sortie double ; additionnez deux entrées, les sorties s’additionnent.
 :::
 
 
@@ -60,7 +60,7 @@ Le produit scalaire est défini par récurrence sur la longueur :
 
 Elles sont écrites pour n'importe quel type de scalaires : l'échelon utilise `≤`, la sigmoïde et tanh utilisent une exponentielle `HasExp.exp`. Avec `α := Float`, `HasExp.exp` est `Float.exp`.
 
-<Figure src="neuron_halfplane.svg" alt="Une droite frontiere w.x = b dans le plan, avec la region de declenchement au-dessus" caption="Un neurone seul est un demi-plan : l'equation w.x = b trace une droite frontiere (bleue) et le neurone s'active exactement d'un cote (orange). ET, OU et les portes logiques du chapitre ne sont que des positions de cette droite ; le XOR echoue car aucune droite unique ne le realise - la geometrie du Ch2 en une image." />
+<Figure src="neuron_halfplane.svg" alt="Une droite frontière w.x = b dans le plan, avec la region de declenchement au-dessus" caption="Un neurone seul est un demi-plan : l'équation w.x = b trace une droite frontière (bleue) et le neurone s'active exactement d'un côté (orange). ET, OU et les portes logiques du chapitre ne sont que des positions de cette droite ; le XOR echoue car aucune droite unique ne le realise - la geometrie du Ch2 en une image." />
 
 ## Le neurone
 
@@ -108,7 +108,7 @@ Avant l'activation, un neurone sans biais est une application linéaire. La preu
 ```lean file=Ch01/Neuron.lean#linear
 ```
 
-<Figure src="sigmoid_deriv.svg" alt="Sigmoide montant de 0 a 1, et sa derivee une cloche de pic 1/4 en zero" caption="La derivee de la sigmoide est une cloche de pic 1/4 : sigma' = sigma(1 - sigma), maximale en 0 ou sigma = 1/2. Cette seule courbe est l'evanescence des gradients du Ch4 en germe - une pile de couches sigmoides multiplie des facteurs au plus egaux a 1/4, c'est exactement pourquoi la ReLU a pris la releve." />
+<Figure src="sigmoid_deriv.svg" alt="Sigmoïde montant de 0 à 1, et sa dérivée une cloche de pic 1/4 en zéro" caption="La dérivée de la sigmoïde est une cloche de pic 1/4 : sigma' = sigma(1 - sigma), maximale en 0 ou sigma = 1/2. Cette seule courbe est l'évanescence des gradients du Ch4 en germe - une pile de couches sigmoides multiplie des facteurs au plus egaux à 1/4, c'est exactement pourquoi la ReLU à pris la releve." />
 
 ## Une propriété de la sigmoïde
 
