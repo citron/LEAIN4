@@ -77,7 +77,10 @@ jobs:
 
   deploy:
     # Publish the built site to GitHub Pages on pushes to main.
-    # Custom domain gacquer.com (CNAME in the artifact); the site lives under /LEAIN4/.
+    # Project page: https://citron.github.io/LEAIN4/ — url=https://citron.github.io,
+    # baseUrl=/LEAIN4/, artifact root deployed as-is (GitHub serves the repo
+    # root at /LEAIN4/). No CNAME: gacquer.com stays on OVH; the OVH sync
+    # uses the same default build (url=https://gacquer.com).
     needs: website
     if: github.ref == 'refs/heads/main' && github.repository == 'citron/LEAIN4'
     runs-on: ubuntu-latest
@@ -99,14 +102,13 @@ jobs:
           cache-dependency-path: website/package-lock.json
       - run: npm ci
         working-directory: website
-      - run: npm run build
+      - name: Build for the github.io project page
+        run: npm run build
         working-directory: website
-      - name: Stage site under /LEAIN4/ + CNAME for the custom domain
-        run: |
-          cd website/build
-          mkdir -p LEAIN4
-          find . -maxdepth 1 ! -name LEAIN4 ! -name . -exec mv {} LEAIN4/ \;
-          echo 'gacquer.com' > CNAME
+        env:
+          SITE_URL: https://citron.github.io
+      - name: No custom domain on the Pages mirror
+        run: rm -f website/build/CNAME
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
