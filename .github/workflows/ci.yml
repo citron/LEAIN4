@@ -35,18 +35,20 @@ jobs:
           test -x "$HOME/.elan/bin/lake" || { echo "elan install failed"; exit 1; }
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.elan/bin:$PATH"
-          lean --version && lake --version
-        shell: bash
-      - name: "Build all targets (single source of truth: scripts/targets.txt)"
-        run: |
-          export PATH="$HOME/.elan/bin:$PATH"
-          # First lean/lake invocation resolves lean-toolchain and downloads
-          # the pinned toolchain over the same flaky GitHub release channel:
-          # pre-install with retries, then build with one retry.
+          # No default toolchain (we install with --default-toolchain none);
+          # resolve and download the pinned one with retries over the flaky
+          # release channel, from lean/ where lean-toolchain lives.
+          cd lean
           for i in 1 2 3 4 5; do
             elan toolchain install "$(cat lean-toolchain)" && break
             echo "toolchain download attempt $i failed"; sleep $((10 * i))
           done
+          cd ..
+          (cd lean && lean --version && lake --version)
+        shell: bash
+      - name: "Build all targets (single source of truth: scripts/targets.txt)"
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
           lake build ${{ steps.targets.outputs.args }} || {
             echo "retrying build once"; sleep 15
             lake build ${{ steps.targets.outputs.args }}; }
