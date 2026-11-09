@@ -96,7 +96,7 @@ Backpropagation, by stages:
 
 ### The flat loop *is* the convolution
 
-The network above stores images and kernels in flat arrays: the kernel sits in `K[c*9 + a*3 + b]`, the image in `x[i*28 + j]`, and each conv cell is a hand-written double loop. Is that layout the mathematics of the first half of this chapter, or only shaped like it? It is, and the bridge is proved over exact $\mathbb{Q}$:
+The network above stores images and kernels in flat arrays: the kernel sits in `K[c*9 + a*3 + b]`, the image in `x[i*28 + j]`, and each conv cell is a handwritten double loop. Is that layout the mathematics of the first half of this chapter, or only shaped like it? It is, and the bridge is proved over exact $\mathbb{Q}$:
 
 ```lean file=Ch06/Conv.lean#cnn_row
 ```

@@ -10,15 +10,15 @@ title: "Chapitre 4 — Réseaux profonds et différentiation automatique"
 
 **Mots nouveaux, en termes simples:**
 
-- **Dérivée**: La vitesse à laquelle une sortie change quand on pousse un peu une entrée.
-- **Gradient**: La liste de toutes les dérivées par rapport à tous les poids. Il pointe vers le haut, donc on avance dans le sens opposé.
-- **Différentiation automatique (autodiff)**: Un programme qui calcule les dérivées exactes de n’importe quel calcul en appliquant mécaniquement la règle en chaîne.
-- **Arbre d’expression**: Un calcul écrit comme un arbre de petites opérations (addition, produit, sigmoïde…). L’autodiff parcourt cet arbre.
-- **Mode direct**: Transporter une dérivée pendant qu’on calcule la valeur. Une passe donne l’effet d’une direction choisie.
-- **Rétropropagation (mode inverse)**: Calculer vers l’avant, puis balayer une seule fois vers l’arrière pour obtenir la dérivée de tous les poids à la fois.
-- **Adjoint**: Le message qui circule pendant le balayage arrière : de combien le résultat final change par unité de changement de ce nœud.
-- **Vérification du gradient**: Vérifier un gradient en poussant un poids très légèrement et en regardant comment la perte bouge vraiment (différences finies).
-- **Preuve par récurrence**: Prouver un énoncé pour le plus petit cas, puis montrer que s’il est vrai pour les petits morceaux il l’est pour le grand.
+- **Dérivée** : La vitesse à laquelle une sortie change quand on pousse un peu une entrée.
+- **Gradient** : La liste de toutes les dérivées par rapport à tous les poids. Il pointe vers le haut, donc on avance dans le sens opposé.
+- **Différentiation automatique (autodiff)** : Un programme qui calcule les dérivées exactes de n’importe quel calcul en appliquant mécaniquement la règle en chaîne.
+- **Arbre d’expression** : Un calcul écrit comme un arbre de petites opérations (addition, produit, sigmoïde…). L’autodiff parcourt cet arbre.
+- **Mode direct** : Transporter une dérivée pendant qu’on calcule la valeur. Une passe donne l’effet d’une direction choisie.
+- **Rétropropagation (mode inverse)** : Calculer vers l’avant, puis balayer une seule fois vers l’arrière pour obtenir la dérivée de tous les poids à la fois.
+- **Adjoint** : Le message qui circule pendant le balayage arrière : de combien le résultat final change par unité de changement de ce nœud.
+- **Vérification du gradient** : Vérifier un gradient en poussant un poids très légèrement et en regardant comment la perte bouge vraiment (différences finies).
+- **Preuve par récurrence** : Prouver un énoncé pour le plus petit cas, puis montrer que s’il est vrai pour les petits morceaux, il l’est pour le grand.
 :::
 
 
@@ -50,7 +50,7 @@ flowchart LR
 `Expr` est un type `inductive` : une valeur est construite par l'un des constructeurs. Une fonction définie par filtrage sur chaque constructeur, qui ne s'appelle que sur des sous-expressions (comme `eval`), est *structurellement récursive* : Lean vérifie qu'elle termine, et les preuves à son sujet se font par `induction`.
 :::
 
-<Figure src="fd_drift.svg" alt="Erreur log2 de la difference centrale de sin selon l'exposant k : courbe en U en Float" caption="Pourquoi la derivee exacte, pas les differences finies en Float : la difference centrale de sin en x = 1, pas h = 2^-k - l'erreur de troncature O(h^2) fait tomber l'erreur (echelle log2) pendant la cancellation Float la fait remonter, dessinant un U au plancher vers 2^-52 : l'epsilon machine. Aucun choix de h n'echappe au mur ; la derivee symbolique du chapitre n'a pas ce plancher." />
+<Figure src="fd_drift.svg" alt="Erreur log2 de la différence centrale de sin selon l'exposant k : courbe en U en Float" caption="Pourquoi la dérivée exacte, pas les différences finies en Float : la différence centrale de sin en x = 1, pas h = 2^-k - l'erreur de troncature O(h^2) fait tomber l'erreur (échelle log2) pendant la cancellation Float la fait remonter, dessinant un U au plancher vers 2^-52 : l'epsilon machine. Aucun choix de h n'echappe au mur ; la dérivée symbolique du chapitre n'à pas ce plancher." />
 
 ## Qu'est-ce que « la dérivée » ?
 
@@ -117,9 +117,9 @@ Avec cette machinerie, la règle delta du chapitre 3 devient un corollaire : la 
 ```lean file=Ch04/Network.lean#delta_rule
 ```
 
-<Figure src="chain_stack.svg" alt="Le gradient à travers une pile de couches sigmoïdes décroît linéairement en L : (1/4)^L au pire, (0.5)^L en général" caption="Pourquoi la profondeur est une multiplication : chaque couche sigmoïde est un facteur au plus 1/4, donc le gradient de bout en bout décroît en ligne droite sur l'axe logarithmique. C'est le théorème de disparition du gradient en une image - et la raison pour laquelle ReLU (pente locale 1) a pris le relais." />
+<Figure src="chain_stack.svg" alt="Le gradient à travers une pile de couches sigmoïdes décroît linéairement en L : (1/4)^L au pire, (0.5)^L en général" caption="Pourquoi la profondeur est une multiplication : chaque couche sigmoïde est un facteur au plus 1/4, donc le gradient de bout en bout décroît en ligne droite sur l'axe logarithmique. C'est le théorème de disparition du gradient en une image - et la raison pour laquelle ReLU (pente locale 1) à pris le relais." />
 
-<Figure src="relu_dead.svg" alt="Deux courbes : la ReLU vivante y = max(0,x) qui monte depuis l'origine, et la ReLU morte plate a zero sur tout l'axe" caption="La ReLU morte, dessinee : une unite dont les poids ont pousse l'entree toujours en negatif sort exactement 0 partout - le gradient de la ReLU vaut 0 sur toute cette demi-droite, donc aucun gradient de perte ne circule et l'unite ne se remet jamais (relu_grad, Ch04). L'initialisation n'est pas cosmetique : elle decide combien d'unites restent vivantes." />
+<Figure src="relu_dead.svg" alt="Deux courbes : la ReLU vivante y = max(0,x) qui monte depuis l'origine, et la ReLU morte plate à zéro sur tout l'axe" caption="La ReLU morte, dessinée : une unité dont les poids ont poussé l'entrée toujours en négatif sort exactement 0 partout - le gradient de la ReLU vaut 0 sur toute cette demi-droite, donc aucun gradient de perte ne circule et l'unité ne se remet jamais (relu_grad, Ch04). L'initialisation n'est pas cosmétique : elle décide combien d'unités restent vivantes." />
 
 ## Des réseaux de profondeur quelconque
 
@@ -147,7 +147,7 @@ Les paramètres initiaux aléatoires proviennent d'un générateur déterministe
 ## Références
 
 - A. E. Bryson, *Applied Optimal Control*, Hemisphere (1975) — la plus ancienne passe complète en mode inverse citée dans la littérature.
-- A. Griewank et A. Walther, *Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation*, SIAM (2008) — la bande en mode inverse que suit l'implémentation `grad`.
+- A. Griewank et A. Walther, *Evaluating Derivatives : Principles and Techniques of Algorithmic Differentiation*, SIAM (2008) — la bande en mode inverse que suit l'implémentation `grad`.
 - D. Bayard, *Rationale of reverse mode (short)*, arXiv:2009.04867 (2020) — l'algèbre de la règle de chaîne derrière la preuve `backprop_correct`.
 
 ## Exercices

@@ -10,13 +10,13 @@ title: "Chapitre 6 — Réseaux convolutifs"
 
 **Mots nouveaux, en termes simples:**
 
-- **Convolution**: Faire glisser un petit détecteur de motif sur l’entrée et noter à quel point il correspond à chaque position.
-- **Noyau (filtre)**: La petite grille de poids utilisée par une convolution.
-- **Partage des poids**: Utiliser les mêmes poids à chaque position, ce qui réduit beaucoup le nombre de paramètres.
-- **Équivariance par translation**: Décalez l’entrée et la sortie se décale pareil : un motif est trouvé où qu’il soit.
-- **Canal (carte de caractéristiques)**: Une image de sortie produite par un noyau.
-- **Max-pooling**: Réduire une image en ne gardant que le plus grand nombre de chaque petit bloc.
-- **CNN**: Réseau de neurones convolutif : des convolutions, des non-linéarités et du pooling, suivis d’un classifieur.
+- **Convolution** : Faire glisser un petit détecteur de motif sur l’entrée et noter à quel point il correspond à chaque position.
+- **Noyau (filtre)** : La petite grille de poids utilisée par une convolution.
+- **Partage des poids** : Utiliser les mêmes poids à chaque position, ce qui réduit beaucoup le nombre de paramètres.
+- **Équivariance par translation** : Décalez l’entrée et la sortie se décale pareil : un motif est trouvé où qu’il soit.
+- **Canal (carte de caractéristiques)** : Une image de sortie produite par un noyau.
+- **Max-pooling** : Réduire une image en ne gardant que le plus grand nombre de chaque petit bloc.
+- **CNN** : Réseau de neurones convolutif : des convolutions, des non-linéarités et du pooling, suivis d’un classifieur.
 :::
 
 
@@ -27,7 +27,7 @@ Une couche dense sur une image de $28\times 28$ a $784$ poids *par neurone*, et 
 
 <Figure src="conv.svg" alt="Un noyau de longueur 3 glissant sur une entrée de longueur 7" caption="Chaque sortie est le produit scalaire du noyau avec une fenêtre de l'entrée." />
 
-<Figure src="rf_growth.svg" alt="Taille du champ receptif selon la profondeur : des couches 3x3 empilees croissent en 2L+1, un 5x5 large reste plat" caption="Les convolutions empilees font croitre le champ receptif lineairement : L couches de 3x3 voient 2L + 1 pixels, la ou un seul 5x5 reste coince a 5 (l'identite de composition demontree au chapitre en est exactement la raison). La profondeur achete du contexte, avec bien moins de parametres qu'un noyau large - le marche qui rend les CNN profonds profonds." />
+<Figure src="rf_growth.svg" alt="Taille du champ réceptif selon la profondeur : des couches 3x3 empilées croissent en 2L+1, un 5x5 large reste plat" caption="Les convolutions empilées font croître le champ réceptif linéairement : L couches de 3x3 voient 2L + 1 pixels, là où un seul 5x5 reste coincé à 5 (l'identité de composition démontrée au chapitre en est exactement la raison). La profondeur achète du contexte, avec bien moins de paramètres qu'un noyau large - le marche qui rend les CNN profonds profonds." />
 
 <Creators fr slugs="lecun" />
 
@@ -42,7 +42,7 @@ Commençons en dimension un, où les preuves sont courtes. Un noyau de longueur 
 ```lean file=Ch06/Conv.lean#conv1d
 ```
 
-(Le deep learning appelle cela *convolution* ; à proprement parler c'est une corrélation croisée, car le noyau n'est pas retourné. La distinction n'a pas d'importance pour l'apprentissage.)
+(Le deep learning appelle cela *convolution* ; à proprement parler, c’est une corrélation croisée, car le noyau n'est pas retourné. La distinction n'a pas d'importance pour l'apprentissage.)
 
 :::tip[Coin Lean : des preuves à l'intérieur des termes]
 L'indice `x ⟨i + j, _⟩` demande une preuve que `i + j < m + k`. Nous la fournissons par `by omega`, à partir des bornes `i < m` et `j < k + 1` données par les types `Fin`. Lean la vérifie à la compilation : il n'y a donc aucune lecture hors limites à l'exécution.
@@ -67,7 +67,7 @@ L'indice `x ⟨i + j, _⟩` demande une preuve que `i + j < m + k`. Nous la four
 
 La passe arrière d'une convolution est donc encore une opération de type convolution : pas besoin d'une nouvelle idée pour l'entraîner.
 
-<Figure src="conv_window.svg" alt="Une entree 8x8 en niveaux de gris avec un carre clair : la fenetre de convolution 3x3 glisse dessus, chaque position est un produit scalaire" caption="La convolution en une image : le reseau lit l'image par une fenetre 3x3 qui glisse partout, chaque position calculant le meme produit scalaire (le partage des poids encode par Conv3x3). Le carre clair illumine la fenetre exactement quand il la recouvre - c'est ce qu'un filtre appris detecte." />
+<Figure src="conv_window.svg" alt="Une entrée 8x8 en niveaux de gris avec un carré clair : la fenêtre de convolution 3x3 glisse dessus, chaque position est un produit scalaire" caption="La convolution en une image : le réseau lit l'image par une fenêtre 3x3 qui glisse partout, chaque position calculant le même produit scalaire (le partage des poids encode par Conv3x3). Le carré clair illumine la fenêtre exactement quand il la recouvre - c'est ce qu'un filtre appris detecte." />
 
 ## Un CNN pour MNIST
 
@@ -126,7 +126,7 @@ La vérification du gradient concorde à mieux que $10^{-6}$ (la valeur affiché
 ## Références
 
 - Y. LeCun, B. Boser, J. S. Denker, et al., *Gradient-Based Learning Applied to Document Recognition*, Proceedings of the IEEE 86 (1998) — convolution, pooling et l'architecture LeNet que ce chapitre implémente en miniature.
-- K. Fukushima, *Neocognitron: A Self-Organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Translation Deformation*, Biological Cybernetics 36 (1980) — l'ancêtre à champs réceptifs de l'alternance convolution/pooling.
+- K. Fukushima, *Neocognitron : A Self-Organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Translation Deformation*, Biological Cybernetics 36 (1980) — l'ancêtre à champs réceptifs de l'alternance convolution/pooling.
 
 ## Exercices
 

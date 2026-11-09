@@ -10,13 +10,13 @@ title: "Chapitre 14 — Modèles du monde"
 
 **Mots nouveaux, en termes simples:**
 
-- **Modèle du monde**: Un simulateur appris : il prédit ce qui se passe ensuite à partir de la situation actuelle et d’une action.
-- **Imagination (rêve)**: S’entraîner dans le modèle du monde plutôt que dans le monde réel.
-- **Trajectoire simulée**: Une séquence de pas simulée.
-- **Accumulation d’erreur**: De petites erreurs de prédiction alimentent la prédiction suivante et s’additionnent.
-- **Constante de Lipschitz**: Une limite sur la manière dont une fonction peut amplifier les différences entre ses entrées.
-- **Contrôleur**: La petite politique qui choisit les actions.
-- **Stratégie d’évolution**: Optimiser en essayant des variations aléatoires et en se déplaçant vers les meilleures. Aucun gradient nécessaire.
+- **Modèle du monde** : Un simulateur appris : il prédit ce qui se passe ensuite à partir de la situation actuelle et d’une action.
+- **Imagination (rêve)** : S’entraîner dans le modèle du monde plutôt que dans le monde réel.
+- **Trajectoire simulée** : Une séquence de pas simulée.
+- **Accumulation d’erreur** : De petites erreurs de prédiction alimentent la prédiction suivante et s’additionnent.
+- **Constante de Lipschitz** : Une limite sur la manière dont une fonction peut amplifier les différences entre ses entrées.
+- **Contrôleur** : La petite politique qui choisit les actions.
+- **Stratégie d’évolution** : Optimiser en essayant des variations aléatoires et en se déplaçant vers les meilleures. Aucun gradient nécessaire.
 :::
 
 
@@ -66,9 +66,9 @@ Le modèle du monde ne voit jamais cette formule. Il ne voit que des **transitio
 
 C'est de l'apprentissage supervisé ordinaire : régression du *changement* d'état à partir de l'état et de l'action. Comme aux chapitres 11 à 13, la perte est une `Expr` : son gradient vient de `backprop`, vérifiée.
 
-<Figure src="dream_drift.svg" alt="Dérive composee sur k pas imaginaires : la borne d'un modele Lipschitz 1,2 explose, celle d'un modele 0,5 reste sous 0,2" caption="La borne de composition de compounding_error, dessinee : l'erreur par pas s'empile geometriquement - avec Lipschitz 1,2 la borne explose au-dela de 6 apres 10 pas imagines, avec 0,5 elle sature a 2*eps. Les trajectoires courtes sont sures, les reves longs exigent une contraction : c'est le theoreme que l'horizon d'un modele du monde doit respecter." />
+<Figure src="dream_drift.svg" alt="Dérive composee sur k pas imaginaires : la borne d'un modèle Lipschitz 1,2 explose, celle d'un modèle 0,5 reste sous 0,2" caption="La borne de composition de compounding_error, dessinée : l'erreur par pas s'empile géométriquement - avec Lipschitz 1,2 la borne explose au-dela de 6 après 10 pas imaginées, avec 0,5 elle sature à 2*eps. Les trajectoires courtes sont sures, les reves longs exigent une contraction : c'est le théorème que l'horizon d'un modèle du monde doit respecter." />
 
-<Figure src="planning_horizon.svg" alt="Deux croissances : erreur du modele 0.1 x 1.25^k croissant, sans-modele 0.25k lineaire, croisement vers k = 17" caption="L'horizon de planification, trace : l'erreur du modele se compose geometriquement (0.1 x 1.25^k) la ou l'erreur sans modele ne s'accumule que lineairement (k*eps). Les deux courbes se croisent vers k = 17 : planifier avec le modele a court horizon, passer au sans-modele au-dela - le theoreme du chapitre en une image." />
+<Figure src="planning_horizon.svg" alt="Deux croissances : erreur du modèle 0.1 x 1.25^k croissant, sans-modèle 0.25k linéaire, croisement vers k = 17" caption="L'horizon de planification, tracé : l'erreur du modèle se compose géométriquement (0.1 x 1.25^k) là où l'erreur sans modèle ne s'accumule que linéairement (k*eps). Les deux courbes se croisent vers k = 17 : planifier avec le modèle à court horizon, passer au sans-modèle au-dela - le théorème du chapitre en une image." />
 
 ## Pourquoi les trajectoires imaginées dérivent
 

@@ -10,16 +10,16 @@ title: "Chapitre 13 — Apprentissage par renforcement"
 
 **Mots nouveaux, en termes simples:**
 
-- **Apprentissage par renforcement**: Apprendre par essais et erreurs à partir de récompenses.
-- **Agent, environnement, récompense**: L’agent agit, l’environnement réagit, et la récompense est le score qu’il reçoit en retour.
-- **Politique**: La règle de l’agent pour choisir une action dans chaque situation.
-- **Retour et actualisation**: Le retour est la somme des récompenses futures ; l’actualisation fait compter moins les récompenses lointaines.
-- **Valeur Q**: À quel point il est bon de prendre une action dans un état, en comptant toutes les récompenses qui suivent.
-- **Équation de Bellman**: La valeur d’une action est la récompense immédiate plus la valeur actualisée du meilleur pas suivant.
-- **Mise à jour TD**: Mise à jour par différence temporelle : déplacer l’estimation actuelle d’une fraction du chemin vers une meilleure cible.
-- **Q-learning**: Apprendre les valeurs Q avec des mises à jour TD, en agissant un peu au hasard pour explorer.
-- **Gradient de politique (REINFORCE)**: Augmenter la probabilité des actions proportionnellement à la récompense qui les a suivies.
-- **Ligne de base**: Un nombre retranché des récompenses pour réduire le bruit sans changer la direction moyenne d’apprentissage.
+- **Apprentissage par renforcement** : Apprendre par essais et erreurs à partir de récompenses.
+- **Agent, environnement, récompense** : L’agent agit, l’environnement réagit, et la récompense est le score qu’il reçoit en retour.
+- **Politique** : La règle de l’agent pour choisir une action dans chaque situation.
+- **Retour et actualisation** : Le retour est la somme des récompenses futures ; l’actualisation fait compter moins les récompenses lointaines.
+- **Valeur Q** : À quel point il est bon de prendre une action dans un état, en comptant toutes les récompenses qui suivent.
+- **Équation de Bellman** : La valeur d’une action est la récompense immédiate plus la valeur actualisée du meilleur pas suivant.
+- **Mise à jour TD** : Mise à jour par différence temporelle : déplacer l’estimation actuelle d’une fraction du chemin vers une meilleure cible.
+- **Q-learning** : Apprendre les valeurs Q avec des mises à jour TD, en agissant un peu au hasard pour explorer.
+- **Gradient de politique (REINFORCE)** : Augmenter la probabilité des actions proportionnellement à la récompense qui les a suivies.
+- **Ligne de base** : Un nombre retranché des récompenses pour réduire le bruit sans changer la direction moyenne d’apprentissage.
 :::
 
 
@@ -39,9 +39,9 @@ flowchart LR
 
 *La boucle de l’apprentissage par renforcement : l’agent agit, l’environnement répond par un nouvel état et une récompense.*
 
-<Figure src="td_bootstrap.svg" alt="Valeurs TD(0) 0.5^i le long d'une chaine de dix pas vers la vraie valeur 1 : les estimations amorcees partent pessimistes et grimpent geometriquement" caption="Le marche de TD, dessine : l'agent n'a pas encore atteint la recompense, donc V(s_i) = 0.5^i sous-estime le vrai 1 - la valeur de chaque etat vaut la moitie de celle du suivant (l'equation de Bellman). La correction formelle (tdIter_error) montre l'erreur retrecir geometriquement a chaque iteration ; l'image est le meme fait, un point par etat." />
+<Figure src="td_bootstrap.svg" alt="Valeurs TD(0) 0.5^i le long d'une chaine de dix pas vers la vraie valeur 1 : les estimations amorcees partent pessimistes et grimpent géométriquement" caption="Le marche de TD, dessiné : l'agent n'à pas encore atteint la récompense, donc V(s_i) = 0.5^i sous-estime le vrai 1 - la valeur de chaque état vaut la moitié de celle du suivant (l'équation de Bellman). La correction formelle (tdIter_error) montre l'erreur retrecir géométriquement à chaque itération ; l'image est le même fait, un point par état." />
 
-<Figure src="vi_contractions.svg" alt="L'erreur vers la valeur optimale retombe geometriquement par balayage, plus vite pour gamma = 0,5" caption="L'iteration de valeur est une contraction : chaque balayage multiplie l'ecart au point fixe V* par gamma au plus (le theoreme du chapitre). gamma = 0,5 l'atteint en quelques balayages ; gamma = 0,9 met dix fois plus de temps - le prix a payer pour se soucier de l'avenir lointain." />
+<Figure src="vi_contractions.svg" alt="L'erreur vers la valeur optimale retombe géométriquement par balayage, plus vite pour gamma = 0,5" caption="L'itération de valeur est une contraction : chaque balayage multiplie l'écart au point fixe V* par gamma au plus (le théorème du chapitre). gamma = 0,5 l'atteint en quelques balayages ; gamma = 0,9 met dix fois plus de temps - le prix à payer pour se soucier de l'avenir lointain." />
 
 <Creators fr slugs="sutton" />
 
@@ -65,7 +65,7 @@ Deux faits exacts, prouvés pour tout anneau commutatif :
 ```lean file=Ch13/Rl.lean#value
 ```
 
-- `valueIter_error` : appliquer répétitivement la mise à jour de Bellman $v\leftarrow r+\gamma v$ réduit l'erreur d'exactement $\gamma$ à chaque balayage ; après $k$ balayages elle vaut $\gamma^k$ fois l'erreur initiale. C'est le cœur de la convergence de l'itération de valeur (ici le cas d'un seul état ; le théorème général dit que l'opérateur de Bellman est une $\gamma$-contraction).
+- `valueIter_error` : appliquer répétitivement la mise à jour de Bellman $v\leftarrow r+\gamma v$ réduit l'erreur d'exactement $\gamma$ à chaque balayage ; après $k$ balayages, elle vaut $\gamma^k$ fois l'erreur initiale. C'est le cœur de la convergence de l'itération de valeur (ici le cas d'un seul état ; le théorème général dit que l'opérateur de Bellman est une $\gamma$-contraction).
 - `bellman_fixed` : le point fixe est $r/(1-\gamma)$.
 - `tdUpdate_error` : une mise à jour $Q\leftarrow Q+\eta(\text{cible}-Q)$ multiplie la distance à la cible par $1-\eta$. Pour $0<\eta\le1$, elle se rapproche de la cible sans la dépasser.
 
@@ -147,7 +147,7 @@ Prouvé ici : contraction en norme sup, unicité du point fixe, et taux géomét
 
 ## Références
 
-- R. S. Sutton et A. G. Barto, *Reinforcement Learning: An Introduction*, MIT Press (1998) — l'apprentissage TD et le REINFORCE bandit que ce chapitre implémente.
+- R. S. Sutton et A. G. Barto, *Reinforcement Learning : An Introduction*, MIT Press (1998) — l'apprentissage TD et le REINFORCE bandit que ce chapitre implémente.
 - C. J. Watkins, *Learning from Delayed Rewards*, thèse, Cambridge (1989) — Q-learning ; sa convergence stochastique est explicitement hors du périmètre de ce chapitre (seule la borne à cible fixe est prouvée).
 
 ## Exercices

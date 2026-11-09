@@ -10,16 +10,16 @@ title: "Chapitre 3 — Le perceptron multicouche"
 
 **Mots nouveaux, en termes simples:**
 
-- **Couche**: Une rangée de neurones qui lisent tous les mêmes entrées.
-- **Couche cachée**: Une couche entre l’entrée et la sortie. Le réseau y invente ses propres caractéristiques intermédiaires utiles.
-- **MLP (perceptron multicouche)**: Plusieurs couches empilées : les sorties de chaque couche sont les entrées de la suivante.
-- **Réseau à formes vérifiées**: Un réseau dont les tailles de couches figurent dans le type : un réseau aux couches incompatibles ne compile pas.
-- **Universalité**: Avec assez de neurones, une couche cachée peut calculer n’importe quelle fonction vrai/faux.
-- **Perte**: Un seul nombre qui dit à quel point le réseau se trompe. Apprendre, c’est le réduire.
-- **Descente de gradient**: Apprendre par petits pas : mesurer comment la perte varie avec chaque poids, puis déplacer chaque poids un peu vers le bas.
-- **Taux d’apprentissage**: La taille de chaque pas de descente de gradient. Trop grand, on dépasse ; trop petit, on rampe.
-- **Règle de dérivation en chaîne**: Pour obtenir l’effet d’un premier changement sur un résultat final, multiplier les effets de chaque étape intermédiaire.
-- **Signal d’erreur (delta)**: La part de responsabilité d’un neurone dans l’erreur finale. Il est transmis en arrière de couche en couche.
+- **Couche** : Une rangée de neurones qui lisent tous les mêmes entrées.
+- **Couche cachée** : Une couche entre l’entrée et la sortie. Le réseau y invente ses propres caractéristiques intermédiaires utiles.
+- **MLP (perceptron multicouche)** : Plusieurs couches empilées : les sorties de chaque couche sont les entrées de la suivante.
+- **Réseau à formes vérifiées** : Un réseau dont les tailles de couches figurent dans le type : un réseau aux couches incompatibles ne compile pas.
+- **Universalité** : Avec assez de neurones, une couche cachée peut calculer n’importe quelle fonction vrai/faux.
+- **Perte** : Un seul nombre qui dit à quel point le réseau se trompe. Apprendre, c’est le réduire.
+- **Descente de gradient** : Apprendre par petits pas : mesurer comment la perte varie avec chaque poids, puis déplacer chaque poids un peu vers le bas.
+- **Taux d’apprentissage** : La taille de chaque pas de descente de gradient. Trop grand, on dépasse ; trop petit, on rampe.
+- **Règle de dérivation en chaîne** : Pour obtenir l’effet d’un premier changement sur un résultat final, multiplier les effets de chaque étape intermédiaire.
+- **Signal d’erreur (delta)** : La part de responsabilité d’un neurone dans l’erreur finale. Il est transmis en arrière de couche en couche.
 :::
 
 
@@ -79,7 +79,7 @@ tampon à plat. `flatMulVec_eq` prouve que c'est **exactement** le `Mat.mulVec` 
 chapitre 3 — entrée par entrée, sans un produit ajouté ni perdu. Le réseau à formes
 vérifiées et le code aplatifié de déploiement sont le même calcul.
 
-<Figure src="mlp_stairs.svg" alt="La sinusoidale et un reseau ReLU par morceaux qui la plie en segments droits" caption="Ce qu'achetent unites ReLU cachees : chaque unite coude un segment droit, et quelques-unes plient n'importe quelle courbe en segments d'escalier qui convergent vers elle (bleu sin, orange une ajustement a 4 unites - la decomposition exacte que la preuve d'approximation universelle construit). Le MLP est le demi-plan du Ch1 rendu lineaire par morceaux par des noeuds d'ajustement appris." />
+<Figure src="mlp_stairs.svg" alt="La sinusoidale et un réseau ReLU par morceaux qui la plie en segments droits" caption="Ce qu'achètent unités ReLU cachées : chaque unité coude un segment droit, et quelques-unes plient n'importe quelle courbe en segments d'escalier qui convergent vers elle (bleu sin, orange un ajustement à 4 unités - la décomposition exacte que la preuve d'approximation universelle construit). Le MLP est le demi-plan du Ch1 rendu linéaire par morceaux par des nœuds d'ajustement appris." />
 
 ## Le XOR, résolu
 
@@ -104,7 +104,7 @@ flowchart LR
 
 Comparez avec le chapitre 2 : mêmes neurones et même activation échelon, mais deux couches au lieu d'une.
 
-<Figure src="depth_signal.svg" alt="log10 du gradient de la premiere couche en fonction de la profondeur L : les droites typique 0.5^L et pire cas 0.25^L plongent toutes les deux" caption="Pourquoi la profondeur est a double tranchant : le gradient de la premiere couche est un produit de L facteurs, donc sur l'echelle logarithmique il chute en ligne droite (chain_stack, Ch04). Le meme produit qui compose les features mange aussi le signal - le theme que chaque chapitre suivant adresse (connexions residuelles, LSTM, blocs residuels)." />
+<Figure src="depth_signal.svg" alt="log10 du gradient de la première couche en fonction de la profondeur L : les droites typique 0.5^L et pire cas 0.25^L plongent toutes les deux" caption="Pourquoi la profondeur est à double tranchant : le gradient de la première couche est un produit de L facteurs, donc sur l'échelle logarithmique il chute en ligne droite (chain_stack, Ch04). Le même produit qui compose les features mange aussi le signal - le thème que chaque chapitre suivant adresse (connexions résiduelles, LSTM, blocs résiduels)." />
 
 ## Théorème — toute fonction booléenne est un réseau à une couche cachée
 

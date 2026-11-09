@@ -10,12 +10,12 @@ title: "Chapitre 11 — GAN"
 
 **Mots nouveaux, en termes simples:**
 
-- **GAN**: Deux réseaux jouent un jeu : un faussaire fabrique des faux, un détective distingue le faux du vrai, et les deux s’améliorent.
-- **Générateur et discriminateur**: Le générateur est le faussaire (bruit en entrée, fausse donnée en sortie). Le discriminateur est le détective (donnée en entrée, probabilité d’être vraie en sortie).
-- **Jeu minimax**: Un joueur essaie de minimiser ce que l’autre essaie de maximiser.
-- **Discriminateur optimal**: La meilleure réponse possible du détective en un point : la part de données réelles parmi toutes les données de ce point.
-- **Effondrement de modes**: Le générateur ne couvre que quelques-unes des sortes de données qui existent.
-- **Distance en variation totale (TV)**: Un nombre de 0 à 1 qui dit à quel point deux histogrammes diffèrent.
+- **GAN** : Deux réseaux jouent un jeu : un faussaire fabrique des faux, un détective distingue le faux du vrai, et les deux s’améliorent.
+- **Générateur et discriminateur** : Le générateur est le faussaire (bruit en entrée, fausse donnée en sortie). Le discriminateur est le détective (donnée en entrée, probabilité d’être vraie en sortie).
+- **Jeu minimax** : Un joueur essaie de minimiser ce que l’autre essaie de maximiser.
+- **Discriminateur optimal** : La meilleure réponse possible du détective en un point : la part de données réelles parmi toutes les données de ce point.
+- **Effondrement de modes** : Le générateur ne couvre que quelques-unes des sortes de données qui existent.
+- **Distance en variation totale (TV)** : Un nombre de 0 à 1 qui dit à quel point deux histogrammes diffèrent.
 :::
 
 
@@ -41,7 +41,7 @@ flowchart LR
 
 *Le jeu des GAN : les deux réseaux s’améliorent en s’affrontant.*
 
-<Figure src="disc_posterior.svg" alt="Le discriminateur optimal D*(x) = p/(p+q) pour deux gaussiennes, un S lisse de 1 a 0" caption="Le discriminateur optimal n'est pas une sortie de classifieur mais une probabilite a posteriori : D*(x) = p(x)/(p(x)+q(x)) - ici 1 la ou seul le reel vit, 1/2 la ou generateur et reel se recouvrent (x = 0), 0 en territoire pur faux. Le S est la formule exacte demontree au chapitre." />
+<Figure src="disc_posterior.svg" alt="Le discriminateur optimal D*(x) = p/(p+q) pour deux gaussiennes, un S lisse de 1 à 0" caption="Le discriminateur optimal n'est pas une sortie de classifieur mais une probabilité à posteriori : D*(x) = p(x)/(p(x)+q(x)) - ici 1 là où seul le réel vit, 1/2 là où générateur et réel se recouvrent (x = 0), 0 en territoire pur faux. Le S est la formule exacte démontrée au chapitre." />
 
 <Creators fr slugs="goodfellow" />
 
@@ -57,7 +57,7 @@ L'objectif minimax porte sur des espérances de log-vraisemblances : lire d'abor
 
 Fixons un point $x$. Soit $a=p_{\text{data}}(x)$ la densité des données réelles en ce point et $b=p_G(x)$ celle des données générées. Le gain du discriminateur en $x$ est $a\log d + b\log(1-d)$ avec $d=D(x)$. Annuler la dérivée, $\frac ad-\frac b{1-d}=0$, donne
 
-<Figure src="optimal_discriminator.svg" alt="Densité réelle, densité générée et discriminateur optimal" caption="Le discriminateur optimal D* = a / (a + b). Là où les données réelles sont denses il est proche de 1, là où seul le générateur met de la masse il est proche de 0, et là où elles coïncident il vaut exactement 1/2." />
+<Figure src="optimal_discriminator.svg" alt="Densité réelle, densité générée et discriminateur optimal" caption="Le discriminateur optimal D* = à / (à + b). Là où les données réelles sont denses il est proche de 1, là où seul le générateur met de la masse il est proche de 0, et là où elles coïncident il vaut exactement 1/2." />
 
 
 $$ d^\star = \frac{a}{a+b}. $$
@@ -81,7 +81,7 @@ Remarquez ce que le théorème **ne dit pas** : il ne dit pas que $d^\star$ est 
 Les preuves d'optimalité deviennent souvent faciles quand on *devine le minimiseur* et qu'on prouve une identité de la forme « perte = minimum + un carré ». L'identité est un calcul d'anneau que `grind` termine ; la positivité du carré fait le reste.
 :::
 
-<Figure src="mode_collapse.svg" alt="Deux courbes de recompense selon la masse a du generateur : couvrir les deux modes a/(a+0,5) est strictement au-dessus de l'effondrement a/(a+1)" caption="Theoreme de l'effondrement de modes, dessine : pour toute masse a, la courbe de couverture a/(a+0,5) est strictement au-dessus de la courbe d'effondrement a/(a+1) - repartir le generateur sur les deux modes paye toujours plus que de se concentrer sur un, exactement l'inegalite que mode_collapse_reward prouve pour tout a, b positifs." />
+<Figure src="mode_collapse.svg" alt="Deux courbes de récompense selon la masse à du générateur : couvrir les deux modes à/(à+0,5) est strictement au-dessus de l'effondrement à/(à+1)" caption="Theoreme de l'effondrement de modes, dessiné : pour toute masse à, la courbe de couverture à/(à+0,5) est strictement au-dessus de la courbe d'effondrement à/(à+1) - repartir le générateur sur les deux modes paye toujours plus que de se concentrer sur un, exactement l'inégalité que mode_collapse_reward prouvé pour tout à, b positifs." />
 
 ## L’effondrement de modes, prouvé
 
@@ -124,7 +124,7 @@ Lecture honnête :
 - **L'entraînement est instable.** Avec 4000 pas, le GAN à gaussienne unique avait une moyenne de 2,23 ; avec 15000 pas, sa largeur est tombée à 0,29 (un effondrement de modes partiel). Entraîner plus n'a pas aidé : les deux réseaux se poursuivent. Ce sont des observations à une graine, pas un benchmark.
 
 :::warning Ce qui est prouvé ici, et ce qui ne l'est pas
-Prouvé : les formules du discriminateur optimal ci-dessus et (par le chapitre 4) les gradients des deux pertes. Non prouvé : que le jeu converge. En général il ne converge pas, et les chiffres ci-dessus le montrent.
+Prouvé : les formules du discriminateur optimal ci-dessus et (par le chapitre 4) les gradients des deux pertes. Non prouvé : que le jeu converge. En général, il ne converge pas, et les chiffres ci-dessus le montrent.
 :::
 
 ## Références

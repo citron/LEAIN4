@@ -18,9 +18,9 @@ title: "Chapitre 17 — Apprentissage contrastif : InfoNCE, exactement"
 
 Le chapitre 15 pénalise l'effondrement dans JEPA par un terme de variance, sans jamais prouver ce que la perte d'un modèle effondré *doit* valoir — parce que l'apprentissage contrastif n'était pas au programme. Ce chapitre comble ce trou : la perte elle-même, définie sur `Rat` exact, avec les quatre faits que tous les praticiens citent comme du folklore, élevés au rang de théorèmes.
 
-<Figure src="infonce_mass.svg" alt="Masse de probabilite sur le positif selon le nombre de negatifs n : la courbe aveugle 1/(n+1) et la courbe a ecart 2 e^2/(e^2+n) bien au-dessus" caption="Ce qu'achete un ecart de similarite : un plongement aveugle partage la masse softmax a parts egales, 1/(n+1) - a 32 negatifs, 3 %. Le couple apparie prouve avec ecart 2 maintient e^2/(e^2+n) pres de 19 % au meme n. L'ecart entre les deux courbes est la valeur de l'apprentissage contrastif, et il grandit avec n : plus de negatifs punit l'aveuglement." />
+<Figure src="infonce_mass.svg" alt="Masse de probabilité sur le positif selon le nombre de négatifs n : la courbe aveugle 1/(n+1) et la courbe à écart 2 e^2/(e^2+n) bien au-dessus" caption="Ce qu'achète un écart de similarité : un plongement aveugle partage la masse softmax à parts égales, 1/(n+1) - à 32 négatifs, 3 %. Le couple apparié prouvé avec écart 2 maintient e^2/(e^2+n) près de 19 % au même n. L'écart entre les deux courbes est la valeur de l'apprentissage contrastif, et il grandit avec n : plus de négatifs punit l'aveuglement." />
 
-<Figure src="nce_temp.svg" alt="InfoNCE -log(e^s/(e^s+3)) selon l'ecart positif s : de 1,39 vers presque zero" caption="Le paysage InfoNCE trace : avec trois negatifs, la perte vaut -log(e^s/(e^s+3)) - elle est a log 4 = 1,39 quand le positif est indiscernable (s = 0) et tend vers 0 quand le positif prend de l'avance. Le plancher demontre au chapitre est exactement la valeur en s = 0." />
+<Figure src="nce_temp.svg" alt="InfoNCE -log(e^s/(e^s+3)) selon l'écart positif s : de 1,39 vers presque zéro" caption="Le paysage InfoNCE tracé : avec trois négatifs, la perte vaut -log(e^s/(e^s+3)) - elle est à log 4 = 1,39 quand le positif est indiscernable (s = 0) et tend vers 0 quand le positif prend de l'avance. Le plancher démontré au chapitre est exactement la valeur en s = 0." />
 
 <Creators fr slugs="hinton" />
 

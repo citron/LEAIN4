@@ -10,12 +10,12 @@ title: "Chapitre 12 — Modèles de diffusion"
 
 **Mots nouveaux, en termes simples:**
 
-- **Modèle de diffusion**: Apprendre à retirer le bruit pas à pas ; générer en partant de bruit pur et en le nettoyant.
-- **Processus direct**: Ajouter progressivement du bruit aux données jusqu’à ce qu’il ne reste que du bruit.
-- **Calendrier de bruit**: La quantité de bruit ajoutée à chaque pas.
-- **Préservation de la variance**: Les pas de bruitage sont dosés pour que la dispersion globale des données reste la même.
-- **Réseau de débruitage**: Un réseau qui regarde une entrée bruitée et prédit le bruit qui a été ajouté.
-- **DDPM et DDIM**: Deux façons de lancer les étapes de nettoyage : avec du bruit aléatoire frais à chaque pas (DDPM) ou entièrement déterministe (DDIM).
+- **Modèle de diffusion** : Apprendre à retirer le bruit pas à pas ; générer en partant de bruit pur et en le nettoyant.
+- **Processus direct** : Ajouter progressivement du bruit aux données jusqu’à ce qu’il ne reste que du bruit.
+- **Calendrier de bruit** : La quantité de bruit ajoutée à chaque pas.
+- **Préservation de la variance** : Les pas de bruitage sont dosés pour que la dispersion globale des données reste la même.
+- **Réseau de débruitage** : Un réseau qui regarde une entrée bruitée et prédit le bruit qui a été ajouté.
+- **DDPM et DDIM** : Deux façons de lancer les étapes de nettoyage : avec du bruit aléatoire frais à chaque pas (DDPM) ou entièrement déterministe (DDIM).
 :::
 
 
@@ -24,7 +24,7 @@ Les modèles de diffusion animent la plupart des générateurs d'images modernes
 1. **Processus direct** : détruire les données en ajoutant un peu de bruit gaussien, de nombreuses fois, jusqu'à ne plus avoir que du bruit.
 2. **Processus inverse** : entraîner un réseau à défaire un pas de bruitage, puis partir de bruit pur et l'appliquer répétitivement.
 
-Contrairement à un GAN il n'y a pas de jeu, et contrairement à un VAE pas de goulot d'étranglement : l'entraînement est une simple régression.
+Contrairement à un GAN, il n'y a pas de jeu, et contrairement à un VAE pas de goulot d'étranglement : l'entraînement est une simple régression.
 
 
 ```mermaid
@@ -35,7 +35,7 @@ flowchart LR
 
 *Ligne du haut : le processus direct détruit les données. Ligne du bas : le réseau entraîné le défait pas à pas pour générer de nouvelles données.*
 
-<Figure src="snr_decay.svg" alt="alpha_bar_t en 0.92^t et le rapport signal/bruit alpha_bar/(1-alpha_bar) qui s'effondre plus vite" caption="Ce que l'echeancier direct detruit vraiment : le rapport signal/bruit alpha_bar_t / (1 - alpha_bar_t). alpha_bar decroit geometriquement (0.92^t) et le SNR s'effondre encore plus vite - a t = 20, x_t est du bruit pur. C'est la decroissance exacte que precise le theoreme de monotonie du chapitre." />
+<Figure src="snr_decay.svg" alt="alpha_bar_t en 0.92^t et le rapport signal/bruit alpha_bar/(1-alpha_bar) qui s'effondre plus vite" caption="Ce que l'échéancier direct détruit vraiment : le rapport signal/bruit alpha_bar_t / (1 - alpha_bar_t). alpha_bar décroît géométriquement (0.92^t) et le SNR s'effondre encore plus vite - à t = 20, x_t est du bruit pur. C'est la décroissance exacte que précise le théorème de monotonie du chapitre." />
 
 
 <Figure src="arch_diffusion.svg"
@@ -52,7 +52,7 @@ Un pas de bruitage est
 
 $$ x_{k} = a_k\,x_{k-1} + s_k\,\varepsilon_k,\qquad \varepsilon_k\sim\mathcal N(0,1),\qquad a_k^2+s_k^2=1 \quad(a_k=\sqrt{1-\beta_k}). $$
 
-La contrainte $a^2+s^2=1$ empêche la variance des données de croître (« préservation de la variance »). Le fait clé pour l'entraînement est qu'**après $t$ pas on peut sauter directement à $x_t$** :
+La contrainte $a^2+s^2=1$ empêche la variance des données de croître (« préservation de la variance »). Le fait clé pour l'entraînement est qu'**après $t$ pas, on peut sauter directement à $x_t$** :
 
 $$ x_t = \bar a_t\,x_0 + \sqrt{1-\bar a_t^{\,2}}\;\varepsilon,\qquad \bar a_t=\prod_{k\le t}a_k. $$
 
