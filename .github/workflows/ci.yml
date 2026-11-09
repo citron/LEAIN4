@@ -34,10 +34,22 @@ jobs:
           fi
           test -x "$HOME/.elan/bin/lake" || { echo "elan install failed"; exit 1; }
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
           lean --version && lake --version
         shell: bash
       - name: "Build all targets (single source of truth: scripts/targets.txt)"
-        run: lake build ${{ steps.targets.outputs.args }}
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          # First lean/lake invocation resolves lean-toolchain and downloads
+          # the pinned toolchain over the same flaky GitHub release channel:
+          # pre-install with retries, then build with one retry.
+          for i in 1 2 3 4 5; do
+            elan toolchain install "$(cat lean-toolchain)" && break
+            echo "toolchain download attempt $i failed"; sleep $((10 * i))
+          done
+          lake build ${{ steps.targets.outputs.args }} || {
+            echo "retrying build once"; sleep 15
+            lake build ${{ steps.targets.outputs.args }}; }
         working-directory: lean
         shell: bash
       - name: "Audit axioms (expects: using sorry #[])"
